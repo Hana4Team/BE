@@ -2,10 +2,8 @@ package com.hana.ddok.account.domain;
 
 import com.hana.ddok.common.domain.BaseEntity;
 import com.hana.ddok.products.domain.Products;
-<<<<<<< HEAD
 import com.hana.ddok.users.domain.Users;
-=======
->>>>>>> a079de37653b131505b07095803f59c478d53079
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,8 +12,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Entity
