@@ -1,6 +1,5 @@
 package com.hana.ddok.products.domain;
 
-import com.hana.ddok.account.domain.Account;
 import com.hana.ddok.common.domain.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,8 +7,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Entity
@@ -47,18 +44,18 @@ public class Products extends BaseEntity {
     @Column(name = "desc1")
     private String desc1;
 
-    @Column(name = "descDetail1")
+    @Column(name = "desc_detail1")
     private String descDetail1;
 
-    @Column(name = "descImage1")
+    @Column(name = "desc_image1")
     private String descImage1;
 
     @Column(name = "desc2")
     private String desc2;
 
-    @Column(name = "descDetail2")
+    @Column(name = "desc_detail2")
     private String descDetail2;
 
-    @Column(name = "descImage2")
+    @Column(name = "desc_image2")
     private String descImage2;
 }

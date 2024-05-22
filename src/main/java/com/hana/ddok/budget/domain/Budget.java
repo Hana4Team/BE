@@ -1,6 +1,6 @@
-package com.hana.ddok.spend.domain;
+package com.hana.ddok.budget.domain;
 
-import com.hana.ddok.common.domain.BaseEntity;
+
 import com.hana.ddok.users.domain.Users;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,22 +8,17 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-
-@Getter
 @Entity
-@Builder
-@Table(name = "spend")
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Spend extends BaseEntity {
+@Builder
+@Table(name = "budget")
+public class Budget {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "spend_id")
-    private Long spendId;
-
-    @Column(name = "spend_date", nullable = false)
-    private LocalDate spendDate;
+    @Column(name = "budget_id", nullable = false)
+    private Long budgetId;
 
     @Column(name = "sum", nullable = false)
     private Integer sum;
@@ -58,7 +53,7 @@ public class Spend extends BaseEntity {
     @Column(name = "overseas", nullable = false)
     private Integer overseas;
 
-    @ManyToOne
-    @JoinColumn(name = "users_id")
+    @OneToOne(mappedBy = "budget", cascade = CascadeType.ALL, orphanRemoval = true)
     private Users users;
+
 }

@@ -17,7 +17,7 @@ public class Home extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "home_id")
-    private Long HomeId;
+    private Long homeId;
 
     @Column(name = "name", nullable = false)
     private String name;
