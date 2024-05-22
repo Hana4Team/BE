@@ -1,4 +1,9 @@
 # BE
+
+## Members
+`김현우`
+`최은진`
+
 ## Commit Message Convention
 
 |    Type     | Description  |
