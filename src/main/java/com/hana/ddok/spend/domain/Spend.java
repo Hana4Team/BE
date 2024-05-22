@@ -2,6 +2,7 @@ package com.hana.ddok.spend.domain;
 
 import com.hana.ddok.common.domain.BaseEntity;
 import com.hana.ddok.users.domain.Users;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
