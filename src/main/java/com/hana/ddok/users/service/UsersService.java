@@ -28,6 +28,6 @@ public class UsersService {
 
         Users user = usersRepository.save(UsersJoinReq.toEntity(req, encodedPwd, home));
 
-        return new UsersJoinRes(user.getUsersId());
+        return new UsersJoinRes(user.getUsersId(), user.getPhoneNumber());
     }
 }
