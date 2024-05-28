@@ -4,7 +4,7 @@ import com.hana.ddok.products.domain.Products;
 import lombok.Getter;
 
 @Getter
-public class ProductsFindAllResDto {
+public class ProductsFindAllRes {
     private Long productsId;
     private String name;
     private String title;
@@ -12,7 +12,7 @@ public class ProductsFindAllResDto {
     private Float interest1;
     private Float interest2;
 
-    public ProductsFindAllResDto(Products products) {
+    public ProductsFindAllRes(Products products) {
         this.productsId = products.getProductsId();
         this.name = products.getName();
         this.title = products.getTitle();
