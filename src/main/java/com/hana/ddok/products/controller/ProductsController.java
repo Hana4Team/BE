@@ -1,7 +1,7 @@
 package com.hana.ddok.products.controller;
 
-import com.hana.ddok.products.dto.res.DepositFindAllResDto;
-import com.hana.ddok.products.dto.res.DepositFindByIdResDto;
+import com.hana.ddok.products.dto.res.ProductsFindAllResDto;
+import com.hana.ddok.products.dto.res.ProductsFindByIdResDto;
 import com.hana.ddok.products.service.ProductsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -14,15 +14,15 @@ import java.util.List;
 public class ProductsController {
     private final ProductsService productsService;
 
-    @GetMapping("/deposit")
-    public List<DepositFindAllResDto> depositFindAll(@RequestParam Integer type) {
-        List<DepositFindAllResDto> depositFindAllResDtoList = productsService.depositFindAll(type);
-        return depositFindAllResDtoList;
+    @GetMapping("/products")
+    public List<ProductsFindAllResDto> productsFindAll(@RequestParam Integer type) {
+        List<ProductsFindAllResDto> productsFindAllResDtoList = productsService.productsFindAll(type);
+        return productsFindAllResDtoList;
     }
 
-    @GetMapping("/deposit/{productsId}")
-    public DepositFindByIdResDto depositFindById(@PathVariable Long productsId) {
-        DepositFindByIdResDto depositFindByIdResDto = productsService.depositFindById(productsId);
-        return depositFindByIdResDto;
+    @GetMapping("/products/{productsId}")
+    public ProductsFindByIdResDto productsFindById(@PathVariable Long productsId) {
+        ProductsFindByIdResDto productsFindByIdResDto = productsService.productsFindById(productsId);
+        return productsFindByIdResDto;
     }
 }

@@ -4,10 +4,9 @@ import com.hana.ddok.products.domain.Products;
 import lombok.Getter;
 
 @Getter
-public class DepositFindByIdResDto {
+public class ProductsFindByIdResDto {
     private Long productsId;
     private String name;
-//    private Integer type;
     private String title;
     private String summary;
     private Float interest1;
@@ -22,10 +21,9 @@ public class DepositFindByIdResDto {
     private String descDetail2;
     private String descImage2;
 
-    public DepositFindByIdResDto(Products products) {
+    public ProductsFindByIdResDto(Products products) {
         this.productsId = products.getProductsId();
         this.name = products.getName();
-//        this.type = products.getType();
         this.title = products.getTitle();
         this.summary = products.getSummary();
         this.interest1 = products.getInterest1();
