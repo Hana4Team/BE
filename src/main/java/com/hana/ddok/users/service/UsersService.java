@@ -9,6 +9,7 @@ import com.hana.ddok.users.dto.UsersJoinRes;
 import com.hana.ddok.users.exception.UsersInvalidPwd;
 import com.hana.ddok.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,13 +17,17 @@ import org.springframework.stereotype.Service;
 public class UsersService {
     private final UsersRepository usersRepository;
     private final HomeRepository homeRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public UsersJoinRes usersJoin(UsersJoinReq req) {
         if(!req.password().equals(req.confirmPassword()))
-            throw new UsersInvalidPwd(); //비번재입력 다름 예외
+            throw new UsersInvalidPwd();
 
+        String encodedPwd = bCryptPasswordEncoder.encode(req.password());
         Home home = homeRepository.findById(0L).get();
-        Users user = usersRepository.save(UsersJoinReq.toEntity(req, home));
+
+        Users user = usersRepository.save(UsersJoinReq.toEntity(req, encodedPwd, home));
+
         return new UsersJoinRes(user.getUsersId());
     }
 }
