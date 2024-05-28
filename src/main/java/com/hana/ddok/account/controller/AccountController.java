@@ -24,8 +24,8 @@ public class AccountController {
     }
 
     @GetMapping("/account")
-    public List<AccountFindAllRes> accountFindAll() {
+    public ResponseEntity<List<AccountFindAllRes>> accountFindAll() {
         List<AccountFindAllRes> accountFindAllResList = accountService.accountFindAll();
-        return accountFindAllResList;
+        return ResponseEntity.ok(accountFindAllResList);
     }
 }
