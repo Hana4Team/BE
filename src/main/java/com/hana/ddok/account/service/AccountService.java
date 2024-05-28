@@ -1,6 +1,6 @@
 package com.hana.ddok.account.service;
 
-import com.hana.ddok.account.dto.res.AccountFindAllRes;
+import com.hana.ddok.account.dto.AccountFindAllRes;
 import com.hana.ddok.account.repository.AccountRepository;
 import com.hana.ddok.users.domain.Users;
 import com.hana.ddok.users.repository.UsersRepository;

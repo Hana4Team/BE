@@ -1,6 +1,6 @@
 package com.hana.ddok.account.controller;
 
-import com.hana.ddok.account.dto.res.AccountFindAllRes;
+import com.hana.ddok.account.dto.AccountFindAllRes;
 import com.hana.ddok.account.service.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;

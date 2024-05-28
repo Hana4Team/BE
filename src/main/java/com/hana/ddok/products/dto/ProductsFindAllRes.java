@@ -1,4 +1,4 @@
-package com.hana.ddok.products.dto.res;
+package com.hana.ddok.products.dto;
 
 import com.hana.ddok.products.domain.Products;
 import lombok.Getter;

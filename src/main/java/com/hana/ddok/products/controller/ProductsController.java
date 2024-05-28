@@ -1,7 +1,7 @@
 package com.hana.ddok.products.controller;
 
-import com.hana.ddok.products.dto.res.ProductsFindAllRes;
-import com.hana.ddok.products.dto.res.ProductsFindByIdRes;
+import com.hana.ddok.products.dto.ProductsFindAllRes;
+import com.hana.ddok.products.dto.ProductsFindByIdRes;
 import com.hana.ddok.products.service.ProductsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

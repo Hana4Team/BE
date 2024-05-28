@@ -1,8 +1,8 @@
 package com.hana.ddok.products.service;
 
 import com.hana.ddok.common.exception.EntityNotFoundException;
-import com.hana.ddok.products.dto.res.ProductsFindAllRes;
-import com.hana.ddok.products.dto.res.ProductsFindByIdRes;
+import com.hana.ddok.products.dto.ProductsFindAllRes;
+import com.hana.ddok.products.dto.ProductsFindByIdRes;
 import com.hana.ddok.products.repository.ProductsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

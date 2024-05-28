@@ -1,4 +1,4 @@
-package com.hana.ddok.account.dto.res;
+package com.hana.ddok.account.dto;
 
 import com.hana.ddok.account.domain.Account;
 
