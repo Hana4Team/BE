@@ -27,8 +27,8 @@ public class Mission {
     @Column(name = "sub_title", nullable = false)
     private String subTitle;
 
-    @Column(name = "desc", nullable = false)
-    private String desc;
+    @Column(name = "description", nullable = false)
+    private String description;
 
     @Column(name = "points")
     private Integer points;
