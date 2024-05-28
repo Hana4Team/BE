@@ -4,6 +4,7 @@ import com.hana.ddok.account.domain.Account;
 import com.hana.ddok.account.dto.AccountFindAllRes;
 import com.hana.ddok.account.dto.AccountSaveReq;
 import com.hana.ddok.account.dto.AccountSaveRes;
+import com.hana.ddok.account.dto.MoneyboxFindAllRes;
 import com.hana.ddok.account.repository.AccountRepository;
 import com.hana.ddok.common.exception.EntityNotFoundException;
 import com.hana.ddok.products.domain.Products;
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -40,5 +43,20 @@ public class AccountService {
                 .map(AccountFindAllRes::new)
                 .toList();
         return accountFindAllResList;
+    }
+
+    @Transactional(readOnly = true)
+    public MoneyboxFindAllRes moneyboxFindAll() {
+        Users users = usersRepository.findById(1L).get();    // TODO : 시큐리티 적용 시 변경
+        List<Account> accountList = accountRepository.findAllByUsers(users);
+
+        Map<Integer, Account> accountMap = accountList.stream()
+                .collect(Collectors.toMap(Account::getType, account -> account));
+        Account parkingAccount = accountMap.get(1);
+        Account expenseAccount = accountMap.get(2);
+        Account savingAccount = accountMap.get(3);
+
+        MoneyboxFindAllRes moneyboxFindAllRes = new MoneyboxFindAllRes(parkingAccount, expenseAccount, savingAccount);
+        return moneyboxFindAllRes;
     }
 }
