@@ -19,7 +19,7 @@ public class Products extends BaseEntity {
     @Column(name = "products_id")
     private Long productsId;
 
-    @Column(name = "name", nullable = false, length = 20)
+    @Column(name = "name", nullable = false)
     private String name;
 
     @Column(name = "type", nullable = false)
@@ -28,17 +28,23 @@ public class Products extends BaseEntity {
     @Column(name = "title")
     private String title;
 
-    @Column(name = "summary1")
-    private String summary1;
+    @Column(name = "summary")
+    private String summary;
 
-    @Column(name = "summary2")
-    private String summary2;
+    @Column(name = "interest1")
+    private Float interest1;
+
+    @Column(name = "interest2")
+    private Float interest2;
 
     @Column(name = "period")
     private String period;
 
-    @Column(name = "payment")
-    private Integer payment;
+    @Column(name = "payment1")
+    private Integer payment1;
+
+    @Column(name = "payment2")
+    private Integer payment2;
 
     @Column(name = "desc1")
     private String desc1;
