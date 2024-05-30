@@ -58,6 +58,19 @@ public class AccountService {
         return accountFindAllResList;
     }
 
+    @Transactional
+    public MoneyboxSaveRes moneyboxSave(MoneyboxSaveReq moneyboxSaveReq) {
+        Users users = usersRepository.findById(1L).get();    // TODO : 시큐리티 적용 시 변경
+        Products products = productsRepository.findById(moneyboxSaveReq.productsId())
+                .orElseThrow(() -> new ProductsNotFound());
+
+        Account parkingAccount = accountRepository.save(moneyboxSaveReq.toEntity(users, products));
+        Account expenseAccount = accountRepository.save(moneyboxSaveReq.toEntity(users, products));
+        Account savingAccount = accountRepository.save(moneyboxSaveReq.toEntity(users, products));
+        
+        return new MoneyboxSaveRes(parkingAccount, expenseAccount, savingAccount);
+    }
+
     @Transactional(readOnly = true)
     public MoneyboxFindAllRes moneyboxFindAll() {
         Users users = usersRepository.findById(1L).get();    // TODO : 시큐리티 적용 시 변경
@@ -69,7 +82,6 @@ public class AccountService {
         Account expenseAccount = accountMap.get(2);
         Account savingAccount = accountMap.get(3);
 
-        MoneyboxFindAllRes moneyboxFindAllRes = new MoneyboxFindAllRes(parkingAccount, expenseAccount, savingAccount);
-        return moneyboxFindAllRes;
+        return new MoneyboxFindAllRes(parkingAccount, expenseAccount, savingAccount);
     }
 }

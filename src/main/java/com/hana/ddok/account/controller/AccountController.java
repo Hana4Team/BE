@@ -1,10 +1,7 @@
 package com.hana.ddok.account.controller;
 
 import com.hana.ddok.account.domain.Account;
-import com.hana.ddok.account.dto.AccountFindAllRes;
-import com.hana.ddok.account.dto.AccountSaveReq;
-import com.hana.ddok.account.dto.AccountSaveRes;
-import com.hana.ddok.account.dto.MoneyboxFindAllRes;
+import com.hana.ddok.account.dto.*;
 import com.hana.ddok.account.service.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -30,9 +27,15 @@ public class AccountController {
         return ResponseEntity.ok(accountFindAllResList);
     }
 
+    @PostMapping("/account/moneybox")
+    public ResponseEntity<MoneyboxSaveRes> moneyboxSave(@RequestBody MoneyboxSaveReq moneyboxSaveReq) {
+        MoneyboxSaveRes MoneyboxSaveRes = accountService.moneyboxSave(moneyboxSaveReq);
+        return ResponseEntity.ok(MoneyboxSaveRes);
+    }
+
     @GetMapping("/account/moneybox")
     public ResponseEntity<MoneyboxFindAllRes> moneyboxFindAll() {
-        MoneyboxFindAllRes moneyboxFindAll = accountService.moneyboxFindAll();
-        return ResponseEntity.ok(moneyboxFindAll);
+        MoneyboxFindAllRes moneyboxFindAllRes = accountService.moneyboxFindAll();
+        return ResponseEntity.ok(moneyboxFindAllRes);
     }
 }

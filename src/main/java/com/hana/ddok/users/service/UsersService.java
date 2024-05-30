@@ -52,7 +52,7 @@ public class UsersService {
             throw new UsersInvalidPwd();
 
         String encodedPwd = bCryptPasswordEncoder.encode(req.password());
-        Home home = homeRepository.findById(0L).get();
+        Home home = homeRepository.findById(1L).get();
 
         Users user = usersRepository.save(UsersJoinReq.toEntity(req, encodedPwd, home));
 
