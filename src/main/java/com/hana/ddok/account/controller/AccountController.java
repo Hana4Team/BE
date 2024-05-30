@@ -32,8 +32,8 @@ public class AccountController {
     }
 
     @PostMapping("/account/moneybox")
-    public ResponseEntity<MoneyboxSaveRes> moneyboxSave(@RequestBody MoneyboxSaveReq moneyboxSaveReq) {
-        MoneyboxSaveRes MoneyboxSaveRes = accountService.moneyboxSave(moneyboxSaveReq);
+    public ResponseEntity<MoneyboxSaveRes> moneyboxSave(@RequestBody MoneyboxSaveReq moneyboxSaveReq, @AuthenticationPrincipal UsersDetails usersDetails) {
+        MoneyboxSaveRes MoneyboxSaveRes = accountService.moneyboxSave(moneyboxSaveReq, usersDetails.getUsername());
         return ResponseEntity.ok(MoneyboxSaveRes);
     }
 

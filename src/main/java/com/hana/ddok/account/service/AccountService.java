@@ -61,14 +61,14 @@ public class AccountService {
     }
 
     @Transactional
-    public MoneyboxSaveRes moneyboxSave(MoneyboxSaveReq moneyboxSaveReq) {
-        Users users = usersRepository.findById(1L).get();    // TODO : 시큐리티 적용 시 변경
+    public MoneyboxSaveRes moneyboxSave(MoneyboxSaveReq moneyboxSaveReq, String phoneNumber) {
+        Users users = usersRepository.findByPhoneNumber(phoneNumber);
         Products products = productsRepository.findById(moneyboxSaveReq.productsId())
                 .orElseThrow(() -> new ProductsNotFound());
 
-        Account parkingAccount = accountRepository.save(moneyboxSaveReq.toEntity(users, products));
-        Account expenseAccount = accountRepository.save(moneyboxSaveReq.toEntity(users, products));
-        Account savingAccount = accountRepository.save(moneyboxSaveReq.toEntity(users, products));
+        Account parkingAccount = accountRepository.save(moneyboxSaveReq.toEntity(users, products, 1));
+        Account expenseAccount = accountRepository.save(moneyboxSaveReq.toEntity(users, products, 2));
+        Account savingAccount = accountRepository.save(moneyboxSaveReq.toEntity(users, products, 3));
 
         return new MoneyboxSaveRes(parkingAccount, expenseAccount, savingAccount);
     }
