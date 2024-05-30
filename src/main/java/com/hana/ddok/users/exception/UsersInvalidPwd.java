@@ -4,6 +4,6 @@ import com.hana.ddok.common.exception.ValueInvalidException;
 
 public class UsersInvalidPwd extends ValueInvalidException {
     public UsersInvalidPwd() {
-        super("비밀번호 재입력이 같지 않습니다");
+        super("유효하지 않은 비밀번호 입력입니다.");
     }
 }
