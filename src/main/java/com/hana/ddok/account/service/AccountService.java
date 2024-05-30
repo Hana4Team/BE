@@ -13,9 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.security.auth.login.AccountNotFoundException;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -88,8 +86,10 @@ public class AccountService {
     @Transactional(readOnly = true)
     public MoneyboxFindBySavingRes moneyboxFindBySavingRes(String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber);
-        Account account = accountRepository.findAllByUsersAndType(users, 4)
-                .orElseThrow(() -> new MoneyboxNotFound());
-        return new MoneyboxFindBySavingRes(account);
+        List<Account> account = accountRepository.findAllByUsersAndType(users, 4);
+        if (account.size() != 1) {
+            throw new MoneyboxNotFound();
+        }
+        return new MoneyboxFindBySavingRes(account.get(0));
     }
 }
