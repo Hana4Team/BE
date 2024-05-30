@@ -6,17 +6,20 @@ import com.hana.ddok.common.jwt.JWTUtil;
 import com.hana.ddok.home.domain.Home;
 import com.hana.ddok.home.repository.HomeRepository;
 import com.hana.ddok.users.domain.Users;
-import com.hana.ddok.users.dto.UsersJoinReq;
-import com.hana.ddok.users.dto.UsersJoinRes;
-import com.hana.ddok.users.dto.UsersLoginReq;
-import com.hana.ddok.users.dto.UsersLoginRes;
+import com.hana.ddok.users.dto.*;
 import com.hana.ddok.users.exception.UsersInvalidPwd;
 import com.hana.ddok.users.exception.UsersNotFound;
 import com.hana.ddok.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
+import net.nurigo.sdk.message.model.Message;
+import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
+import net.nurigo.sdk.message.response.SingleMessageSentResponse;
+import net.nurigo.sdk.message.service.DefaultMessageService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -25,9 +28,12 @@ public class UsersService {
     private final HomeRepository homeRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JWTUtil jwtUtil;
+    private final DefaultMessageService messageService;
 
     @Value("${jwt.expired.time}")
     private Long expiredTime;
+    @Value("${coolsms.number.from}")
+    private String from;
 
     public UsersLoginRes usersLogin(UsersLoginReq req) {
 
@@ -52,10 +58,25 @@ public class UsersService {
             throw new UsersInvalidPwd();
 
         String encodedPwd = bCryptPasswordEncoder.encode(req.password());
-        Home home = homeRepository.findById(0L).get();
+        Home home = homeRepository.findById(1L).get();
 
         Users user = usersRepository.save(UsersJoinReq.toEntity(req, encodedPwd, home));
 
         return new UsersJoinRes(user.getUsersId(), user.getPhoneNumber());
+    }
+
+    public SingleMessageSentResponse usersMessage(UsersMessageReq req) {
+        Message message = new Message();
+
+        Random random = new Random();
+        int code = 1000000 + random.nextInt(9000000);
+
+        message.setFrom(from);
+        message.setTo(req.phoneNumber());
+        message.setText("인증번호: " + code);
+
+        SingleMessageSentResponse response = this.messageService.sendOne(new SingleMessageSendingRequest(message));
+        System.out.println(response);
+        return response;
     }
 }
