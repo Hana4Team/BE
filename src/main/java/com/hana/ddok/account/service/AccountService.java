@@ -39,19 +39,21 @@ public class AccountService {
     public List<AccountFindAllRes> accountFindAll(String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber);
 
+        // 일반 계좌 조회
         List<Account> accountList = accountRepository.findAllByUsers(users);
         List<AccountFindAllRes> accountFindAllResList = accountList.stream()
                 .filter(account -> account.getType() == 1)
                 .map(AccountFindAllRes::new)
                 .collect(Collectors.toList());
 
+        // 머니박스 계좌 조회 : 파킹통장(2)로 balance를 합침
         Optional<Account> parkingAccountOptional = accountList.stream()
                 .filter(account -> account.getType() == 2)
                 .findFirst();
         if (parkingAccountOptional.isPresent()) {
             Account parkingAccount = parkingAccountOptional.get();
             Long moneyboxTotalBalance = accountList.stream()
-                    .filter(account -> account.getType() == 2 || account.getType() == 3 || account.getType() == 4)
+                    .filter(account -> account.getType() != 1)
                     .mapToLong(Account::getBalance)
                     .sum();
             accountFindAllResList.add(new AccountFindAllRes(parkingAccount, moneyboxTotalBalance));
