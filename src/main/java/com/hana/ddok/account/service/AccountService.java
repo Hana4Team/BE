@@ -25,8 +25,8 @@ public class AccountService {
     private final UsersRepository usersRepository;
 
     @Transactional
-    public AccountSaveRes accountSave(AccountSaveReq accountSaveReq) {
-        Users users = usersRepository.findById(1L).get();    // TODO : 시큐리티 적용 시 변경
+    public AccountSaveRes accountSave(AccountSaveReq accountSaveReq, String phoneNumber) {
+        Users users = usersRepository.findByPhoneNumber(phoneNumber);
         Products products = productsRepository.findById(accountSaveReq.productsId())
                 .orElseThrow(() -> new ProductsNotFound());
         Account account = accountRepository.save(accountSaveReq.toEntity(users, products));

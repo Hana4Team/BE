@@ -20,8 +20,8 @@ public class AccountController {
     private final AccountService accountService;
 
     @PostMapping("/account")
-    public ResponseEntity<AccountSaveRes> accountSave(@RequestBody AccountSaveReq accountSaveReq) {
-        AccountSaveRes accountSaveRes = accountService.accountSave(accountSaveReq);
+    public ResponseEntity<AccountSaveRes> accountSave(@RequestBody AccountSaveReq accountSaveReq, @AuthenticationPrincipal UsersDetails usersDetails) {
+        AccountSaveRes accountSaveRes = accountService.accountSave(accountSaveReq, usersDetails.getUsername());
         return ResponseEntity.ok(accountSaveRes);
     }
 
