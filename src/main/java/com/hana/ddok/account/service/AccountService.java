@@ -1,10 +1,7 @@
 package com.hana.ddok.account.service;
 
 import com.hana.ddok.account.domain.Account;
-import com.hana.ddok.account.dto.AccountFindAllRes;
-import com.hana.ddok.account.dto.AccountSaveReq;
-import com.hana.ddok.account.dto.AccountSaveRes;
-import com.hana.ddok.account.dto.MoneyboxFindAllRes;
+import com.hana.ddok.account.dto.*;
 import com.hana.ddok.account.repository.AccountRepository;
 import com.hana.ddok.products.domain.Products;
 import com.hana.ddok.products.exception.ProductsNotFound;
@@ -17,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,14 +43,17 @@ public class AccountService {
                 .map(AccountFindAllRes::new)
                 .collect(Collectors.toList());
 
-        Account parkingAccount = accountList.stream()
+        Optional<Account> parkingAccountOptional = accountList.stream()
                 .filter(account -> account.getType() == 2)
-                .findFirst().get();
-        Long moneyboxTotalBalance = accountList.stream()
-                .filter(account -> account.getType() == 2 || account.getType() == 3 || account.getType() == 4)
-                .mapToLong(Account::getBalance)
-                .sum();
-        accountFindAllResList.add(new AccountFindAllRes(parkingAccount, moneyboxTotalBalance));
+                .findFirst();
+        if (parkingAccountOptional.isPresent()) {
+            Account parkingAccount = parkingAccountOptional.get();
+            Long moneyboxTotalBalance = accountList.stream()
+                    .filter(account -> account.getType() == 2 || account.getType() == 3 || account.getType() == 4)
+                    .mapToLong(Account::getBalance)
+                    .sum();
+            accountFindAllResList.add(new AccountFindAllRes(parkingAccount, moneyboxTotalBalance));
+        }
 
         return accountFindAllResList;
     }
