@@ -7,7 +7,6 @@ import com.hana.ddok.users.domain.Users;
 import java.time.LocalDate;
 
 public record AccountSaveReq(
-        Integer type,
         Integer payment,
         LocalDate endDate,
         String password,
@@ -16,7 +15,7 @@ public record AccountSaveReq(
     public Account toEntity(Users users, Products products) {
         return Account.builder()
                 .accountNumber("880")    // TODO : 추후 랜덤으로
-                .type(type)
+                .type(1)
                 .balance(0L)
                 .payment(payment)
                 .endDate(endDate)
