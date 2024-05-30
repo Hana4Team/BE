@@ -9,7 +9,15 @@ spring:
     username: root
     password: mysql123
     driver-class-name: com.mysql.cj.jdbc.Driver
+
 jwt:
   secret: c3ByaW5nYm9vdC1qd3QtdHV0b3JpYWwtc3ByaW5nYm9vdC1qd3QtdHV0b3JpYWwtc3ByaW5nYm9vdC1qd3QtdHV0b3JpYWwK
   expired:
     time: 604800000 # 7 days in milliseconds
+
+coolsms:
+  number:
+    from: 01095612028
+  api:
+    key: NCSP6WUKOM9I7XGN
+    secret: ISTXPET0RJXKMFR1D79GGKC2IOYSFOUR

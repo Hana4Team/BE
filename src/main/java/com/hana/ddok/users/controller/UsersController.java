@@ -1,11 +1,9 @@
 package com.hana.ddok.users.controller;
 
-import com.hana.ddok.users.dto.UsersJoinReq;
-import com.hana.ddok.users.dto.UsersJoinRes;
-import com.hana.ddok.users.dto.UsersLoginReq;
-import com.hana.ddok.users.dto.UsersLoginRes;
+import com.hana.ddok.users.dto.*;
 import com.hana.ddok.users.service.UsersService;
 import lombok.RequiredArgsConstructor;
+import net.nurigo.sdk.message.response.SingleMessageSentResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,4 +27,8 @@ public class UsersController {
         return ResponseEntity.ok(res);
     }
 
+    @PostMapping("/message")
+    public ResponseEntity<SingleMessageSentResponse> usersMessage(@RequestBody UsersMessageReq req) {
+        return ResponseEntity.ok(usersService.usersMessage(req));
+    }
 }
