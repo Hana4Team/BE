@@ -2,6 +2,7 @@ package com.hana.ddok.account.service;
 
 import com.hana.ddok.account.domain.Account;
 import com.hana.ddok.account.dto.*;
+import com.hana.ddok.account.exception.MoneyboxNotFound;
 import com.hana.ddok.account.repository.AccountRepository;
 import com.hana.ddok.products.domain.Products;
 import com.hana.ddok.products.exception.ProductsNotFound;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.security.auth.login.AccountNotFoundException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -72,8 +74,8 @@ public class AccountService {
     }
 
     @Transactional(readOnly = true)
-    public MoneyboxFindAllRes moneyboxFindAll() {
-        Users users = usersRepository.findById(1L).get();    // TODO : 시큐리티 적용 시 변경
+    public MoneyboxFindAllRes moneyboxFindAll(String phoneNumber) {
+        Users users = usersRepository.findByPhoneNumber(phoneNumber);
         List<Account> accountList = accountRepository.findAllByUsers(users);
 
         Map<Integer, Account> accountMap = accountList.stream()
@@ -81,7 +83,9 @@ public class AccountService {
         Account parkingAccount = accountMap.get(1);
         Account expenseAccount = accountMap.get(2);
         Account savingAccount = accountMap.get(3);
-
+        if (parkingAccount == null || expenseAccount == null || savingAccount == null) {
+            throw new MoneyboxNotFound();
+        }
         return new MoneyboxFindAllRes(parkingAccount, expenseAccount, savingAccount);
     }
 }

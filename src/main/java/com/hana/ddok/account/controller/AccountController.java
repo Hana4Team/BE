@@ -38,8 +38,8 @@ public class AccountController {
     }
 
     @GetMapping("/account/moneybox")
-    public ResponseEntity<MoneyboxFindAllRes> moneyboxFindAll() {
-        MoneyboxFindAllRes moneyboxFindAllRes = accountService.moneyboxFindAll();
+    public ResponseEntity<MoneyboxFindAllRes> moneyboxFindAll(@AuthenticationPrincipal UsersDetails usersDetails) {
+        MoneyboxFindAllRes moneyboxFindAllRes = accountService.moneyboxFindAll(usersDetails.getUsername());
         return ResponseEntity.ok(moneyboxFindAllRes);
     }
 }
