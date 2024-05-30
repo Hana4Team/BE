@@ -6,7 +6,6 @@ import com.hana.ddok.account.dto.AccountSaveReq;
 import com.hana.ddok.account.dto.AccountSaveRes;
 import com.hana.ddok.account.dto.MoneyboxFindAllRes;
 import com.hana.ddok.account.repository.AccountRepository;
-import com.hana.ddok.common.exception.EntityNotFoundException;
 import com.hana.ddok.products.domain.Products;
 import com.hana.ddok.products.exception.ProductsNotFound;
 import com.hana.ddok.products.repository.ProductsRepository;
@@ -39,9 +38,22 @@ public class AccountService {
     @Transactional(readOnly = true)
     public List<AccountFindAllRes> accountFindAll() {
         Users users = usersRepository.findById(1L).get();    // TODO : 시큐리티 적용 시 변경
-        List<AccountFindAllRes> accountFindAllResList = accountRepository.findAllByUsers(users).stream()
+
+        List<Account> accountList = accountRepository.findAllByUsers(users);
+        List<AccountFindAllRes> accountFindAllResList = accountList.stream()
+                .filter(account -> account.getType() == 1)
                 .map(AccountFindAllRes::new)
-                .toList();
+                .collect(Collectors.toList());
+
+        Account parkingAccount = accountList.stream()
+                .filter(account -> account.getType() == 2)
+                .findFirst().get();
+        Long moneyboxTotalBalance = accountList.stream()
+                .filter(account -> account.getType() == 2 || account.getType() == 3 || account.getType() == 4)
+                .mapToLong(Account::getBalance)
+                .sum();
+        accountFindAllResList.add(new AccountFindAllRes(parkingAccount, moneyboxTotalBalance));
+
         return accountFindAllResList;
     }
 
