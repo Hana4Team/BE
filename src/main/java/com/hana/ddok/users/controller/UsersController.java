@@ -35,4 +35,9 @@ public class UsersController {
     public ResponseEntity<UsersGetRes> usersGet(@AuthenticationPrincipal UsersDetails usersDetails) {
         return ResponseEntity.ok(usersService.usersGet(usersDetails.getUsername()));
     }
+    @GetMapping("/point")
+    public ResponseEntity<UsersGetPointRes> usersGetPoint(@AuthenticationPrincipal UsersDetails usersDetails) {
+        return ResponseEntity.ok(usersService.usersGetPoint(usersDetails.getUsername()));
+    }
+
 }

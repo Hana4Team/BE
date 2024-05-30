@@ -83,4 +83,9 @@ public class UsersService {
         return new UsersGetRes(user.getName(), user.getPhoneNumber(), user.getStep(), user.getStepStatus());
     }
 
+    public UsersGetPointRes usersGetPoint(String phoneNumber) {
+        Users user = usersRepository.findByPhoneNumber(phoneNumber);
+        return new UsersGetPointRes(user.getPoints());
+    }
+
 }
