@@ -1,11 +1,10 @@
 package com.hana.ddok.users.service;
 
-import com.hana.ddok.common.exception.EntityNotFoundException;
-import com.hana.ddok.common.exception.ValueInvalidException;
 import com.hana.ddok.common.jwt.JWTUtil;
 import com.hana.ddok.home.domain.Home;
 import com.hana.ddok.home.repository.HomeRepository;
 import com.hana.ddok.users.domain.Users;
+import com.hana.ddok.users.domain.UsersDetails;
 import com.hana.ddok.users.dto.*;
 import com.hana.ddok.users.exception.UsersInvalidPwd;
 import com.hana.ddok.users.exception.UsersNotFound;
@@ -59,7 +58,6 @@ public class UsersService {
 
         String encodedPwd = bCryptPasswordEncoder.encode(req.password());
         Home home = homeRepository.findById(1L).get();
-
         Users user = usersRepository.save(UsersJoinReq.toEntity(req, encodedPwd, home));
 
         return new UsersJoinRes(user.getUsersId(), user.getPhoneNumber());
@@ -79,4 +77,10 @@ public class UsersService {
         System.out.println(response);
         return response;
     }
+
+    public UsersGetRes usersGet(String phoneNumber) {
+        Users user = usersRepository.findByPhoneNumber(phoneNumber);
+        return new UsersGetRes(user.getName(), user.getPhoneNumber(), user.getStep(), user.getStepStatus());
+    }
+
 }
