@@ -1,4 +1,13 @@
 package com.hana.ddok.account.dto;
 
-public record MoneyboxFindBySavingRes() {
+import com.hana.ddok.account.domain.Account;
+
+public record MoneyboxFindBySavingRes(
+        Long savingBalance
+) {
+    public MoneyboxFindBySavingRes(Account account) {
+        this(
+                account.getBalance()
+        );
+    }
 }

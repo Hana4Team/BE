@@ -42,4 +42,10 @@ public class AccountController {
         MoneyboxFindAllRes moneyboxFindAllRes = accountService.moneyboxFindAll(usersDetails.getUsername());
         return ResponseEntity.ok(moneyboxFindAllRes);
     }
+
+    @GetMapping("/account/moneybox/saving")
+    public ResponseEntity<MoneyboxFindBySavingRes> moneyboxFindBySaving(@AuthenticationPrincipal UsersDetails usersDetails) {
+        MoneyboxFindBySavingRes moneyboxFindBySavingRes = accountService.moneyboxFindBySavingRes(usersDetails.getUsername());
+        return ResponseEntity.ok(moneyboxFindBySavingRes);
+    }
 }

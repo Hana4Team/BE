@@ -84,4 +84,12 @@ public class AccountService {
         }
         return new MoneyboxFindAllRes(accountList.get(0), accountList.get(1), accountList.get(2));
     }
+
+    @Transactional(readOnly = true)
+    public MoneyboxFindBySavingRes moneyboxFindBySavingRes(String phoneNumber) {
+        Users users = usersRepository.findByPhoneNumber(phoneNumber);
+        Account account = accountRepository.findAllByUsersAndType(users, 4)
+                .orElseThrow(() -> new MoneyboxNotFound());
+        return new MoneyboxFindBySavingRes(account);
+    }
 }
