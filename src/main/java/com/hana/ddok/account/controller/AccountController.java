@@ -3,8 +3,12 @@ package com.hana.ddok.account.controller;
 import com.hana.ddok.account.domain.Account;
 import com.hana.ddok.account.dto.*;
 import com.hana.ddok.account.service.AccountService;
+import com.hana.ddok.users.domain.Users;
+import com.hana.ddok.users.domain.UsersDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,8 +26,8 @@ public class AccountController {
     }
 
     @GetMapping("/account")
-    public ResponseEntity<List<AccountFindAllRes>> accountFindAll() {
-        List<AccountFindAllRes> accountFindAllResList = accountService.accountFindAll();
+    public ResponseEntity<List<AccountFindAllRes>> accountFindAll(@AuthenticationPrincipal UsersDetails usersDetails) {
+        List<AccountFindAllRes> accountFindAllResList = accountService.accountFindAll(usersDetails.getUsername());
         return ResponseEntity.ok(accountFindAllResList);
     }
 

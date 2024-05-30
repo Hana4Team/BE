@@ -34,8 +34,8 @@ public class AccountService {
     }
 
     @Transactional(readOnly = true)
-    public List<AccountFindAllRes> accountFindAll() {
-        Users users = usersRepository.findById(1L).get();    // TODO : 시큐리티 적용 시 변경
+    public List<AccountFindAllRes> accountFindAll(String phoneNumber) {
+        Users users = usersRepository.findByPhoneNumber(phoneNumber);
 
         List<Account> accountList = accountRepository.findAllByUsers(users);
         List<AccountFindAllRes> accountFindAllResList = accountList.stream()
@@ -67,7 +67,7 @@ public class AccountService {
         Account parkingAccount = accountRepository.save(moneyboxSaveReq.toEntity(users, products));
         Account expenseAccount = accountRepository.save(moneyboxSaveReq.toEntity(users, products));
         Account savingAccount = accountRepository.save(moneyboxSaveReq.toEntity(users, products));
-        
+
         return new MoneyboxSaveRes(parkingAccount, expenseAccount, savingAccount);
     }
 
