@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface AccountRepository extends JpaRepository<Account, Long> {
     List<Account> findAllByUsers(Users users);
+    List<Account> findAllByUsersAndTypeNot(Users users, Integer type);
 }

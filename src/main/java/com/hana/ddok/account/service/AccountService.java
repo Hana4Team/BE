@@ -66,9 +66,9 @@ public class AccountService {
         Products products = productsRepository.findById(moneyboxSaveReq.productsId())
                 .orElseThrow(() -> new ProductsNotFound());
 
-        Account parkingAccount = accountRepository.save(moneyboxSaveReq.toEntity(users, products, 1));
-        Account expenseAccount = accountRepository.save(moneyboxSaveReq.toEntity(users, products, 2));
-        Account savingAccount = accountRepository.save(moneyboxSaveReq.toEntity(users, products, 3));
+        Account parkingAccount = accountRepository.save(moneyboxSaveReq.toEntity(users, products, 2));
+        Account expenseAccount = accountRepository.save(moneyboxSaveReq.toEntity(users, products, 3));
+        Account savingAccount = accountRepository.save(moneyboxSaveReq.toEntity(users, products, 4));
 
         return new MoneyboxSaveRes(parkingAccount, expenseAccount, savingAccount);
     }
@@ -76,16 +76,10 @@ public class AccountService {
     @Transactional(readOnly = true)
     public MoneyboxFindAllRes moneyboxFindAll(String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber);
-        List<Account> accountList = accountRepository.findAllByUsers(users);
-
-        Map<Integer, Account> accountMap = accountList.stream()
-                .collect(Collectors.toMap(Account::getType, account -> account));
-        Account parkingAccount = accountMap.get(1);
-        Account expenseAccount = accountMap.get(2);
-        Account savingAccount = accountMap.get(3);
-        if (parkingAccount == null || expenseAccount == null || savingAccount == null) {
+        List<Account> accountList = accountRepository.findAllByUsersAndTypeNot(users, 1);
+        if (accountList.size() != 3) {
             throw new MoneyboxNotFound();
         }
-        return new MoneyboxFindAllRes(parkingAccount, expenseAccount, savingAccount);
+        return new MoneyboxFindAllRes(accountList.get(0), accountList.get(1), accountList.get(2));
     }
 }
