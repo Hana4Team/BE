@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.Random;
 
 @Service
@@ -63,11 +64,11 @@ public class UsersService {
         return new UsersJoinRes(user.getUsersId(), user.getPhoneNumber());
     }
 
-    public SingleMessageSentResponse usersMessage(UsersMessageReq req) {
+    public UsersMessageRes usersMessage(UsersMessageReq req) {
         Message message = new Message();
 
         Random random = new Random();
-        int code = 1000000 + random.nextInt(9000000);
+        Integer code = 1000000 + random.nextInt(9000000);
 
         message.setFrom(from);
         message.setTo(req.phoneNumber());
@@ -75,7 +76,12 @@ public class UsersService {
 
         SingleMessageSentResponse response = this.messageService.sendOne(new SingleMessageSendingRequest(message));
         System.out.println(response);
-        return response;
+
+        return new UsersMessageRes(code);
+    }
+
+    public UsersMsgCheckRes usersMsgCheck(UsersMsgCheckReq req) {
+        return new UsersMsgCheckRes(Objects.equals(req.code(), req.input()) ? "match" : "mismatch");
     }
 
     public UsersGetRes usersGet(String phoneNumber) {
