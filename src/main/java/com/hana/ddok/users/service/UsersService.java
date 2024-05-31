@@ -110,4 +110,11 @@ public class UsersService {
         usersRepository.save(user);
         return new UsersMissionRes(user.getPhoneNumber(), user.getStep(), user.getStepStatus());
     }
+
+    public UsersMissionRes usersMissionCheck(String phoneNumber) {
+        Users user = usersRepository.findByPhoneNumber(phoneNumber);
+        user.updateStepStatus(user.getStepStatus() == 2 ? 3 : 1); //성공 -> 성공확인 / 실패 -> 진행중
+        usersRepository.save(user);
+        return new UsersMissionRes(user.getPhoneNumber(), user.getStep(), user.getStepStatus());
+    }
 }

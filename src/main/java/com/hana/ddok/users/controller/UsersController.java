@@ -49,5 +49,8 @@ public class UsersController {
     public ResponseEntity<UsersMissionRes> usersMove(@AuthenticationPrincipal UsersDetails usersDetails) {
         return ResponseEntity.ok(usersService.usersMove(usersDetails.getUsername()));
     }
-
+    @PutMapping("/check")
+    public ResponseEntity<UsersMissionRes> usersMissionCheck(@AuthenticationPrincipal UsersDetails usersDetails) {
+        return ResponseEntity.ok(usersService.usersMissionCheck(usersDetails.getUsername()));
+    }
 }
