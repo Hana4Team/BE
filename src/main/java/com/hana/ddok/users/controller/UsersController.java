@@ -40,4 +40,9 @@ public class UsersController {
         return ResponseEntity.ok(usersService.usersGetPoint(usersDetails.getUsername()));
     }
 
+    @PutMapping("/start")
+    public ResponseEntity<UsersMissionRes> usersMissionStart(@AuthenticationPrincipal UsersDetails usersDetails) {
+        return ResponseEntity.ok(usersService.usersMissionStart(usersDetails.getUsername()));
+    }
+
 }

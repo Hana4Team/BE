@@ -4,7 +4,6 @@ import com.hana.ddok.common.jwt.JWTUtil;
 import com.hana.ddok.home.domain.Home;
 import com.hana.ddok.home.repository.HomeRepository;
 import com.hana.ddok.users.domain.Users;
-import com.hana.ddok.users.domain.UsersDetails;
 import com.hana.ddok.users.dto.*;
 import com.hana.ddok.users.exception.UsersInvalidPwd;
 import com.hana.ddok.users.exception.UsersNotFound;
@@ -87,5 +86,20 @@ public class UsersService {
         Users user = usersRepository.findByPhoneNumber(phoneNumber);
         return new UsersGetPointRes(user.getPoints());
     }
+
+    //null(시작전)
+    //1 : 진행중
+    //2 : 성공
+    //3 : 성공확인
+    //4 : 실패
+    public UsersMissionRes usersMissionStart(String phoneNumber) {
+        Users user = usersRepository.findByPhoneNumber(phoneNumber);
+        user.updateStep(user.getStep()+1);
+        user.updateStepStatus(1); //진행중
+        usersRepository.save(user);
+        return new UsersMissionRes(user.getPhoneNumber(), user.getStep(), user.getStepStatus());
+    }
+
+
 
 }

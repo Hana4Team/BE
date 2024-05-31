@@ -1,11 +1,10 @@
 package com.hana.ddok.users.domain;
 import com.hana.ddok.budget.domain.Budget;
+import com.hana.ddok.common.exception.EntityNotFoundException;
+import com.hana.ddok.common.exception.ValueInvalidException;
 import com.hana.ddok.home.domain.Home;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 
@@ -50,4 +49,26 @@ public class Users {
     @OneToOne
     @JoinColumn(name = "budget_id")
     private Budget budget;
+
+    public void updateStep(Integer step) {
+        this.step = step;
+    }
+    public void updateStepStatus(Integer stepStatus) {
+        this.stepStatus = stepStatus;
+    }
+
+    public void updatePoints(Integer points) {
+        if (points < 0) {
+            throw new ValueInvalidException("하나머니는 마이너스가 될 수 없습니다.");
+        }
+        this.points = points;
+    }
+
+    public void updateHome(Home home) {
+        if (home == null) {
+            throw new EntityNotFoundException("집을 찾을 수 없습니다.");
+        }
+        this.home = home;
+    }
+
 }
