@@ -1,6 +1,7 @@
 package com.hana.ddok.users.service;
 
 import com.hana.ddok.common.exception.EntityNotFoundException;
+import com.hana.ddok.common.exception.ValueInvalidException;
 import com.hana.ddok.common.jwt.JWTUtil;
 import com.hana.ddok.home.domain.Home;
 import com.hana.ddok.home.repository.HomeRepository;
@@ -148,5 +149,14 @@ public class UsersService {
         user.updateStepStatus(user.getStepStatus() == 2 ? 3 : 1); //성공 -> 성공확인 / 실패 -> 진행중
         usersRepository.save(user);
         return new UsersMissionRes(user.getPhoneNumber(), user.getStep(), user.getStepStatus());
+    }
+
+    public UsersReadNewsRes usersReadNews(String phoneNumber) {
+        Users user = usersRepository.findByPhoneNumber(phoneNumber);
+        if (user.getReadNews())
+            throw new ValueInvalidException("이미 읽은 회원입니다.");
+        user.updateReadNews(true);
+        usersRepository.save(user);
+        return new UsersReadNewsRes(true);
     }
 }

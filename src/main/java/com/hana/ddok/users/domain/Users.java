@@ -42,6 +42,9 @@ public class Users {
     @Column(name = "points", nullable = false)
     private Integer points;
 
+    @Column(name = "read_news", nullable = false)
+    private Boolean readNews;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "home_id", nullable = false)
     private Home home;
@@ -49,6 +52,10 @@ public class Users {
     @OneToOne
     @JoinColumn(name = "budget_id")
     private Budget budget;
+
+    public void updateReadNews(Boolean readNews) {
+        this.readNews = readNews;
+    }
 
     public void updateStep(Integer step) {
         this.step = step;

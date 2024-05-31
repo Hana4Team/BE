@@ -64,4 +64,11 @@ public class UsersController {
     public ResponseEntity<UsersMissionRes> usersMissionCheck(@AuthenticationPrincipal UsersDetails usersDetails) {
         return ResponseEntity.ok(usersService.usersMissionCheck(usersDetails.getUsername()));
     }
+
+    @PutMapping("/news")
+    public ResponseEntity<UsersReadNewsRes> usersReadNews(@AuthenticationPrincipal UsersDetails usersDetails) {
+        return ResponseEntity.ok(usersService.usersReadNews(usersDetails.getUsername()));
+    }
+
+
 }
