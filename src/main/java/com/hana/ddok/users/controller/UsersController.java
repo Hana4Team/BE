@@ -16,7 +16,7 @@ public class UsersController {
 
     @PostMapping("/login")
     public ResponseEntity<UsersLoginRes> usersLogin(@RequestBody UsersLoginReq req) {
-        return ResponseEntity.ok(usersService.usersLogin(req));
+        return ResponseEntity.status(200).body(usersService.usersLogin(req));
     }
 
     @PostMapping("/join")

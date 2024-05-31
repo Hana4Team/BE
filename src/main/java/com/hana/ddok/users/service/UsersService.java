@@ -49,7 +49,7 @@ public class UsersService {
         }
 
         String token = jwtUtil.createJwt(user.getPhoneNumber(), expiredTime);
-        return new UsersLoginRes(user.getName(), user.getPhoneNumber(), user.getStep(), user.getStepStatus(), token);
+        return new UsersLoginRes(true, user.getName(), user.getPhoneNumber(), user.getStep(), user.getStepStatus(), token);
     }
 
 
@@ -61,7 +61,7 @@ public class UsersService {
         Home home = homeRepository.findById(1L).orElseThrow(() -> new EntityNotFoundException("집을 찾을 수 없습니다"));
         Users user = usersRepository.save(UsersJoinReq.toEntity(req, encodedPwd, home));
 
-        return new UsersJoinRes(user.getUsersId(), user.getPhoneNumber());
+        return new UsersJoinRes(true, user.getUsersId(), user.getPhoneNumber());
     }
 
     public UsersMessageRes usersMessage(UsersMessageReq req) {
