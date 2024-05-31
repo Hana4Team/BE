@@ -45,4 +45,9 @@ public class UsersController {
         return ResponseEntity.ok(usersService.usersMissionStart(usersDetails.getUsername()));
     }
 
+    @PutMapping("/move")
+    public ResponseEntity<UsersMissionRes> usersMove(@AuthenticationPrincipal UsersDetails usersDetails) {
+        return ResponseEntity.ok(usersService.usersMove(usersDetails.getUsername()));
+    }
+
 }

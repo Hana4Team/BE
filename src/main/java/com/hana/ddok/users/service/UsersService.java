@@ -1,5 +1,6 @@
 package com.hana.ddok.users.service;
 
+import com.hana.ddok.common.exception.EntityNotFoundException;
 import com.hana.ddok.common.jwt.JWTUtil;
 import com.hana.ddok.home.domain.Home;
 import com.hana.ddok.home.repository.HomeRepository;
@@ -56,7 +57,7 @@ public class UsersService {
             throw new UsersInvalidPwd();
 
         String encodedPwd = bCryptPasswordEncoder.encode(req.password());
-        Home home = homeRepository.findById(1L).get();
+        Home home = homeRepository.findById(1L).orElseThrow(() -> new EntityNotFoundException("집을 찾을 수 없습니다"));
         Users user = usersRepository.save(UsersJoinReq.toEntity(req, encodedPwd, home));
 
         return new UsersJoinRes(user.getUsersId(), user.getPhoneNumber());
@@ -101,5 +102,12 @@ public class UsersService {
     }
 
 
-
+    public UsersMissionRes usersMove(String phoneNumber) {
+        Users user = usersRepository.findByPhoneNumber(phoneNumber);
+        Home home = homeRepository.findById(user.getHome().getHomeId() + 1).orElseThrow(() -> new EntityNotFoundException("집을 찾을 수 없습니다."));
+        user.updateHome(home);
+        user.updateStepStatus(2); //성공
+        usersRepository.save(user);
+        return new UsersMissionRes(user.getPhoneNumber(), user.getStep(), user.getStepStatus());
+    }
 }
