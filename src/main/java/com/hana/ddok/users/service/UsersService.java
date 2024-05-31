@@ -94,6 +94,32 @@ public class UsersService {
         return new UsersGetPointRes(user.getPoints());
     }
 
+    public UsersSavePointRes usersSavePoint(String phoneNumber, UsersSavePointReq req) {
+        Users user = usersRepository.findByPhoneNumber(phoneNumber);
+        Random random = new Random();
+        Integer points = 0;
+        Integer curStep = user.getStep();
+
+        if (req.isMission()) {
+            points = switch (user.getStep()) {
+                case 1 -> random.nextInt(201) + 100; // 100 ~ 300
+                case 2 -> random.nextInt(201) + 500; // 500 ~ 700
+                case 3 -> random.nextInt(301) + 700; // 700 ~ 1000
+                case 4 -> random.nextInt(1001) + 1000; // 1000 ~ 2000
+                case 5 -> random.nextInt(1001) + 2000; // 2000 ~ 3000
+                default -> throw new IllegalArgumentException("Invalid step: " + user.getStep());
+            };
+        } else {
+            curStep = 0;
+            points = random.nextInt(41) + 10; // 10 ~ 50
+        }
+
+        user.updatePoints(user.getPoints() + points);
+        usersRepository.save(user);
+
+        return new UsersSavePointRes(curStep, points);
+    }
+
     //null(시작전)
     //1 : 진행중
     //2 : 성공

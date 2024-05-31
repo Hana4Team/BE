@@ -44,6 +44,12 @@ public class UsersController {
         return ResponseEntity.ok(usersService.usersGetPoint(usersDetails.getUsername()));
     }
 
+    @PutMapping("/point")
+    public ResponseEntity<UsersSavePointRes> usersSavePoint(@AuthenticationPrincipal UsersDetails usersDetails,
+                                                           @RequestBody UsersSavePointReq req) {
+        return ResponseEntity.ok(usersService.usersSavePoint(usersDetails.getUsername(), req));
+    }
+
     @PutMapping("/start")
     public ResponseEntity<UsersMissionRes> usersMissionStart(@AuthenticationPrincipal UsersDetails usersDetails) {
         return ResponseEntity.ok(usersService.usersMissionStart(usersDetails.getUsername()));
