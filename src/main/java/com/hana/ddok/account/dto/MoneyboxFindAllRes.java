@@ -1,6 +1,7 @@
 package com.hana.ddok.account.dto;
 
 import com.hana.ddok.account.domain.Account;
+import com.hana.ddok.account.domain.Moneybox;
 
 public record MoneyboxFindAllRes(
         String accountNumber,
@@ -8,12 +9,12 @@ public record MoneyboxFindAllRes(
         Long expenseBalance,
         Long savingBalance
 ) {
-    public MoneyboxFindAllRes(Account parkingAccount, Account expenseAccount, Account savingAccount) {
+    public MoneyboxFindAllRes(Account account, Moneybox moneybox) {
         this(
-                parkingAccount.getAccountNumber(),
-                parkingAccount.getBalance(),
-                expenseAccount.getBalance(),
-                savingAccount.getBalance()
+                account.getAccountNumber(),
+                moneybox.getParkingBalance(),
+                moneybox.getExpenseBalance(),
+                moneybox.getSavingBalance()
         );
     }
 }
