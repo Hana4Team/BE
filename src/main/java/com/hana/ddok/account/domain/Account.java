@@ -28,9 +28,6 @@ public class Account extends BaseEntity {
     @Column(name = "account_number", nullable = false)
     private String accountNumber;
 
-    @Column(name = "type", nullable = false)
-    private Integer type;
-
     @Column(name = "balance", nullable = false)
     private Long balance;
 
