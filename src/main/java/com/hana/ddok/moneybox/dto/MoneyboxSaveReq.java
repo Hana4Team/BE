@@ -25,15 +25,4 @@ public record MoneyboxSaveReq(
                 .products(products)
                 .build();
     }
-
-    public Moneybox toEntity(Account account) {
-        return Moneybox.builder()
-                .parkingBalance(0L)
-                .expenseBalance(0L)
-                .savingBalance(0L)
-                .expenseTotal(0L)
-                .isCharged(false)
-                .account(account)
-                .build();
-    }
 }

@@ -32,7 +32,15 @@ public class MoneyboxService {
         Products products = productsRepository.findById(moneyboxSaveReq.productsId())
                 .orElseThrow(() -> new ProductsNotFound());
         Account account = accountRepository.save(moneyboxSaveReq.toEntity(users, products));
-        Moneybox moneybox = moneyboxRepository.save(moneyboxSaveReq.toEntity(account));
+        Moneybox moneybox = moneyboxRepository.save(Moneybox.builder()
+                .parkingBalance(0L)
+                .expenseBalance(0L)
+                .savingBalance(0L)
+                .expenseTotal(0L)
+                .isCharged(false)
+                .account(account)
+                .build()
+        );
         return new MoneyboxSaveRes(account, moneybox);
     }
 
