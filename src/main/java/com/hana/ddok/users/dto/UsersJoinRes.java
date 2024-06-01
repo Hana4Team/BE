@@ -1,4 +1,4 @@
 package com.hana.ddok.users.dto;
 
-public record UsersJoinRes(Long usersId){
+public record UsersJoinRes(Boolean success, Long usersId, String phoneNumber) {
 }
