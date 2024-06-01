@@ -39,7 +39,7 @@ public class MoneyboxService {
     @Transactional(readOnly = true)
     public MoneyboxFindAllRes moneyboxFindAll(String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber);
-        Account account = accountRepository.findByUsersAndProductsType(users, 3)
+        Account account = accountRepository.findByUsersAndProductsType(users, 4)
                 .orElseThrow(() -> new AccountNotFound());
         Moneybox moneybox = moneyboxRepository.findByAccount(account)
                 .orElseThrow(() -> new MoneyboxNotFound());
@@ -49,7 +49,7 @@ public class MoneyboxService {
     @Transactional(readOnly = true)
     public MoneyboxFindBySavingRes moneyboxFindBySavingRes(String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber);
-        Account account = accountRepository.findByUsersAndProductsType(users, 3)
+        Account account = accountRepository.findByUsersAndProductsType(users, 4)
                 .orElseThrow(() -> new AccountNotFound());
         Moneybox moneybox = moneyboxRepository.findByAccount(account)
                 .orElseThrow(() -> new MoneyboxNotFound());
