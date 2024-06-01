@@ -2,6 +2,7 @@ package com.hana.ddok.account.service;
 
 import com.hana.ddok.account.domain.Account;
 import com.hana.ddok.account.dto.*;
+import com.hana.ddok.account.exception.AccountNotFound;
 import com.hana.ddok.account.repository.AccountRepository;
 import com.hana.ddok.products.domain.Products;
 import com.hana.ddok.products.exception.ProductsNotFound;
@@ -43,5 +44,14 @@ public class AccountService {
                 .map(AccountFindAllRes::new)
                 .collect(Collectors.toList());
         return accountFindAllResList;
+    }
+
+    @Transactional(readOnly = true)
+    public AccountFindByIdRes accountFindById(Long accountId, Integer year, Integer month, String phoneNumber) {
+        AccountFindByIdRes accountFindByIdRes = accountRepository.findById(accountId)
+                .map(AccountFindByIdRes::new)
+                .orElseThrow(() -> new AccountNotFound());
+        // TODO : 거래 관련 추가
+        return accountFindByIdRes;
     }
 }

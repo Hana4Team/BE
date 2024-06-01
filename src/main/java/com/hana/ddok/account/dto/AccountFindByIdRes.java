@@ -2,15 +2,15 @@ package com.hana.ddok.account.dto;
 
 import com.hana.ddok.account.domain.Account;
 
-public record AccountFindAllRes(
-    Long accountId,
+public record AccountFindByIdRes(
     String name,
+    String accountNumber,
     Long balance
 ) {
-    public AccountFindAllRes(Account account) {
+    public AccountFindByIdRes(Account account) {
         this(
-                account.getAccountId(),
                 account.getProducts().getName(),
+                account.getAccountNumber(),
                 account.getBalance()
         );
     }

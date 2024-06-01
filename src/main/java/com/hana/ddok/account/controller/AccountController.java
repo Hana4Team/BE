@@ -27,4 +27,10 @@ public class AccountController {
         List<AccountFindAllRes> accountFindAllResList = accountService.accountFindAll(accountFindAllReq, usersDetails.getUsername());
         return ResponseEntity.ok(accountFindAllResList);
     }
+
+    @GetMapping("/account/{accountId}")
+    public ResponseEntity<AccountFindByIdRes> accountFindById(@PathVariable Long accountId, @RequestParam Integer year, @RequestParam Integer month, @AuthenticationPrincipal UsersDetails usersDetails) {
+        AccountFindByIdRes accountFindByIdRes = accountService.accountFindById(accountId, year, month, usersDetails.getUsername());
+        return ResponseEntity.ok(accountFindByIdRes);
+    }
 }
