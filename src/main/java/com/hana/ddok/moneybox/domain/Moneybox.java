@@ -1,8 +1,7 @@
 package com.hana.ddok.account.domain;
 
 import com.hana.ddok.common.domain.BaseEntity;
-import com.hana.ddok.products.domain.Products;
-import com.hana.ddok.users.domain.Users;
+import com.hana.ddok.products.domain.Account;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
