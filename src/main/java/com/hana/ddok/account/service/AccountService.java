@@ -86,10 +86,10 @@ public class AccountService {
     @Transactional(readOnly = true)
     public MoneyboxFindBySavingRes moneyboxFindBySavingRes(String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber);
-        List<Account> account = accountRepository.findAllByUsersAndType(users, 4);
-        if (account.size() != 1) {
-            throw new MoneyboxNotFound();
-        }
-        return new MoneyboxFindBySavingRes(account.get(0));
+        Account account = accountRepository.findByUsersAndProductsType(users, 3)
+                .orElseThrow(() -> new AccountNotFound());
+        Moneybox moneybox = moneyboxRepository.findByAccount(account)
+                .orElseThrow(() -> new MoneyboxNotFound());
+        return new MoneyboxFindBySavingRes(moneybox);
     }
 }
