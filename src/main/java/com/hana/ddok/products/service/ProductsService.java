@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -19,7 +20,7 @@ public class ProductsService {
     public List<ProductsFindAllRes> productsFindAll(Integer type) {
         List<ProductsFindAllRes> productsFindAllResList = productsRepository.findByType(type).stream()
                 .map(ProductsFindAllRes::new)
-                .toList();
+                .collect(Collectors.toList());
         return productsFindAllResList;
     }
 

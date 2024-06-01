@@ -6,16 +6,16 @@ import com.hana.ddok.users.domain.Users;
 
 import java.time.LocalDate;
 
-public record AccountSaveReq(
+public record MoneyboxSaveReq(
         Integer payment,
         LocalDate endDate,
         String password,
         Long productsId
 ) {
-    public Account toEntity(Users users, Products products) {
+    public Account toEntity(Users users, Products products, Integer type) {
         return Account.builder()
                 .accountNumber("880")    // TODO : 추후 랜덤으로
-                .type(1)
+                .type(type)
                 .balance(0L)
                 .payment(payment)
                 .endDate(endDate)
