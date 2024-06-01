@@ -1,6 +1,7 @@
 package com.hana.ddok.moneybox.dto;
 
 import com.hana.ddok.account.domain.Account;
+import com.hana.ddok.moneybox.domain.Moneybox;
 import com.hana.ddok.products.domain.Products;
 import com.hana.ddok.users.domain.Users;
 
@@ -22,6 +23,17 @@ public record MoneyboxSaveReq(
                 .isDeleted(0)
                 .users(users)
                 .products(products)
+                .build();
+    }
+
+    public Moneybox toEntity(Account account) {
+        return Moneybox.builder()
+                .parkingBalance(0L)
+                .expenseBalance(0L)
+                .savingBalance(0L)
+                .expenseTotal(0L)
+                .isCharged(false)
+                .account(account)
                 .build();
     }
 }
