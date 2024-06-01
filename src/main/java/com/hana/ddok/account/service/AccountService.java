@@ -36,10 +36,10 @@ public class AccountService {
     public List<AccountFindAllRes> accountFindAll(AccountFindAllReq accountFindAllReq, String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber);
         List<AccountFindAllRes> accountFindAllResList = accountRepository.findAllByUsers(users).stream()
-                .filter(account -> (accountFindAllReq.depositAccount() && account.getProducts().getType().equals(1)) ||
-                                (accountFindAllReq.savingsAccount() && account.getProducts().getType().equals(2)) ||
-                                (accountFindAllReq.depositWithdrawalAccount() && account.getProducts().getType().equals(3)) ||
-                                (accountFindAllReq.moneyboxAccount() && account.getProducts().getType().equals(4))
+                .filter(account -> (accountFindAllReq.depositWithdrawalAccount() && account.getProducts().getType().equals(1)) ||
+                        (accountFindAllReq.depositAccount() && account.getProducts().getType().equals(2)) ||
+                        (accountFindAllReq.savingsAccount() && account.getProducts().getType().equals(3)) ||
+                        (accountFindAllReq.moneyboxAccount() && account.getProducts().getType().equals(4))
                 )
                 .map(AccountFindAllRes::new)
                 .collect(Collectors.toList());
