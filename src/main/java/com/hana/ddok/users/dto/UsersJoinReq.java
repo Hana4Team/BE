@@ -17,6 +17,7 @@ public record UsersJoinReq(String name, LocalDate birthDate, String phoneNumber,
                 .step(0)
                 .stepStatus(null)
                 .points(0)
+                .readNews(false)
                 .home(home)
                 .build();
     }
