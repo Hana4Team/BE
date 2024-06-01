@@ -17,19 +17,19 @@ import org.springframework.web.bind.annotation.*;
 public class MoneyboxController {
     private final MoneyboxService moneyboxService;
 
-    @PostMapping("/account/moneybox")
+    @PostMapping("/moneybox")
     public ResponseEntity<MoneyboxSaveRes> moneyboxSave(@RequestBody MoneyboxSaveReq moneyboxSaveReq, @AuthenticationPrincipal UsersDetails usersDetails) {
         MoneyboxSaveRes MoneyboxSaveRes = moneyboxService.moneyboxSave(moneyboxSaveReq, usersDetails.getUsername());
         return ResponseEntity.ok(MoneyboxSaveRes);
     }
 
-    @GetMapping("/account/moneybox")
+    @GetMapping("/moneybox")
     public ResponseEntity<MoneyboxFindAllRes> moneyboxFindAll(@AuthenticationPrincipal UsersDetails usersDetails) {
         MoneyboxFindAllRes moneyboxFindAllRes = moneyboxService.moneyboxFindAll(usersDetails.getUsername());
         return ResponseEntity.ok(moneyboxFindAllRes);
     }
 
-    @GetMapping("/account/moneybox/saving")
+    @GetMapping("/moneybox/saving")
     public ResponseEntity<MoneyboxFindBySavingRes> moneyboxFindBySaving(@AuthenticationPrincipal UsersDetails usersDetails) {
         MoneyboxFindBySavingRes moneyboxFindBySavingRes = moneyboxService.moneyboxFindBySavingRes(usersDetails.getUsername());
         return ResponseEntity.ok(moneyboxFindBySavingRes);
