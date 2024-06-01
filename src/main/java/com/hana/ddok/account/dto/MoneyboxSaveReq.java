@@ -12,10 +12,9 @@ public record MoneyboxSaveReq(
         String password,
         Long productsId
 ) {
-    public Account toEntity(Users users, Products products, Integer type) {
+    public Account toEntity(Users users, Products products) {
         return Account.builder()
                 .accountNumber("880")    // TODO : 추후 랜덤으로
-                .type(type)
                 .balance(0L)
                 .payment(payment)
                 .endDate(endDate)

@@ -3,15 +3,11 @@ package com.hana.ddok.account.dto;
 import com.hana.ddok.account.domain.Account;
 
 public record MoneyboxSaveRes(
-        Long parkingAccountId,
-        Long expenseAccountId,
-        Long savingAccountId
+        Long accountId
 ) {
-    public MoneyboxSaveRes(Account parkingAccount, Account expenseAccount, Account savingAccount) {
+    public MoneyboxSaveRes(Account account) {
         this(
-                parkingAccount.getAccountId(),
-                expenseAccount.getAccountId(),
-                savingAccount.getAccountId()
+                account.getAccountId()
         );
     }
 }

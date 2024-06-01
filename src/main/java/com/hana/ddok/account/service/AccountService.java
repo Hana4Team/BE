@@ -65,12 +65,8 @@ public class AccountService {
         Users users = usersRepository.findByPhoneNumber(phoneNumber);
         Products products = productsRepository.findById(moneyboxSaveReq.productsId())
                 .orElseThrow(() -> new ProductsNotFound());
-
-        Account parkingAccount = accountRepository.save(moneyboxSaveReq.toEntity(users, products, 2));
-        Account expenseAccount = accountRepository.save(moneyboxSaveReq.toEntity(users, products, 3));
-        Account savingAccount = accountRepository.save(moneyboxSaveReq.toEntity(users, products, 4));
-
-        return new MoneyboxSaveRes(parkingAccount, expenseAccount, savingAccount);
+        Account account = accountRepository.save(moneyboxSaveReq.toEntity(users, products);
+        return new MoneyboxSaveRes(account);
     }
 
     @Transactional(readOnly = true)
