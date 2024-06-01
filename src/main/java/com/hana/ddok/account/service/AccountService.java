@@ -2,11 +2,7 @@ package com.hana.ddok.account.service;
 
 import com.hana.ddok.account.domain.Account;
 import com.hana.ddok.account.dto.*;
-import com.hana.ddok.account.exception.AccountNotFound;
-import com.hana.ddok.account.exception.MoneyboxNotFound;
 import com.hana.ddok.account.repository.AccountRepository;
-import com.hana.ddok.moneybox.domain.Moneybox;
-import com.hana.ddok.moneybox.repository.MoneyboxRepository;
 import com.hana.ddok.products.domain.Products;
 import com.hana.ddok.products.exception.ProductsNotFound;
 import com.hana.ddok.products.repository.ProductsRepository;
@@ -25,7 +21,6 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final ProductsRepository productsRepository;
     private final UsersRepository usersRepository;
-    private final MoneyboxRepository moneyboxRepository;
 
     @Transactional
     public AccountSaveRes accountSave(AccountSaveReq accountSaveReq, String phoneNumber) {
@@ -37,40 +32,16 @@ public class AccountService {
     }
 
     @Transactional(readOnly = true)
-    public List<AccountFindAllRes> accountFindAll(String phoneNumber) {
+    public List<AccountFindAllRes> accountFindAll(AccountFindAllReq accountFindAllReq, String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber);
         List<AccountFindAllRes> accountFindAllResList = accountRepository.findAllByUsers(users).stream()
+                .filter(account -> (accountFindAllReq.depositAccount() && account.getProducts().getType().equals(1)) ||
+                                (accountFindAllReq.savingsAccount() && account.getProducts().getType().equals(2)) ||
+                                (accountFindAllReq.depositWithdrawalAccount() && account.getProducts().getType().equals(3)) ||
+                                (accountFindAllReq.moneyboxAccount() && account.getProducts().getType().equals(4))
+                )
                 .map(AccountFindAllRes::new)
                 .collect(Collectors.toList());
         return accountFindAllResList;
-    }
-
-    @Transactional
-    public MoneyboxSaveRes moneyboxSave(MoneyboxSaveReq moneyboxSaveReq, String phoneNumber) {
-        Users users = usersRepository.findByPhoneNumber(phoneNumber);
-        Products products = productsRepository.findById(moneyboxSaveReq.productsId())
-                .orElseThrow(() -> new ProductsNotFound());
-        Account account = accountRepository.save(moneyboxSaveReq.toEntity(users, products));
-        return new MoneyboxSaveRes(account);
-    }
-
-    @Transactional(readOnly = true)
-    public MoneyboxFindAllRes moneyboxFindAll(String phoneNumber) {
-        Users users = usersRepository.findByPhoneNumber(phoneNumber);
-        Account account = accountRepository.findByUsersAndProductsType(users, 3)
-                .orElseThrow(() -> new AccountNotFound());
-        Moneybox moneybox = moneyboxRepository.findByAccount(account)
-                .orElseThrow(() -> new MoneyboxNotFound());
-        return new MoneyboxFindAllRes(account, moneybox);
-    }
-
-    @Transactional(readOnly = true)
-    public MoneyboxFindBySavingRes moneyboxFindBySavingRes(String phoneNumber) {
-        Users users = usersRepository.findByPhoneNumber(phoneNumber);
-        Account account = accountRepository.findByUsersAndProductsType(users, 3)
-                .orElseThrow(() -> new AccountNotFound());
-        Moneybox moneybox = moneyboxRepository.findByAccount(account)
-                .orElseThrow(() -> new MoneyboxNotFound());
-        return new MoneyboxFindBySavingRes(moneybox);
     }
 }

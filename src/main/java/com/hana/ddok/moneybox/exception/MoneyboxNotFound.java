@@ -1,4 +1,4 @@
-package com.hana.ddok.account.exception;
+package com.hana.ddok.moneybox.exception;
 
 import com.hana.ddok.common.exception.EntityNotFoundException;
 

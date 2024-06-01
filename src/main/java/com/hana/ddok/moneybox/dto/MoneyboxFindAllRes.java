@@ -1,4 +1,4 @@
-package com.hana.ddok.account.dto;
+package com.hana.ddok.moneybox.dto;
 
 import com.hana.ddok.account.domain.Account;
 import com.hana.ddok.moneybox.domain.Moneybox;
