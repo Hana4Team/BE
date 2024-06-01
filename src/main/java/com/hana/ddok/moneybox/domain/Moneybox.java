@@ -1,16 +1,13 @@
-package com.hana.ddok.account.domain;
+package com.hana.ddok.moneybox.domain;
 
+import com.hana.ddok.account.domain.Account;
 import com.hana.ddok.common.domain.BaseEntity;
-import com.hana.ddok.products.domain.Account;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Getter
 @Entity

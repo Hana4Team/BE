@@ -1,7 +1,7 @@
 package com.hana.ddok.account.dto;
 
 import com.hana.ddok.account.domain.Account;
-import com.hana.ddok.account.domain.Moneybox;
+import com.hana.ddok.moneybox.domain.Moneybox;
 
 public record MoneyboxFindAllRes(
         String accountNumber,

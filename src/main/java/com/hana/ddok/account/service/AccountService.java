@@ -1,11 +1,11 @@
 package com.hana.ddok.account.service;
 
 import com.hana.ddok.account.domain.Account;
-import com.hana.ddok.account.domain.Moneybox;
 import com.hana.ddok.account.dto.*;
 import com.hana.ddok.account.exception.AccountNotFound;
 import com.hana.ddok.account.exception.MoneyboxNotFound;
 import com.hana.ddok.account.repository.AccountRepository;
+import com.hana.ddok.moneybox.domain.Moneybox;
 import com.hana.ddok.moneybox.repository.MoneyboxRepository;
 import com.hana.ddok.products.domain.Products;
 import com.hana.ddok.products.exception.ProductsNotFound;
@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,27 +39,9 @@ public class AccountService {
     @Transactional(readOnly = true)
     public List<AccountFindAllRes> accountFindAll(String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber);
-
-        // 일반 계좌 조회
-        List<Account> accountList = accountRepository.findAllByUsers(users);
-        List<AccountFindAllRes> accountFindAllResList = accountList.stream()
-                .filter(account -> account.getType() == 1)
+        List<AccountFindAllRes> accountFindAllResList = accountRepository.findAllByUsers(users).stream()
                 .map(AccountFindAllRes::new)
                 .collect(Collectors.toList());
-
-        // 머니박스 계좌 조회 : 파킹통장(2)로 balance를 합침
-        Optional<Account> parkingAccountOptional = accountList.stream()
-                .filter(account -> account.getType() == 2)
-                .findFirst();
-        if (parkingAccountOptional.isPresent()) {
-            Account parkingAccount = parkingAccountOptional.get();
-            Long moneyboxTotalBalance = accountList.stream()
-                    .filter(account -> account.getType() != 1)
-                    .mapToLong(Account::getBalance)
-                    .sum();
-            accountFindAllResList.add(new AccountFindAllRes(parkingAccount, moneyboxTotalBalance));
-        }
-
         return accountFindAllResList;
     }
 
