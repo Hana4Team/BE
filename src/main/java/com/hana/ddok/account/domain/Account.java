@@ -1,5 +1,6 @@
 package com.hana.ddok.account.domain;
 
+import com.hana.ddok.account.exception.AccountBalanceInvalid;
 import com.hana.ddok.common.domain.BaseEntity;
 import com.hana.ddok.products.domain.Products;
 import com.hana.ddok.users.domain.Users;
@@ -53,4 +54,11 @@ public class Account extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "products_id")
     private Products products;
+
+    public void updateBalance(Long balance) {
+        this.balance += balance;
+        if (this.balance < 0) {
+            throw new AccountBalanceInvalid();
+        }
+    }
 }

@@ -28,6 +28,9 @@ public class TransactionService {
                 .orElseThrow(() -> new AccountNotFound());
         Account recipentAccount = accountRepository.findByAccountNumber(transactionSaveReq.recipientAccount())
                 .orElseThrow(() -> new AccountNotFound());
+
+        senderAccount.updateBalance(-transactionSaveReq.amount());
+        recipentAccount.updateBalance(+transactionSaveReq.amount());
         Transaction transaction = transactionRepository.save(transactionSaveReq.toEntity(senderAccount, recipentAccount));
         return new TransactionSaveRes(transaction);
     }
