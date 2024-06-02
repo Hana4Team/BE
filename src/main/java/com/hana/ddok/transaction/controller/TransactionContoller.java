@@ -1,5 +1,7 @@
 package com.hana.ddok.transaction.controller;
 
+import com.hana.ddok.transaction.dto.AccountChargeReq;
+import com.hana.ddok.transaction.dto.AccountChargeRes;
 import com.hana.ddok.transaction.dto.TransactionSaveReq;
 import com.hana.ddok.transaction.dto.TransactionSaveRes;
 import com.hana.ddok.transaction.service.TransactionService;
@@ -15,6 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class TransactionContoller {
     private final TransactionService transactionService;
+
+    @PostMapping("transaction/charge")
+    public ResponseEntity<AccountChargeRes> accountCharge(@RequestBody AccountChargeReq accountChargeReq) {
+        AccountChargeRes accountChargeRes = transactionService.accountCharge(accountChargeReq);
+        return ResponseEntity.ok(accountChargeRes);
+    }
 
     @PostMapping("transaction")
     public ResponseEntity<TransactionSaveRes> transactionSave(@RequestBody TransactionSaveReq transactionSaveReq) {

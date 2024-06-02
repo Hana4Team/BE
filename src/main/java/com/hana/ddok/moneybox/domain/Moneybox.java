@@ -1,6 +1,7 @@
 package com.hana.ddok.moneybox.domain;
 
 import com.hana.ddok.account.domain.Account;
+import com.hana.ddok.account.exception.AccountBalanceInvalid;
 import com.hana.ddok.common.domain.BaseEntity;
 
 import jakarta.persistence.*;
@@ -39,4 +40,11 @@ public class Moneybox extends BaseEntity {
     @OneToOne
     @JoinColumn(name = "account_id")
     private Account account;
+
+    public void updateParkingBalance(Long balance) {
+        parkingBalance += balance;
+        if (parkingBalance < 0) {
+            throw new AccountBalanceInvalid();
+        }
+    }
 }
