@@ -4,6 +4,7 @@ import com.hana.ddok.account.domain.Account;
 import com.hana.ddok.account.dto.*;
 import com.hana.ddok.account.exception.AccountNotFound;
 import com.hana.ddok.account.repository.AccountRepository;
+import com.hana.ddok.account.util.AccountNumberGenerator;
 import com.hana.ddok.products.domain.Products;
 import com.hana.ddok.products.exception.ProductsNotFound;
 import com.hana.ddok.products.repository.ProductsRepository;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,7 +30,15 @@ public class AccountService {
         Users users = usersRepository.findByPhoneNumber(phoneNumber);
         Products products = productsRepository.findById(accountSaveReq.productsId())
                 .orElseThrow(() -> new ProductsNotFound());
-        Account account = accountRepository.save(accountSaveReq.toEntity(users, products));
+
+        String accountNumber;
+        Optional<Account> existingAccount;
+        do {
+            accountNumber = AccountNumberGenerator.generateAccountNumber();
+            existingAccount = accountRepository.findByAccountNumber(accountNumber);
+        } while (existingAccount.isPresent());
+
+        Account account = accountRepository.save(accountSaveReq.toEntity(users, products, accountNumber));
         return new AccountSaveRes(account);
     }
 

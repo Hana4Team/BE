@@ -1,6 +1,7 @@
 package com.hana.ddok.moneybox.dto;
 
 import com.hana.ddok.account.domain.Account;
+import com.hana.ddok.account.util.AccountNumberGenerator;
 import com.hana.ddok.moneybox.domain.Moneybox;
 import com.hana.ddok.products.domain.Products;
 import com.hana.ddok.users.domain.Users;
@@ -13,9 +14,9 @@ public record MoneyboxSaveReq(
         String password,
         Long productsId
 ) {
-    public Account toEntity(Users users, Products products) {
+    public Account toEntity(Users users, Products products, String accountNumber) {
         return Account.builder()
-                .accountNumber("880")    // TODO : 추후 랜덤으로
+                .accountNumber(accountNumber)
                 .balance(0L)
                 .payment(payment)
                 .endDate(endDate)

@@ -2,6 +2,7 @@ package com.hana.ddok.moneybox.service;
 
 import com.hana.ddok.account.domain.Account;
 import com.hana.ddok.account.exception.AccountNotFound;
+import com.hana.ddok.account.util.AccountNumberGenerator;
 import com.hana.ddok.moneybox.dto.MoneyboxFindAllRes;
 import com.hana.ddok.moneybox.dto.MoneyboxFindBySavingRes;
 import com.hana.ddok.moneybox.dto.MoneyboxSaveReq;
@@ -19,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class MoneyboxService {
@@ -31,7 +34,15 @@ public class MoneyboxService {
         Users users = usersRepository.findByPhoneNumber(phoneNumber);
         Products products = productsRepository.findById(moneyboxSaveReq.productsId())
                 .orElseThrow(() -> new ProductsNotFound());
-        Account account = accountRepository.save(moneyboxSaveReq.toEntity(users, products));
+
+        String accountNumber;
+        Optional<Account> existingAccount;
+        do {
+            accountNumber = AccountNumberGenerator.generateAccountNumber();
+            existingAccount = accountRepository.findByAccountNumber(accountNumber);
+        } while (existingAccount.isPresent());
+
+        Account account = accountRepository.save(moneyboxSaveReq.toEntity(users, products, accountNumber));
         Moneybox moneybox = moneyboxRepository.save(Moneybox.builder()
                 .parkingBalance(0L)
                 .expenseBalance(0L)
