@@ -53,6 +53,7 @@ public class Moneybox extends BaseEntity {
         if (expenseBalance < 0) {
             throw new AccountBalanceInvalid();
         }
+        updateExpenseTotal(-balance);
     }
 
     public void updateSavingBalance(Long balance) {
@@ -60,5 +61,9 @@ public class Moneybox extends BaseEntity {
         if (savingBalance < 0) {
             throw new AccountBalanceInvalid();
         }
+    }
+
+    public void updateExpenseTotal(Long balance) {
+        expenseTotal += balance;
     }
 }

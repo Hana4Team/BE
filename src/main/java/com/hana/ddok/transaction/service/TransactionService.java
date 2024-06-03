@@ -1,8 +1,9 @@
 package com.hana.ddok.transaction.service;
 
 import com.hana.ddok.account.domain.Account;
-import com.hana.ddok.account.exception.AccountChargeDenied;
+import com.hana.ddok.account.exception.AccountDepositDenied;
 import com.hana.ddok.account.exception.AccountNotFound;
+import com.hana.ddok.account.exception.AccountWithdrawalDenied;
 import com.hana.ddok.account.repository.AccountRepository;
 import com.hana.ddok.moneybox.domain.Moneybox;
 import com.hana.ddok.moneybox.exception.MoneyboxNotFound;
@@ -11,10 +12,8 @@ import com.hana.ddok.transaction.domain.Transaction;
 import com.hana.ddok.transaction.dto.*;
 import com.hana.ddok.transaction.repository.TransactionRepository;
 import com.hana.ddok.users.domain.Users;
-import com.hana.ddok.users.domain.UsersDetails;
 import com.hana.ddok.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,17 +48,43 @@ public class TransactionService {
 
     @Transactional
     public TransactionDepositSaveRes transactionDepositSave(TransactionDepositSaveReq transactionDepositSaveReq) {
-        Account recipentAccount = accountRepository.findByAccountNumber(transactionDepositSaveReq.recipientAccount())
+        Account account = accountRepository.findByAccountNumber(transactionDepositSaveReq.recipientAccount())
                 .orElseThrow(() -> new AccountNotFound());
 
         // 입출금 계좌만 충전 가능
-        if (recipentAccount.getProducts().getType() != 1) {
-            throw new AccountChargeDenied();
+        if (account.getProducts().getType() != 1) {
+            throw new AccountDepositDenied();
         }
 
-        recipentAccount.updateBalance(transactionDepositSaveReq.amount());
-        Transaction transaction = transactionRepository.save(transactionDepositSaveReq.toEntity(recipentAccount));
+        account.updateBalance(transactionDepositSaveReq.amount());
+        Transaction transaction = transactionRepository.save(transactionDepositSaveReq.toEntity(account));
         return new TransactionDepositSaveRes(transaction);
+    }
+
+    @Transactional
+    public TransactionWithdrawalSaveRes transactionWithdrawalSave(TransactionWithdrawalSaveReq transactionWithdrawalSaveReq) {
+        Account account = accountRepository.findByAccountNumber(transactionWithdrawalSaveReq.senderAccount())
+                .orElseThrow(() -> new AccountNotFound());
+
+        Long amount = transactionWithdrawalSaveReq.amount();
+        Integer type = account.getProducts().getType();
+        switch (type) {
+            case 1: // 입출금통장
+                account.updateBalance(-amount);
+                break;
+            case 4: // 머니박스
+                account.updateBalance(-amount);
+                // 지출 잔액 변경
+                Moneybox moneybox = moneyboxRepository.findByAccount(account)
+                        .orElseThrow(() -> new MoneyboxNotFound());
+                moneybox.updateExpenseBalance(-amount);
+                break;
+            default:
+                throw new AccountWithdrawalDenied();
+        }
+
+        Transaction transaction = transactionRepository.save(transactionWithdrawalSaveReq.toEntity(account));
+        return new TransactionWithdrawalSaveRes(transaction);
     }
 
     @Transactional
@@ -71,8 +96,8 @@ public class TransactionService {
         Moneybox moneybox = moneyboxRepository.findByAccount(account)
                 .orElseThrow(() -> new MoneyboxNotFound());
 
-        String senderMoneybox = transactionMoneyboxSaveReq.senderMoneybox();
         Long amount = transactionMoneyboxSaveReq.amount();
+        String senderMoneybox = transactionMoneyboxSaveReq.senderMoneybox();
         switch (senderMoneybox) {
             case "parking":
                 moneybox.updateParkingBalance(-amount);
