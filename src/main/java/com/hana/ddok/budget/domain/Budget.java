@@ -1,6 +1,7 @@
 package com.hana.ddok.budget.domain;
 
 
+import com.hana.ddok.account.exception.AccountBalanceInvalid;
 import com.hana.ddok.users.domain.Users;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -56,4 +57,7 @@ public class Budget {
     @OneToOne(mappedBy = "budget", cascade = CascadeType.ALL, orphanRemoval = true)
     private Users users;
 
+    public void setSum(Integer sum) {
+        this.sum = sum;
+    }
 }
