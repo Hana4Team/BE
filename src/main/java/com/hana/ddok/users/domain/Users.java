@@ -77,5 +77,4 @@ public class Users {
         }
         this.home = home;
     }
-
 }
