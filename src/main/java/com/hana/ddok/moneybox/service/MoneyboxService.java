@@ -13,6 +13,7 @@ import com.hana.ddok.moneybox.exception.MoneyboxNotFound;
 import com.hana.ddok.moneybox.repository.MoneyboxRepository;
 import com.hana.ddok.products.domain.Products;
 import com.hana.ddok.products.exception.ProductsNotFound;
+import com.hana.ddok.products.exception.ProductsTypeInvalid;
 import com.hana.ddok.products.repository.ProductsRepository;
 import com.hana.ddok.users.domain.Users;
 import com.hana.ddok.users.repository.UsersRepository;
@@ -34,6 +35,9 @@ public class MoneyboxService {
         Users users = usersRepository.findByPhoneNumber(phoneNumber);
         Products products = productsRepository.findById(moneyboxSaveReq.productsId())
                 .orElseThrow(() -> new ProductsNotFound());
+        if (products.getType() != 4) {
+            throw new ProductsTypeInvalid();
+        }
 
         String accountNumber;
         Optional<Account> existingAccount;

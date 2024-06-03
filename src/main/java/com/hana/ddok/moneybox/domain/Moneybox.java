@@ -47,4 +47,18 @@ public class Moneybox extends BaseEntity {
             throw new AccountBalanceInvalid();
         }
     }
+
+    public void updateExpenseBalance(Long balance) {
+        expenseBalance += balance;
+        if (expenseBalance < 0) {
+            throw new AccountBalanceInvalid();
+        }
+    }
+
+    public void updateSavingBalance(Long balance) {
+        savingBalance += balance;
+        if (savingBalance < 0) {
+            throw new AccountBalanceInvalid();
+        }
+    }
 }

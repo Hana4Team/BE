@@ -7,6 +7,7 @@ import com.hana.ddok.account.repository.AccountRepository;
 import com.hana.ddok.account.util.AccountNumberGenerator;
 import com.hana.ddok.products.domain.Products;
 import com.hana.ddok.products.exception.ProductsNotFound;
+import com.hana.ddok.products.exception.ProductsTypeInvalid;
 import com.hana.ddok.products.repository.ProductsRepository;
 import com.hana.ddok.users.domain.Users;
 import com.hana.ddok.users.repository.UsersRepository;
@@ -30,6 +31,9 @@ public class AccountService {
         Users users = usersRepository.findByPhoneNumber(phoneNumber);
         Products products = productsRepository.findById(accountSaveReq.productsId())
                 .orElseThrow(() -> new ProductsNotFound());
+        if (products.getType() == 4) {
+            throw new ProductsTypeInvalid();
+        }
 
         String accountNumber;
         Optional<Account> existingAccount;
