@@ -1,12 +1,7 @@
 package com.hana.ddok.budget.service;
 
-import com.hana.ddok.account.dto.AccountFindAllReq;
-import com.hana.ddok.account.dto.AccountFindAllRes;
 import com.hana.ddok.budget.domain.Budget;
-import com.hana.ddok.budget.dto.BudgetFindByCategoryRes;
-import com.hana.ddok.budget.dto.BudgetFindRes;
-import com.hana.ddok.budget.dto.BudgetUpdateReq;
-import com.hana.ddok.budget.dto.BudgetUpdateRes;
+import com.hana.ddok.budget.dto.*;
 import com.hana.ddok.budget.exception.BudgetNotFound;
 import com.hana.ddok.budget.repository.BudgetRepository;
 import com.hana.ddok.users.domain.Users;
@@ -15,8 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -66,5 +59,31 @@ public class BudgetService {
                 .orElseThrow(() -> new BudgetNotFound());
 
         return new BudgetFindByCategoryRes(budget);
+    }
+
+    @Transactional
+    public BudgetByCategoryUpdateRes budgetByCategoryUpdate(BudgetByCategoryUpdateReq budgetByCategoryUpdateReq, String phoneNumber) {
+        Users users = usersRepository.findByPhoneNumber(phoneNumber);
+        Budget budget = budgetRepository.findByUsers(users)
+                .orElseThrow(() -> new BudgetNotFound());
+
+        budget = Budget.builder()
+                .budgetId(budget.getBudgetId())
+                .sum(budget.getSum())
+                .shopping(budgetByCategoryUpdateReq.shopping())
+                .food(budgetByCategoryUpdateReq.food())
+                .traffic(budgetByCategoryUpdateReq.traffic())
+                .hospital(budgetByCategoryUpdateReq.hospital())
+                .fee(budgetByCategoryUpdateReq.fee())
+                .education(budgetByCategoryUpdateReq.education())
+                .leisure(budgetByCategoryUpdateReq.leisure())
+                .society(budgetByCategoryUpdateReq.society())
+                .daily(budgetByCategoryUpdateReq.daily())
+                .overseas(budgetByCategoryUpdateReq.overseas())
+                .users(users)
+                .build();
+        budgetRepository.save(budget);
+
+        return new BudgetByCategoryUpdateRes(budget);
     }
 }

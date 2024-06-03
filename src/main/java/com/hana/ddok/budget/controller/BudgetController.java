@@ -1,9 +1,6 @@
 package com.hana.ddok.budget.controller;
 
-import com.hana.ddok.budget.dto.BudgetFindByCategoryRes;
-import com.hana.ddok.budget.dto.BudgetFindRes;
-import com.hana.ddok.budget.dto.BudgetUpdateReq;
-import com.hana.ddok.budget.dto.BudgetUpdateRes;
+import com.hana.ddok.budget.dto.*;
 import com.hana.ddok.budget.service.BudgetService;
 import com.hana.ddok.users.domain.UsersDetails;
 import lombok.RequiredArgsConstructor;
@@ -33,5 +30,11 @@ public class BudgetController {
     public ResponseEntity<BudgetFindByCategoryRes> budgetFindByCategory(@AuthenticationPrincipal UsersDetails usersDetails) {
         BudgetFindByCategoryRes budgetFindByCategoryRes = budgetService.budgetFindByCategory(usersDetails.getUsername());
         return ResponseEntity.ok(budgetFindByCategoryRes);
+    }
+
+    @PutMapping("/budget/category")
+    public ResponseEntity<BudgetByCategoryUpdateRes> budgetByCategoryUpdate(@RequestBody BudgetByCategoryUpdateReq budgetByCategoryUpdateReq, @AuthenticationPrincipal UsersDetails usersDetails) {
+        BudgetByCategoryUpdateRes budgetByCategoryUpdateRes = budgetService.budgetByCategoryUpdate(budgetByCategoryUpdateReq, usersDetails.getUsername());
+        return ResponseEntity.ok(budgetByCategoryUpdateRes);
     }
 }
