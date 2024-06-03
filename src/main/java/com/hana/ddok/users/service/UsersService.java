@@ -128,7 +128,6 @@ public class UsersService {
     //4 : 실패
     public UsersMissionRes usersMissionStart(String phoneNumber) {
         Users user = usersRepository.findByPhoneNumber(phoneNumber);
-        user.updateStep(user.getStep()+1);
         user.updateStepStatus(1); //진행중
         usersRepository.save(user);
         return new UsersMissionRes(user.getPhoneNumber(), user.getStep(), user.getStepStatus());
@@ -146,7 +145,14 @@ public class UsersService {
 
     public UsersMissionRes usersMissionCheck(String phoneNumber) {
         Users user = usersRepository.findByPhoneNumber(phoneNumber);
-        user.updateStepStatus(user.getStepStatus() == 2 ? 3 : 1); //성공 -> 성공확인 / 실패 -> 진행중
+        if (user.getStepStatus() == 3) { //실패시
+            if (user.getStep() == 2) {
+                user.updateStepStatus(1);
+            } else user.updateStepStatus(null);
+        } else { //성공시
+            user.updateStep(user.getStep() + 1);
+            user.updateStepStatus(null);
+        }
         usersRepository.save(user);
         return new UsersMissionRes(user.getPhoneNumber(), user.getStep(), user.getStepStatus());
     }
