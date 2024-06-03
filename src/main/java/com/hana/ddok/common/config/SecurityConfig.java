@@ -46,7 +46,7 @@ public class SecurityConfig {
 
         //경로별 인가 작업
         http.authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/", "/api/v1/users/login", "/api/v1/users/join", "/api/v1/users/logout").permitAll()
+                        .requestMatchers("/", "/api/v1/users/login", "/api/v1/users/join").permitAll()
                         .anyRequest().authenticated());
 
         // 로그인 필터 전에 동작

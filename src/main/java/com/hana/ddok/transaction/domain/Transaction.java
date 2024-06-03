@@ -21,7 +21,7 @@ public class Transaction extends BaseEntity {
     private Long transactionId;
 
     @Column(name = "amount", nullable = false)
-    private Integer amount;
+    private Long amount;
 
     @Column(name = "type", nullable = false)
     private Integer type;
