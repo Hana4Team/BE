@@ -16,12 +16,6 @@ import java.util.List;
 public class AccountController {
     private final AccountService accountService;
 
-    @PostMapping("/account")
-    public ResponseEntity<AccountSaveRes> accountSave(@RequestBody AccountSaveReq accountSaveReq, @AuthenticationPrincipal UsersDetails usersDetails) {
-        AccountSaveRes accountSaveRes = accountService.accountSave(accountSaveReq, usersDetails.getUsername());
-        return ResponseEntity.ok(accountSaveRes);
-    }
-
     @GetMapping("/account")
     public ResponseEntity<List<AccountFindAllRes>> accountFindAll(@RequestBody AccountFindAllReq accountFindAllReq, @AuthenticationPrincipal UsersDetails usersDetails) {
         List<AccountFindAllRes> accountFindAllResList = accountService.accountFindAll(accountFindAllReq, usersDetails.getUsername());

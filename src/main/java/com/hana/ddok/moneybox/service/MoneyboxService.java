@@ -46,16 +46,8 @@ public class MoneyboxService {
             existingAccount = accountRepository.findByAccountNumber(accountNumber);
         } while (existingAccount.isPresent());
 
-        Account account = accountRepository.save(moneyboxSaveReq.toEntity(users, products, accountNumber));
-        Moneybox moneybox = moneyboxRepository.save(Moneybox.builder()
-                .parkingBalance(0L)
-                .expenseBalance(0L)
-                .savingBalance(0L)
-                .expenseTotal(0L)
-                .isCharged(false)
-                .account(account)
-                .build()
-        );
+        Account account = accountRepository.save(moneyboxSaveReq.toAccount(users, products, accountNumber));
+        Moneybox moneybox = moneyboxRepository.save(moneyboxSaveReq.toEntity(account));
         return new MoneyboxSaveRes(account, moneybox);
     }
 

@@ -18,7 +18,7 @@ public class ProductsService {
 
     @Transactional(readOnly = true)
     public List<ProductsFindAllRes> productsFindAll(Integer type) {
-        List<ProductsFindAllRes> productsFindAllResList = productsRepository.findByType(type).stream()
+        List<ProductsFindAllRes> productsFindAllResList = productsRepository.findAllByType(type).stream()
                 .map(ProductsFindAllRes::new)
                 .collect(Collectors.toList());
         return productsFindAllResList;

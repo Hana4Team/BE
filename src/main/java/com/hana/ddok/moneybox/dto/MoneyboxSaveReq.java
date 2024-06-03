@@ -9,17 +9,25 @@ import com.hana.ddok.users.domain.Users;
 import java.time.LocalDate;
 
 public record MoneyboxSaveReq(
-        Integer payment,
-        LocalDate endDate,
         String password,
         Long productsId
 ) {
-    public Account toEntity(Users users, Products products, String accountNumber) {
+
+    public Moneybox toEntity(Account account) {
+        return Moneybox.builder()
+                .parkingBalance(0L)
+                .expenseBalance(0L)
+                .savingBalance(0L)
+                .expenseTotal(0L)
+                .isCharged(false)
+                .account(account)
+                .build();
+    }
+
+    public Account toAccount(Users users, Products products, String accountNumber) {
         return Account.builder()
                 .accountNumber(accountNumber)
                 .balance(0L)
-                .payment(payment)
-                .endDate(endDate)
                 .password(password)
                 .isDeleted(0)
                 .users(users)

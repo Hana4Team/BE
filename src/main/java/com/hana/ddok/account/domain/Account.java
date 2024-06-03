@@ -11,7 +11,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -31,12 +30,6 @@ public class Account extends BaseEntity {
 
     @Column(name = "balance", nullable = false)
     private Long balance;
-
-    @Column(name = "payment")
-    private Integer payment;
-
-    @Column(name = "end_date")
-    private LocalDate endDate;
 
     @Column(name = "password", nullable = false)
     private String password;
