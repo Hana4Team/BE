@@ -35,8 +35,13 @@ public class TransactionService {
         senderAccount.updateBalance(-transactionSaveReq.amount());
         recipentAccount.updateBalance(transactionSaveReq.amount());
 
-        // 받는 분이 머니박스일 경우, 파킹 잔액 변경
-        if (recipentAccount.getProducts().getType() == 4) {
+        // 계좌가 머니박스일 경우, 파킹 잔액 변경
+        if (senderAccount.getProducts().getType() == 4) {
+            Moneybox moneybox = moneyboxRepository.findByAccount(senderAccount)
+                    .orElseThrow(() -> new MoneyboxNotFound());
+            moneybox.updateParkingBalance(transactionSaveReq.amount());
+        }
+        else if (recipentAccount.getProducts().getType() == 4) {
             Moneybox moneybox = moneyboxRepository.findByAccount(recipentAccount)
                     .orElseThrow(() -> new MoneyboxNotFound());
             moneybox.updateParkingBalance(transactionSaveReq.amount());
@@ -44,21 +49,6 @@ public class TransactionService {
 
         Transaction transaction = transactionRepository.save(transactionSaveReq.toEntity(senderAccount, recipentAccount));
         return new TransactionSaveRes(transaction);
-    }
-
-    @Transactional
-    public TransactionDepositSaveRes transactionDepositSave(TransactionDepositSaveReq transactionDepositSaveReq) {
-        Account account = accountRepository.findByAccountNumber(transactionDepositSaveReq.recipientAccount())
-                .orElseThrow(() -> new AccountNotFound());
-
-        // 입출금 계좌만 충전 가능
-        if (account.getProducts().getType() != 1) {
-            throw new AccountDepositDenied();
-        }
-
-        account.updateBalance(transactionDepositSaveReq.amount());
-        Transaction transaction = transactionRepository.save(transactionDepositSaveReq.toEntity(account));
-        return new TransactionDepositSaveRes(transaction);
     }
 
     @Transactional

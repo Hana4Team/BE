@@ -24,12 +24,6 @@ public class TransactionContoller {
         return ResponseEntity.ok(transactionSaveRes);
     }
 
-    @PostMapping("transaction/deposit")
-    public ResponseEntity<TransactionDepositSaveRes> transactionDepositSave(@RequestBody TransactionDepositSaveReq transactionDepositSaveReq) {
-        TransactionDepositSaveRes transactionDepositSaveRes = transactionService.transactionDepositSave(transactionDepositSaveReq);
-        return ResponseEntity.ok(transactionDepositSaveRes);
-    }
-
     @PostMapping("transaction/withdrawal")
     public ResponseEntity<TransactionWithdrawalSaveRes> transactionWithdrawalSave(@RequestBody TransactionWithdrawalSaveReq transactionWithdrawalSaveReq) {
         TransactionWithdrawalSaveRes transactionWithdrawalSaveRes = transactionService.transactionWithdrawalSave(transactionWithdrawalSaveReq);
