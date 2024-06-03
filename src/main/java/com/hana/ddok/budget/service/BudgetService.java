@@ -3,6 +3,7 @@ package com.hana.ddok.budget.service;
 import com.hana.ddok.account.dto.AccountFindAllReq;
 import com.hana.ddok.account.dto.AccountFindAllRes;
 import com.hana.ddok.budget.domain.Budget;
+import com.hana.ddok.budget.dto.BudgetFindByCategoryRes;
 import com.hana.ddok.budget.dto.BudgetFindRes;
 import com.hana.ddok.budget.dto.BudgetUpdateReq;
 import com.hana.ddok.budget.dto.BudgetUpdateRes;
@@ -56,5 +57,14 @@ public class BudgetService {
 
         budget.setSum(budgetUpdateReq.sum());
         return new BudgetUpdateRes(budget);
+    }
+
+    @Transactional(readOnly = true)
+    public BudgetFindByCategoryRes budgetFindByCategory(String phoneNumber) {
+        Users users = usersRepository.findByPhoneNumber(phoneNumber);
+        Budget budget = budgetRepository.findByUsers(users)
+                .orElseThrow(() -> new BudgetNotFound());
+
+        return new BudgetFindByCategoryRes(budget);
     }
 }

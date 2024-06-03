@@ -1,5 +1,6 @@
 package com.hana.ddok.budget.controller;
 
+import com.hana.ddok.budget.dto.BudgetFindByCategoryRes;
 import com.hana.ddok.budget.dto.BudgetFindRes;
 import com.hana.ddok.budget.dto.BudgetUpdateReq;
 import com.hana.ddok.budget.dto.BudgetUpdateRes;
@@ -26,5 +27,11 @@ public class BudgetController {
     public ResponseEntity<BudgetUpdateRes> budgetUpdate(@RequestBody BudgetUpdateReq budgetUpdateReq, @AuthenticationPrincipal UsersDetails usersDetails) {
         BudgetUpdateRes budgetUpdateRes = budgetService.budgetUpdate(budgetUpdateReq, usersDetails.getUsername());
         return ResponseEntity.ok(budgetUpdateRes);
+    }
+
+    @GetMapping("/budget/category")
+    public ResponseEntity<BudgetFindByCategoryRes> budgetFindByCategory(@AuthenticationPrincipal UsersDetails usersDetails) {
+        BudgetFindByCategoryRes budgetFindByCategoryRes = budgetService.budgetFindByCategory(usersDetails.getUsername());
+        return ResponseEntity.ok(budgetFindByCategoryRes);
     }
 }
