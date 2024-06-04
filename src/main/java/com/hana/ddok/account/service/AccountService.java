@@ -34,11 +34,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -65,24 +63,6 @@ public class AccountService {
                 .map(AccountFindAllRes::new)
                 .collect(Collectors.toList());
         return accountFindAllResList;
-    }
-
-    @Transactional(readOnly = true)
-    public AccountFindByIdRes accountFindById(Long accountId, Integer year, Integer month) {
-        Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new AccountNotFound());
-
-        LocalDateTime startDate = LocalDateTime.of(year, month, 1, 0, 0);
-        LocalDateTime endDate = startDate.plusMonths(1).minusDays(1).plusHours(23).plusMinutes(59).plusSeconds(59);
-
-        List<Transaction> senderTransactionList =  transactionRepository.findAllBySenderAccountAndCreatedAtBetween(account, startDate, endDate);
-        List<Transaction> recipientTransactionList =  transactionRepository.findAllByRecipientAccountAndCreatedAtBetween(account, startDate, endDate);
-
-        List<Transaction> allTransactions = Stream.concat(senderTransactionList.stream(), recipientTransactionList.stream())
-                .collect(Collectors.toList());
-        Collections.sort(allTransactions, Comparator.comparing(Transaction::getCreatedAt));
-
-        return new AccountFindByIdRes(account, allTransactions);
     }
 
     @Transactional(readOnly = true)

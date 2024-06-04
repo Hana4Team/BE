@@ -17,6 +17,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 @Service
 @RequiredArgsConstructor
 public class TransactionService {
@@ -50,6 +57,29 @@ public class TransactionService {
         Transaction transaction = transactionRepository.save(transactionSaveReq.toEntity(senderAccount, recipentAccount));
         return new TransactionSaveRes(transaction);
     }
+
+    @Transactional(readOnly = true)
+    public List<TransactionFindAllRes> transactionFindAll(Long accountId, Integer year, Integer month) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new AccountNotFound());
+
+        LocalDateTime startDate = LocalDateTime.of(year, month, 1, 0, 0);
+        LocalDateTime endDate = startDate.plusMonths(1).minusDays(1).plusHours(23).plusMinutes(59).plusSeconds(59);
+
+        List<Transaction> senderTransactionList =  transactionRepository.findAllBySenderAccountAndCreatedAtBetween(account, startDate, endDate);
+        List<Transaction> recipientTransactionList =  transactionRepository.findAllByRecipientAccountAndCreatedAtBetween(account, startDate, endDate);
+
+        List<Transaction> allTransactionList = Stream.concat(senderTransactionList.stream(), recipientTransactionList.stream())
+                .collect(Collectors.toList());
+        Collections.sort(allTransactionList, Comparator.comparing(Transaction::getCreatedAt));
+
+        List<TransactionFindAllRes> transactionFindAllResList = allTransactionList.stream()
+                .map(transaction -> new TransactionFindAllRes(transaction, accountId == transaction.getSenderAccount().getAccountId()))
+                .collect(Collectors.toList());
+
+        return transactionFindAllResList;
+    }
+
 
     @Transactional
     public TransactionSpendSaveRes transactionSpendSave(TransactionSpendSaveReq transactionSpendSaveReq) {

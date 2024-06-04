@@ -27,12 +27,6 @@ public class AccountController {
         return ResponseEntity.ok(accountFindAllResList);
     }
 
-    @GetMapping("/account/{accountId}")
-    public ResponseEntity<AccountFindByIdRes> accountFindById(@PathVariable Long accountId, @RequestParam Integer year, @RequestParam Integer month) {
-        AccountFindByIdRes accountFindByIdRes = accountService.accountFindById(accountId, year, month);
-        return ResponseEntity.ok(accountFindByIdRes);
-    }
-
     @GetMapping("/account/mission")
     public ResponseEntity<AccountFindbyMissionRes> accountFindByMission(@AuthenticationPrincipal UsersDetails usersDetails) {
         AccountFindbyMissionRes accountFindbyMissionRes = accountService.accountFindByMission(usersDetails.getUsername());
