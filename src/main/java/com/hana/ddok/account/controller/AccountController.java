@@ -23,8 +23,8 @@ public class AccountController {
     }
 
     @GetMapping("/account/{accountId}")
-    public ResponseEntity<AccountFindByIdRes> accountFindById(@PathVariable Long accountId, @RequestParam Integer year, @RequestParam Integer month, @AuthenticationPrincipal UsersDetails usersDetails) {
-        AccountFindByIdRes accountFindByIdRes = accountService.accountFindById(accountId, year, month, usersDetails.getUsername());
+    public ResponseEntity<AccountFindByIdRes> accountFindById(@PathVariable Long accountId, @RequestParam Integer year, @RequestParam Integer month) {
+        AccountFindByIdRes accountFindByIdRes = accountService.accountFindById(accountId, year, month);
         return ResponseEntity.ok(accountFindByIdRes);
     }
 }
