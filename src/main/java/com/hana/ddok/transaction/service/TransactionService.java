@@ -1,7 +1,6 @@
 package com.hana.ddok.transaction.service;
 
 import com.hana.ddok.account.domain.Account;
-import com.hana.ddok.account.exception.AccountDepositDenied;
 import com.hana.ddok.account.exception.AccountNotFound;
 import com.hana.ddok.account.exception.AccountWithdrawalDenied;
 import com.hana.ddok.account.repository.AccountRepository;
@@ -52,19 +51,19 @@ public class TransactionService {
     }
 
     @Transactional
-    public TransactionWithdrawalSaveRes transactionWithdrawalSave(TransactionWithdrawalSaveReq transactionWithdrawalSaveReq) {
-        Account account = accountRepository.findByAccountNumber(transactionWithdrawalSaveReq.senderAccount())
+    public TransactionSpendSaveRes transactionSpendSave(TransactionSpendSaveReq transactionSpendSaveReq) {
+        Account account = accountRepository.findByAccountNumber(transactionSpendSaveReq.senderAccount())
                 .orElseThrow(() -> new AccountNotFound());
 
-        Long amount = transactionWithdrawalSaveReq.amount();
+        Long amount = transactionSpendSaveReq.amount();
         Integer type = account.getProducts().getType();
         switch (type) {
             case 1: // 입출금통장
                 account.updateBalance(-amount);
                 break;
-            case 4: // 머니박스
+            case 5: // 머니박스
                 account.updateBalance(-amount);
-                // 지출 잔액 변경
+                // 소비공간 잔액 변경
                 Moneybox moneybox = moneyboxRepository.findByAccount(account)
                         .orElseThrow(() -> new MoneyboxNotFound());
                 moneybox.updateExpenseBalance(-amount);
@@ -72,9 +71,8 @@ public class TransactionService {
             default:
                 throw new AccountWithdrawalDenied();
         }
-
-        Transaction transaction = transactionRepository.save(transactionWithdrawalSaveReq.toEntity(account));
-        return new TransactionWithdrawalSaveRes(transaction);
+        Transaction transaction = transactionRepository.save(transactionSpendSaveReq.toEntity(account));
+        return new TransactionSpendSaveRes(transaction);
     }
 
     @Transactional
