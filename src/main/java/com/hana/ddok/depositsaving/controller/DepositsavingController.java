@@ -1,5 +1,6 @@
 package com.hana.ddok.depositsaving.controller;
 
+import com.hana.ddok.depositsaving.dto.DepositsavingFindbyDepositRes;
 import com.hana.ddok.depositsaving.dto.DepositsavingFindbySaving100Res;
 import com.hana.ddok.depositsaving.dto.DepositsavingFindbySavingRes;
 import com.hana.ddok.depositsaving.service.DepositsavingService;
@@ -25,5 +26,11 @@ public class DepositsavingController {
     public ResponseEntity<DepositsavingFindbySavingRes> depositsavingFindBySaving(@AuthenticationPrincipal UsersDetails usersDetails) {
         DepositsavingFindbySavingRes depositsavingFindbySavingRes = depositsavingService.depositsavingFindBySaving(usersDetails.getUsername());
         return ResponseEntity.ok(depositsavingFindbySavingRes);
+    }
+
+    @GetMapping("/depositsaving/deposit")
+    public ResponseEntity<DepositsavingFindbyDepositRes> depositsavingFindByDeposit(@AuthenticationPrincipal UsersDetails usersDetails) {
+        DepositsavingFindbyDepositRes depositsavingFindbyDepositRes = depositsavingService.depositsavingFindByDeposit(usersDetails.getUsername());
+        return ResponseEntity.ok(depositsavingFindbyDepositRes);
     }
 }

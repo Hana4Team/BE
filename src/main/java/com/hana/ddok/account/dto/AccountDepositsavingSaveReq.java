@@ -11,7 +11,8 @@ public record AccountDepositsavingSaveReq(
         Integer payment,
         LocalDate endDate,
         Long productsId,
-        Long withdrawalAccountId
+        Long withdrawalAccountId,
+        Long initialAmount
 ) {
     public Account toEntity(Users users, Products products, String accountNumber, String password) {
         return Account.builder()

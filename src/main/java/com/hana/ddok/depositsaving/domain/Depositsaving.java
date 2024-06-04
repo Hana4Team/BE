@@ -28,7 +28,7 @@ public class Depositsaving extends BaseEntity {
     @Column(name = "end_date")
     private LocalDate endDate;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "withdrawal_account_id")
     private Account withdrawalAccount;
 

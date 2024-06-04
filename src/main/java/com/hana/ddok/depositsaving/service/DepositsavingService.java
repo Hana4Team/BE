@@ -4,6 +4,7 @@ import com.hana.ddok.account.domain.Account;
 import com.hana.ddok.account.exception.AccountNotFound;
 import com.hana.ddok.account.repository.AccountRepository;
 import com.hana.ddok.depositsaving.domain.Depositsaving;
+import com.hana.ddok.depositsaving.dto.DepositsavingFindbyDepositRes;
 import com.hana.ddok.depositsaving.dto.DepositsavingFindbySaving100Res;
 import com.hana.ddok.depositsaving.dto.DepositsavingFindbySavingRes;
 import com.hana.ddok.depositsaving.exception.DepositsavingNotFound;
@@ -53,6 +54,23 @@ public class DepositsavingService {
         Transaction transaction = transactionRepository.findFirstByRecipientAccountOrderByCreatedAt(account)
                 .orElseThrow(() -> new TransactionNotFound());
 
-        return new DepositsavingFindbySavingRes(account, depositsaving, transaction);
+        // 납입기간(월) 계산
+        Period period = Period.between(account.getCreatedAt().toLocalDate(),depositsaving.getEndDate());
+        Integer monthPeriod = period.getYears() * 12 + period.getMonths();
+
+        return new DepositsavingFindbySavingRes(account, depositsaving, transaction, monthPeriod);
+    }
+
+    @Transactional(readOnly = true)
+    public DepositsavingFindbyDepositRes depositsavingFindByDeposit(String phoneNumber) {
+        Users users = usersRepository.findByPhoneNumber(phoneNumber);
+        Account account = accountRepository.findByUsersAndProductsType(users, ProductsType.DEPOSIT)
+                .orElseThrow(() -> new AccountNotFound());
+        Depositsaving depositsaving = depositsavingRepository.findByAccount(account)
+                .orElseThrow(() -> new DepositsavingNotFound());
+        Transaction transaction = transactionRepository.findFirstByRecipientAccountOrderByCreatedAt(account)
+                .orElseThrow(() -> new TransactionNotFound());
+
+        return new DepositsavingFindbyDepositRes(account, depositsaving, transaction);
     }
 }

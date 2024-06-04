@@ -134,6 +134,14 @@ public class AccountService {
 
         Account account = accountRepository.save(accountDepositsavingSaveReq.toEntity(users, products, generateAccountNumber(), password));
         Depositsaving depositsaving = depositsavingRepository.save(accountDepositsavingSaveReq.toDepositsaving(account, withdrawalAccount));
+
+        // 계좌 간 송금 [입출금계좌 -> 예적금]
+        transactionService.transactionSave(
+                new TransactionSaveReq(
+                        accountDepositsavingSaveReq.initialAmount(), "예적금가입", "예적금가입", withdrawalAccount.getAccountNumber(), account.getAccountNumber()
+                )
+        );
+
         return new AccountDepositsavingSaveRes(depositsaving, account);
     }
 

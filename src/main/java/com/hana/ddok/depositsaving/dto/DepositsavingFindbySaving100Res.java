@@ -27,7 +27,7 @@ public record DepositsavingFindbySaving100Res(
                 depositsaving.getPayment(),
                 account.getCreatedAt().toLocalDate(),
                 depositsaving.getEndDate(),
-                depositsaving.getPayment().longValue() * 100
+                depositsaving.getPayment().longValue() * 100 + transaction.getAmount()
         );
     }
 }
