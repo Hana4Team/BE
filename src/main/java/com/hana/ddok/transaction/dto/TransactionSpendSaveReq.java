@@ -3,10 +3,11 @@ package com.hana.ddok.transaction.dto;
 import com.hana.ddok.account.domain.Account;
 import com.hana.ddok.transaction.domain.Transaction;
 
-public record TransactionWithdrawalSaveReq(
+public record TransactionSpendSaveReq(
         Long amount,
         String senderTitle,
-        String senderAccount
+        String senderAccount,
+        Integer spendType
 ) {
     public Transaction toEntity(Account account) {
         return Transaction.builder()

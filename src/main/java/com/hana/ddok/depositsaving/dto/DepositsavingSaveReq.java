@@ -17,7 +17,6 @@ public record DepositsavingSaveReq(
         return Depositsaving.builder()
                 .payment(payment)
                 .endDate(endDate)
-                .missionConnected(false)
                 .withdrawalAccount(withdrawalAccount)
                 .account(account)
                 .build();
@@ -28,7 +27,8 @@ public record DepositsavingSaveReq(
                 .accountNumber(accountNumber)
                 .balance(0L)
                 .password(password)
-                .isDeleted(0)
+                .isDeleted(false)
+                .isMissionConnected(false)
                 .users(users)
                 .products(products)
                 .build();

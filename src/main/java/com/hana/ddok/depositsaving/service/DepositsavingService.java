@@ -1,7 +1,6 @@
 package com.hana.ddok.depositsaving.service;
 
 import com.hana.ddok.account.domain.Account;
-import com.hana.ddok.account.exception.AccountDepositDenied;
 import com.hana.ddok.account.exception.AccountNotFound;
 import com.hana.ddok.account.exception.AccountWithdrawalDenied;
 import com.hana.ddok.account.repository.AccountRepository;

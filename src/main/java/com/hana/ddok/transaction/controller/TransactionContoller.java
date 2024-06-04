@@ -1,6 +1,5 @@
 package com.hana.ddok.transaction.controller;
 
-import com.hana.ddok.transaction.domain.Transaction;
 import com.hana.ddok.transaction.dto.*;
 import com.hana.ddok.transaction.service.TransactionService;
 import com.hana.ddok.users.domain.UsersDetails;
@@ -24,10 +23,10 @@ public class TransactionContoller {
         return ResponseEntity.ok(transactionSaveRes);
     }
 
-    @PostMapping("transaction/withdrawal")
-    public ResponseEntity<TransactionWithdrawalSaveRes> transactionWithdrawalSave(@RequestBody TransactionWithdrawalSaveReq transactionWithdrawalSaveReq) {
-        TransactionWithdrawalSaveRes transactionWithdrawalSaveRes = transactionService.transactionWithdrawalSave(transactionWithdrawalSaveReq);
-        return ResponseEntity.ok(transactionWithdrawalSaveRes);
+    @PostMapping("transaction/spend")
+    public ResponseEntity<TransactionSpendSaveRes> transactionSpendSave(@RequestBody TransactionSpendSaveReq transactionSpendSaveReq) {
+        TransactionSpendSaveRes transactionSpendSaveRes = transactionService.transactionSpendSave(transactionSpendSaveReq);
+        return ResponseEntity.ok(transactionSpendSaveRes);
     }
 
     @PostMapping("transaction/moneybox")

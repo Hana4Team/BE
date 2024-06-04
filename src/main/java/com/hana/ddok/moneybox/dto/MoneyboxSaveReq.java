@@ -29,7 +29,8 @@ public record MoneyboxSaveReq(
                 .accountNumber(accountNumber)
                 .balance(0L)
                 .password(password)
-                .isDeleted(0)
+                .isDeleted(false)
+                .isMissionConnected(false)
                 .users(users)
                 .products(products)
                 .build();
