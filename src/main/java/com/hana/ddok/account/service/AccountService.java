@@ -6,10 +6,8 @@ import com.hana.ddok.account.exception.AccountNotFound;
 import com.hana.ddok.account.exception.AccountWithdrawalDenied;
 import com.hana.ddok.account.repository.AccountRepository;
 import com.hana.ddok.depositsaving.domain.Depositsaving;
-import com.hana.ddok.account.dto.AccountFindbyMissionRes;
 import com.hana.ddok.account.dto.AccountDepositsavingSaveReq;
 import com.hana.ddok.account.dto.AccountDepositsavingSaveRes;
-import com.hana.ddok.depositsaving.exception.DepositsavingNotFound;
 import com.hana.ddok.depositsaving.repository.DepositsavingRepository;
 import com.hana.ddok.moneybox.domain.Moneybox;
 import com.hana.ddok.account.dto.AccountMoneyboxSaveReq;
@@ -21,10 +19,8 @@ import com.hana.ddok.products.domain.ProductsType;
 import com.hana.ddok.products.exception.ProductsNotFound;
 import com.hana.ddok.products.exception.ProductsTypeInvalid;
 import com.hana.ddok.products.repository.ProductsRepository;
-import com.hana.ddok.transaction.domain.Transaction;
 import com.hana.ddok.transaction.dto.TransactionMoneyboxSaveReq;
 import com.hana.ddok.transaction.dto.TransactionSaveReq;
-import com.hana.ddok.transaction.exception.TransactionNotFound;
 import com.hana.ddok.transaction.repository.TransactionRepository;
 import com.hana.ddok.transaction.service.TransactionService;
 import com.hana.ddok.users.domain.Users;
@@ -33,8 +29,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.Period;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -63,24 +57,6 @@ public class AccountService {
                 .map(AccountFindAllRes::new)
                 .collect(Collectors.toList());
         return accountFindAllResList;
-    }
-
-    @Transactional(readOnly = true)
-    public AccountFindbyMissionRes accountFindByMission(String phoneNumber) {
-        Users users = usersRepository.findByPhoneNumber(phoneNumber);
-        Account account = accountRepository.findByUsersAndIsMissionConnected(users, true)
-                .orElseThrow(() -> new AccountNotFound());
-        Depositsaving depositsaving = depositsavingRepository.findByAccount(account)
-                .orElseThrow(() -> new DepositsavingNotFound());
-        Transaction transaction = transactionRepository.findFirstByRecipientAccountOrderByCreatedAt(account)
-                .orElseThrow(() -> new TransactionNotFound());
-
-        LocalDate startDate = account.getCreatedAt().toLocalDate();
-        LocalDate endDate = depositsaving.getEndDate();
-        Period period = Period.between(startDate, endDate);
-        Integer monthPeriod = period.getYears() * 12 + period.getMonths();
-
-        return new AccountFindbyMissionRes(account, depositsaving, transaction, monthPeriod);
     }
 
     @Transactional

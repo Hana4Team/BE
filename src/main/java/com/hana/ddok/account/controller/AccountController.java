@@ -2,7 +2,6 @@ package com.hana.ddok.account.controller;
 
 import com.hana.ddok.account.dto.*;
 import com.hana.ddok.account.service.AccountService;
-import com.hana.ddok.account.dto.AccountFindbyMissionRes;
 import com.hana.ddok.account.dto.AccountMoneyboxSaveReq;
 import com.hana.ddok.account.dto.AccountMoneyboxSaveRes;
 import com.hana.ddok.account.dto.AccountDepositsavingSaveReq;
@@ -25,12 +24,6 @@ public class AccountController {
     public ResponseEntity<List<AccountFindAllRes>> accountFindAll(@RequestBody AccountFindAllReq accountFindAllReq, @AuthenticationPrincipal UsersDetails usersDetails) {
         List<AccountFindAllRes> accountFindAllResList = accountService.accountFindAll(accountFindAllReq, usersDetails.getUsername());
         return ResponseEntity.ok(accountFindAllResList);
-    }
-
-    @GetMapping("/account/mission")
-    public ResponseEntity<AccountFindbyMissionRes> accountFindByMission(@AuthenticationPrincipal UsersDetails usersDetails) {
-        AccountFindbyMissionRes accountFindbyMissionRes = accountService.accountFindByMission(usersDetails.getUsername());
-        return ResponseEntity.ok(accountFindbyMissionRes);
     }
 
     @PostMapping("/account/moneybox")
