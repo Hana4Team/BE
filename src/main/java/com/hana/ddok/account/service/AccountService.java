@@ -5,12 +5,15 @@ import com.hana.ddok.account.dto.*;
 import com.hana.ddok.account.exception.AccountNotFound;
 import com.hana.ddok.account.exception.AccountWithdrawalDenied;
 import com.hana.ddok.account.repository.AccountRepository;
-import com.hana.ddok.account.util.AccountNumberGenerator;
 import com.hana.ddok.depositsaving.domain.Depositsaving;
 import com.hana.ddok.account.dto.AccountFindbyMissionRes;
+import com.hana.ddok.account.dto.AccountDepositsavingSaveReq;
+import com.hana.ddok.account.dto.AccountDepositsavingSaveRes;
 import com.hana.ddok.depositsaving.exception.DepositsavingNotFound;
 import com.hana.ddok.depositsaving.repository.DepositsavingRepository;
 import com.hana.ddok.moneybox.domain.Moneybox;
+import com.hana.ddok.account.dto.AccountMoneyboxSaveReq;
+import com.hana.ddok.account.dto.AccountMoneyboxSaveRes;
 import com.hana.ddok.moneybox.exception.MoneyboxNotFound;
 import com.hana.ddok.moneybox.repository.MoneyboxRepository;
 import com.hana.ddok.products.domain.Products;
@@ -33,10 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -104,6 +104,20 @@ public class AccountService {
     }
 
     @Transactional
+    public AccountMoneyboxSaveRes accountMoneyboxSave(AccountMoneyboxSaveReq accountMoneyboxSaveReq, String phoneNumber) {
+        Users users = usersRepository.findByPhoneNumber(phoneNumber);
+        Products products = productsRepository.findById(accountMoneyboxSaveReq.productsId())
+                .orElseThrow(() -> new ProductsNotFound());
+        if (products.getType() != ProductsType.MONEYBOX) {
+            throw new ProductsTypeInvalid();
+        }
+
+        Account account = accountRepository.save(accountMoneyboxSaveReq.toEntity(users, products, generateAccountNumber()));
+        Moneybox moneybox = moneyboxRepository.save(accountMoneyboxSaveReq.toMoneybox(account));
+        return new AccountMoneyboxSaveRes(account, moneybox);
+    }
+
+    @Transactional
     public AccountSaving100SaveRes accountSaving100Save(AccountSaving100SaveReq accountSaving100SaveReq, String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber);
         Products products = productsRepository.findById(accountSaving100SaveReq.productsId())
@@ -121,15 +135,7 @@ public class AccountService {
         // 비밀번호 동일하게 설정
         String password = withdrawalAccount.getPassword();
 
-        // 계좌번호 생성
-        String accountNumber;
-        Optional<Account> existingAccount;
-        do {
-            accountNumber = AccountNumberGenerator.generateAccountNumber();
-            existingAccount = accountRepository.findByAccountNumber(accountNumber);
-        } while (existingAccount.isPresent());
-
-        Account account = accountRepository.save(accountSaving100SaveReq.toEntity(users, products, accountNumber, password));
+        Account account = accountRepository.save(accountSaving100SaveReq.toEntity(users, products, generateAccountNumber(), password));
         Depositsaving depositsaving = depositsavingRepository.save(accountSaving100SaveReq.toDepositsaving(account, withdrawalAccount));
 
         // 초기자본 : 머니박스(저축)
@@ -150,5 +156,52 @@ public class AccountService {
         );
 
         return new AccountSaving100SaveRes(depositsaving, account);
+    }
+
+    @Transactional
+    public AccountDepositsavingSaveRes accountDepositsavingSave(AccountDepositsavingSaveReq accountDepositsavingSaveReq, String phoneNumber) {
+        Users users = usersRepository.findByPhoneNumber(phoneNumber);
+        Products products = productsRepository.findById(accountDepositsavingSaveReq.productsId())
+                .orElseThrow(() -> new ProductsNotFound());
+        if (products.getType() != ProductsType.DEPOSIT && products.getType() != ProductsType.SAVING) {
+            throw new ProductsTypeInvalid();
+        }
+
+        // 출금계좌 : 입출금계좌만 가능
+        Account withdrawalAccount = accountRepository.findById(accountDepositsavingSaveReq.withdrawalAccountId())
+                .orElseThrow(() -> new AccountNotFound());
+        if (withdrawalAccount.getProducts().getType() != ProductsType.DEPOSITWITHDRAWAL) {
+            throw new AccountWithdrawalDenied();
+        }
+        // 비밀번호 동일하게 설정
+        String password = withdrawalAccount.getPassword();
+
+        // 기존 미션연결여부 해제
+        Account existAccount = accountRepository.findByUsersAndIsMissionConnected(users, true)
+                .orElseThrow(() -> new AccountNotFound());
+        existAccount.updateIsMissionConnected(false);
+
+        Account account = accountRepository.save(accountDepositsavingSaveReq.toEntity(users, products, generateAccountNumber(), password));
+        Depositsaving depositsaving = depositsavingRepository.save(accountDepositsavingSaveReq.toDepositsaving(account, withdrawalAccount));
+        return new AccountDepositsavingSaveRes(depositsaving, account);
+    }
+
+    @Transactional(readOnly = true)
+    public String generateAccountNumber() {
+        String accountNumber;
+        Optional<Account> existingAccount;
+        do {
+            StringBuilder sb = new StringBuilder("880-");
+            Random random = new Random();
+            for (int i = 0; i < 11; i++) {
+                sb.append(random.nextInt(10)); // 0~9
+                if (i == 5) {
+                    sb.append("-");
+                }
+            }
+            accountNumber = sb.toString();   // 880-XXXXXX-XXXXX
+            existingAccount = accountRepository.findByAccountNumber(accountNumber);
+        } while (existingAccount.isPresent());
+        return accountNumber;
     }
 }

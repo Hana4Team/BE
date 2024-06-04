@@ -2,8 +2,6 @@ package com.hana.ddok.moneybox.controller;
 
 import com.hana.ddok.moneybox.dto.MoneyboxFindAllRes;
 import com.hana.ddok.moneybox.dto.MoneyboxFindBySavingRes;
-import com.hana.ddok.moneybox.dto.MoneyboxSaveReq;
-import com.hana.ddok.moneybox.dto.MoneyboxSaveRes;
 import com.hana.ddok.moneybox.service.MoneyboxService;
 import com.hana.ddok.users.domain.UsersDetails;
 import lombok.RequiredArgsConstructor;
@@ -16,12 +14,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class MoneyboxController {
     private final MoneyboxService moneyboxService;
-
-    @PostMapping("/moneybox")
-    public ResponseEntity<MoneyboxSaveRes> moneyboxSave(@RequestBody MoneyboxSaveReq moneyboxSaveReq, @AuthenticationPrincipal UsersDetails usersDetails) {
-        MoneyboxSaveRes MoneyboxSaveRes = moneyboxService.moneyboxSave(moneyboxSaveReq, usersDetails.getUsername());
-        return ResponseEntity.ok(MoneyboxSaveRes);
-    }
 
     @GetMapping("/moneybox")
     public ResponseEntity<MoneyboxFindAllRes> moneyboxFindAll(@AuthenticationPrincipal UsersDetails usersDetails) {

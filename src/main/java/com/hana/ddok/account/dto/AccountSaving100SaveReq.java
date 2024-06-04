@@ -22,7 +22,7 @@ public record AccountSaving100SaveReq(
                 .interest(products.getInterest2())
                 .password(password)
                 .isDeleted(false)
-                .isMissionConnected(false)
+                .isMissionConnected(true)
                 .users(users)
                 .products(products)
                 .build();

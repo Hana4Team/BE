@@ -60,4 +60,8 @@ public class Account extends BaseEntity {
             throw new AccountBalanceInvalid();
         }
     }
+
+    public void updateIsMissionConnected(Boolean isMissionConnected) {
+        this.isMissionConnected = isMissionConnected;
+    }
 }

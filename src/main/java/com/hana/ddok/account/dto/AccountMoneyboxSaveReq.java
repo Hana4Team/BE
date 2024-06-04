@@ -1,30 +1,15 @@
-package com.hana.ddok.moneybox.dto;
+package com.hana.ddok.account.dto;
 
 import com.hana.ddok.account.domain.Account;
-import com.hana.ddok.account.util.AccountNumberGenerator;
 import com.hana.ddok.moneybox.domain.Moneybox;
 import com.hana.ddok.products.domain.Products;
 import com.hana.ddok.users.domain.Users;
 
-import java.time.LocalDate;
-
-public record MoneyboxSaveReq(
+public record AccountMoneyboxSaveReq(
         String password,
         Long productsId
 ) {
-
-    public Moneybox toEntity(Account account) {
-        return Moneybox.builder()
-                .parkingBalance(0L)
-                .expenseBalance(0L)
-                .savingBalance(0L)
-                .expenseTotal(0L)
-                .isCharged(false)
-                .account(account)
-                .build();
-    }
-
-    public Account toAccount(Users users, Products products, String accountNumber) {
+    public Account toEntity(Users users, Products products, String accountNumber) {
         return Account.builder()
                 .accountNumber(accountNumber)
                 .balance(0L)
@@ -34,6 +19,17 @@ public record MoneyboxSaveReq(
                 .isMissionConnected(false)
                 .users(users)
                 .products(products)
+                .build();
+    }
+
+    public Moneybox toMoneybox(Account account) {
+        return Moneybox.builder()
+                .parkingBalance(0L)
+                .expenseBalance(0L)
+                .savingBalance(0L)
+                .expenseTotal(0L)
+                .isCharged(false)
+                .account(account)
                 .build();
     }
 }
