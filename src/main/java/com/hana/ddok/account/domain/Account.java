@@ -34,11 +34,14 @@ public class Account extends BaseEntity {
     @Column(name = "password", nullable = false)
     private String password;
 
+    @Column(name = "is_mission_connected")
+    private Boolean isMissionConnected;
+
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
     @Column(name = "is_deleted", nullable = false)
-    private Integer isDeleted;
+    private Boolean isDeleted;
 
     @ManyToOne
     @JoinColumn(name = "users_id")

@@ -29,7 +29,8 @@ public record UsersJoinReq(String name, LocalDate birthDate, String phoneNumber,
                 .accountNumber(accountNumber)
                 .balance(10000000L)
                 .password(password)
-                .isDeleted(0)
+                .isDeleted(false)
+                .isMissionConnected(false)
                 .users(users)
                 .products(products)
                 .build();

@@ -4,7 +4,8 @@ import com.hana.ddok.account.domain.Account;
 import com.hana.ddok.account.dto.*;
 import com.hana.ddok.account.exception.AccountNotFound;
 import com.hana.ddok.account.repository.AccountRepository;
-import com.hana.ddok.products.repository.ProductsRepository;
+import com.hana.ddok.depositsaving.domain.Depositsaving;
+import com.hana.ddok.account.dto.AccountFindbyMissionRes;
 import com.hana.ddok.transaction.domain.Transaction;
 import com.hana.ddok.transaction.repository.TransactionRepository;
 import com.hana.ddok.users.domain.Users;
@@ -13,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Comparator;
@@ -58,5 +58,13 @@ public class AccountService {
         Collections.sort(allTransactions, Comparator.comparing(Transaction::getCreatedAt));
 
         return new AccountFindByIdRes(account, allTransactions);
+    }
+
+    @Transactional(readOnly = true)
+    public AccountFindbyMissionRes accountFindByMission(String phoneNumber) {
+        Users users = usersRepository.findByPhoneNumber(phoneNumber);
+        Account account = accountRepository.findByUsersAndIsMissionConnected(users, true)
+                .orElseThrow(() -> new AccountNotFound());
+        return new AccountFindbyMissionRes(account);
     }
 }
