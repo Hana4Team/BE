@@ -7,6 +7,7 @@ import com.hana.ddok.account.repository.AccountRepository;
 import com.hana.ddok.moneybox.domain.Moneybox;
 import com.hana.ddok.moneybox.exception.MoneyboxNotFound;
 import com.hana.ddok.moneybox.repository.MoneyboxRepository;
+import com.hana.ddok.products.domain.ProductsType;
 import com.hana.ddok.transaction.domain.Transaction;
 import com.hana.ddok.transaction.dto.*;
 import com.hana.ddok.transaction.repository.TransactionRepository;
@@ -35,12 +36,12 @@ public class TransactionService {
         recipentAccount.updateBalance(transactionSaveReq.amount());
 
         // 계좌가 머니박스일 경우, 파킹 잔액 변경
-        if (senderAccount.getProducts().getType() == 4) {
+        if (senderAccount.getProducts().getType() == ProductsType.MONEYBOX) {
             Moneybox moneybox = moneyboxRepository.findByAccount(senderAccount)
                     .orElseThrow(() -> new MoneyboxNotFound());
             moneybox.updateParkingBalance(transactionSaveReq.amount());
         }
-        else if (recipentAccount.getProducts().getType() == 4) {
+        else if (recipentAccount.getProducts().getType() == ProductsType.MONEYBOX) {
             Moneybox moneybox = moneyboxRepository.findByAccount(recipentAccount)
                     .orElseThrow(() -> new MoneyboxNotFound());
             moneybox.updateParkingBalance(transactionSaveReq.amount());
@@ -56,12 +57,12 @@ public class TransactionService {
                 .orElseThrow(() -> new AccountNotFound());
 
         Long amount = transactionSpendSaveReq.amount();
-        Integer type = account.getProducts().getType();
+        ProductsType type = account.getProducts().getType();
         switch (type) {
-            case 1: // 입출금통장
+            case DEPOSITWITHDRAWAL:
                 account.updateBalance(-amount);
                 break;
-            case 5: // 머니박스
+            case MONEYBOX:
                 account.updateBalance(-amount);
                 // 소비공간 잔액 변경
                 Moneybox moneybox = moneyboxRepository.findByAccount(account)
@@ -78,7 +79,7 @@ public class TransactionService {
     @Transactional
     public TransactionMoneyboxSaveRes transactionMoneyboxSave(TransactionMoneyboxSaveReq transactionMoneyboxSaveReq, String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber);
-        Account account = accountRepository.findByUsersAndProductsType(users, 4)
+        Account account = accountRepository.findByUsersAndProductsType(users, ProductsType.MONEYBOX)
                 .orElseThrow(() -> new AccountNotFound());
 
         Moneybox moneybox = moneyboxRepository.findByAccount(account)

@@ -12,6 +12,7 @@ import com.hana.ddok.moneybox.dto.MoneyboxSaveRes;
 import com.hana.ddok.moneybox.exception.MoneyboxNotFound;
 import com.hana.ddok.moneybox.repository.MoneyboxRepository;
 import com.hana.ddok.products.domain.Products;
+import com.hana.ddok.products.domain.ProductsType;
 import com.hana.ddok.products.exception.ProductsNotFound;
 import com.hana.ddok.products.exception.ProductsTypeInvalid;
 import com.hana.ddok.products.repository.ProductsRepository;
@@ -35,7 +36,7 @@ public class MoneyboxService {
         Users users = usersRepository.findByPhoneNumber(phoneNumber);
         Products products = productsRepository.findById(moneyboxSaveReq.productsId())
                 .orElseThrow(() -> new ProductsNotFound());
-        if (products.getType() != 4) {
+        if (products.getType() != ProductsType.MONEYBOX) {
             throw new ProductsTypeInvalid();
         }
 
@@ -54,7 +55,7 @@ public class MoneyboxService {
     @Transactional(readOnly = true)
     public MoneyboxFindAllRes moneyboxFindAll(String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber);
-        Account account = accountRepository.findByUsersAndProductsType(users, 4)
+        Account account = accountRepository.findByUsersAndProductsType(users, ProductsType.MONEYBOX)
                 .orElseThrow(() -> new AccountNotFound());
         Moneybox moneybox = moneyboxRepository.findByAccount(account)
                 .orElseThrow(() -> new MoneyboxNotFound());
@@ -64,7 +65,7 @@ public class MoneyboxService {
     @Transactional(readOnly = true)
     public MoneyboxFindBySavingRes moneyboxFindBySavingRes(String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber);
-        Account account = accountRepository.findByUsersAndProductsType(users, 4)
+        Account account = accountRepository.findByUsersAndProductsType(users, ProductsType.MONEYBOX)
                 .orElseThrow(() -> new AccountNotFound());
         Moneybox moneybox = moneyboxRepository.findByAccount(account)
                 .orElseThrow(() -> new MoneyboxNotFound());

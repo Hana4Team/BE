@@ -10,6 +10,7 @@ import com.hana.ddok.common.jwt.JWTUtil;
 import com.hana.ddok.home.domain.Home;
 import com.hana.ddok.home.repository.HomeRepository;
 import com.hana.ddok.products.domain.Products;
+import com.hana.ddok.products.domain.ProductsType;
 import com.hana.ddok.products.exception.ProductsNotFound;
 import com.hana.ddok.products.repository.ProductsRepository;
 import com.hana.ddok.users.domain.Users;
@@ -73,7 +74,7 @@ public class UsersService {
         Users users = usersRepository.save(UsersJoinReq.toEntity(req, encodedPwd, home));
 
         // 입출금계좌 자동 개설
-        Products products = productsRepository.findByType(1)
+        Products products = productsRepository.findByType(ProductsType.DEPOSITWITHDRAWAL)
                 .orElseThrow(() -> new ProductsNotFound());
         String accountNumber;
         Optional<Account> existingAccount;

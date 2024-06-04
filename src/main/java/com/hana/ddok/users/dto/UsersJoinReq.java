@@ -28,6 +28,7 @@ public record UsersJoinReq(String name, LocalDate birthDate, String phoneNumber,
         return Account.builder()
                 .accountNumber(accountNumber)
                 .balance(10000000L)
+                .interest(products.getInterest2())
                 .password(password)
                 .isDeleted(false)
                 .isMissionConnected(false)

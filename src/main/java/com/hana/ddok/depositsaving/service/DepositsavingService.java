@@ -10,6 +10,7 @@ import com.hana.ddok.depositsaving.dto.DepositsavingSaveReq;
 import com.hana.ddok.depositsaving.dto.DepositsavingSaveRes;
 import com.hana.ddok.depositsaving.repository.DepositsavingRepository;
 import com.hana.ddok.products.domain.Products;
+import com.hana.ddok.products.domain.ProductsType;
 import com.hana.ddok.products.exception.ProductsNotFound;
 import com.hana.ddok.products.exception.ProductsTypeInvalid;
 import com.hana.ddok.products.repository.ProductsRepository;
@@ -34,25 +35,26 @@ public class DepositsavingService {
         Users users = usersRepository.findByPhoneNumber(phoneNumber);
         Products products = productsRepository.findById(depositsavingSaveReq.productsId())
                 .orElseThrow(() -> new ProductsNotFound());
-        Integer type = products.getType();
-        if (type != 2 && type != 3) {
+        if (products.getType() != ProductsType.DEPOSIT && products.getType() != ProductsType.SAVING) {
             throw new ProductsTypeInvalid();
         }
 
+        // 출금계좌 : 입출금계좌만 가능
+        Account withdrawalAccount = accountRepository.findById(depositsavingSaveReq.withdrawalAccountId())
+                .orElseThrow(() -> new AccountNotFound());
+        if (withdrawalAccount.getProducts().getType() != ProductsType.DEPOSITWITHDRAWAL) {
+            throw new AccountWithdrawalDenied();
+        }
+        // 비밀번호 동일하게 설정
+        String password = withdrawalAccount.getPassword();
+
+        // 계좌번호 생성
         String accountNumber;
         Optional<Account> existingAccount;
         do {
             accountNumber = AccountNumberGenerator.generateAccountNumber();
             existingAccount = accountRepository.findByAccountNumber(accountNumber);
         } while (existingAccount.isPresent());
-
-        Account withdrawalAccount = accountRepository.findById(depositsavingSaveReq.withdrawalAccountId())
-                .orElseThrow(() -> new AccountNotFound());
-        if (withdrawalAccount.getProducts().getType() != 1) {
-            throw new AccountWithdrawalDenied();
-        }
-
-        String password = withdrawalAccount.getPassword();
 
         Account account = accountRepository.save(depositsavingSaveReq.toAccount(users, products, accountNumber, password));
         Depositsaving depositsaving = depositsavingRepository.save(depositsavingSaveReq.toEntity(account, withdrawalAccount));

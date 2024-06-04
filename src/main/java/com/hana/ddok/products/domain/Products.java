@@ -22,8 +22,9 @@ public class Products extends BaseEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
-    private Integer type;
+    private ProductsType type;
 
     @Column(name = "title")
     private String title;
@@ -31,10 +32,10 @@ public class Products extends BaseEntity {
     @Column(name = "summary")
     private String summary;
 
-    @Column(name = "interest1")
+    @Column(name = "interest1", nullable = false)
     private Float interest1;
 
-    @Column(name = "interest2")
+    @Column(name = "interest2", nullable = false)
     private Float interest2;
 
     @Column(name = "period")

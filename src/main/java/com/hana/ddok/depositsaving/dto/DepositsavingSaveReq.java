@@ -26,6 +26,7 @@ public record DepositsavingSaveReq(
         return Account.builder()
                 .accountNumber(accountNumber)
                 .balance(0L)
+                .interest(products.getInterest2())
                 .password(password)
                 .isDeleted(false)
                 .isMissionConnected(false)
