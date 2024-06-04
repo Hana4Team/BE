@@ -34,4 +34,10 @@ public class AccountController {
         AccountFindbyMissionRes accountFindbyMissionRes = accountService.accountFindByMission(usersDetails.getUsername());
         return ResponseEntity.ok(accountFindbyMissionRes);
     }
+
+    @PostMapping("/account/saving100")
+    public ResponseEntity<AccountSaving100SaveRes> accountSaving100Save(@RequestBody AccountSaving100SaveReq accountSaving100SaveReq, @AuthenticationPrincipal UsersDetails usersDetails) {
+        AccountSaving100SaveRes accountSaving100SaveRes = accountService.accountSaving100Save(accountSaving100SaveReq, usersDetails.getUsername());
+        return ResponseEntity.ok(accountSaving100SaveRes);
+    }
 }

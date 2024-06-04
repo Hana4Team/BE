@@ -39,7 +39,7 @@ public class TransactionService {
         if (senderAccount.getProducts().getType() == ProductsType.MONEYBOX) {
             Moneybox moneybox = moneyboxRepository.findByAccount(senderAccount)
                     .orElseThrow(() -> new MoneyboxNotFound());
-            moneybox.updateParkingBalance(transactionSaveReq.amount());
+            moneybox.updateParkingBalance(-transactionSaveReq.amount());
         }
         else if (recipentAccount.getProducts().getType() == ProductsType.MONEYBOX) {
             Moneybox moneybox = moneyboxRepository.findByAccount(recipentAccount)
@@ -64,10 +64,12 @@ public class TransactionService {
                 break;
             case MONEYBOX:
                 account.updateBalance(-amount);
-                // 소비공간 잔액 변경
+                // 소비공간 잔액 업데이트
                 Moneybox moneybox = moneyboxRepository.findByAccount(account)
                         .orElseThrow(() -> new MoneyboxNotFound());
                 moneybox.updateExpenseBalance(-amount);
+                // 소비합계 업데이트
+                moneybox.updateExpenseTotal(amount);
                 break;
             default:
                 throw new AccountWithdrawalDenied();
