@@ -31,7 +31,6 @@ public record UsersJoinReq(String name, LocalDate birthDate, String phoneNumber,
                 .interest(products.getInterest2())
                 .password(password)
                 .isDeleted(false)
-                .isMissionConnected(false)
                 .users(users)
                 .products(products)
                 .build();

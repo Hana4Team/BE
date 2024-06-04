@@ -37,9 +37,6 @@ public class Account extends BaseEntity {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "is_mission_connected")
-    private Boolean isMissionConnected;
-
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
@@ -59,9 +56,5 @@ public class Account extends BaseEntity {
         if (this.balance < 0) {
             throw new AccountBalanceInvalid();
         }
-    }
-
-    public void updateIsMissionConnected(Boolean isMissionConnected) {
-        this.isMissionConnected = isMissionConnected;
     }
 }

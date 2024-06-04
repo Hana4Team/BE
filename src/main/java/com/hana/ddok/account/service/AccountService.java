@@ -132,11 +132,6 @@ public class AccountService {
         // 비밀번호 동일하게 설정
         String password = withdrawalAccount.getPassword();
 
-        // 기존 미션연결여부 해제
-        Account existAccount = accountRepository.findByUsersAndIsMissionConnected(users, true)
-                .orElseThrow(() -> new AccountNotFound());
-        existAccount.updateIsMissionConnected(false);
-
         Account account = accountRepository.save(accountDepositsavingSaveReq.toEntity(users, products, generateAccountNumber(), password));
         Depositsaving depositsaving = depositsavingRepository.save(accountDepositsavingSaveReq.toDepositsaving(account, withdrawalAccount));
         return new AccountDepositsavingSaveRes(depositsaving, account);

@@ -12,5 +12,4 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     List<Account> findAllByUsers(Users users);
     Optional<Account> findByUsersAndProductsType(Users users, ProductsType type);
     Optional<Account> findByAccountNumber(String accountNumber);
-    Optional<Account> findByUsersAndIsMissionConnected(Users users, Boolean missionConnected);
 }
