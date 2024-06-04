@@ -28,9 +28,6 @@ public class Depositsaving extends BaseEntity {
     @Column(name = "end_date")
     private LocalDate endDate;
 
-    @Column(name = "mission_connected")
-    private Boolean missionConnected;
-
     @OneToOne
     @JoinColumn(name = "withdrawal_account_id")
     private Account withdrawalAccount;
