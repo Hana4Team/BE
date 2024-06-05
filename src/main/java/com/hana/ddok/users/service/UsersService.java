@@ -27,6 +27,7 @@ import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -64,7 +65,7 @@ public class UsersService {
         return new UsersLoginRes(true, user.getName(), user.getPhoneNumber(), user.getStep(), user.getStepStatus(), token);
     }
 
-
+    @Transactional
     public UsersJoinRes usersJoin(UsersJoinReq req) {
         Optional<Users> existingUser = usersRepository.findByPhoneNumber(req.phoneNumber());
         if (existingUser.isPresent()) {
@@ -104,7 +105,6 @@ public class UsersService {
         message.setText("인증번호: " + code);
 
         SingleMessageSentResponse response = this.messageService.sendOne(new SingleMessageSendingRequest(message));
-        System.out.println(response);
 
         return new UsersMessageRes(code);
     }
