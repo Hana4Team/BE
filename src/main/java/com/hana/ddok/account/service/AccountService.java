@@ -101,7 +101,7 @@ public class AccountService {
         // 초기자본 : 머니박스(저축)
         Moneybox moneybox = moneyboxRepository.findByAccountUsers(users)
                 .orElseThrow(() -> new MoneyboxNotFound());
-        Long initialAmount = moneybox.getSavingBalance();
+        Integer initialAmount = moneybox.getSavingBalance().intValue();
         // 머니박스 간 송금 [머니박스(저축) -> 머니박스(파킹)]
         transactionService.transactionMoneyboxSave(
                 new TransactionMoneyboxSaveReq(
@@ -143,7 +143,7 @@ public class AccountService {
         // 계좌 간 송금 [입출금계좌 -> 예적금]
         transactionService.transactionSave(
                 new TransactionSaveReq(
-                        accountDepositsavingSaveReq.initialAmount(), "예적금가입", "예적금가입", withdrawalAccount.getAccountNumber(), account.getAccountNumber()
+                        accountDepositsavingSaveReq.initialAmount().intValue(), "예적금가입", "예적금가입", withdrawalAccount.getAccountNumber(), account.getAccountNumber()
                 )
         );
 

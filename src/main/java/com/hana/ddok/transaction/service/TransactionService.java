@@ -44,19 +44,21 @@ public class TransactionService {
         Account recipentAccount = accountRepository.findByAccountNumber(transactionSaveReq.recipientAccount())
                 .orElseThrow(() -> new AccountNotFound());
 
-        senderAccount.updateBalance(-transactionSaveReq.amount());
-        recipentAccount.updateBalance(transactionSaveReq.amount());
+        Long amount = transactionSaveReq.amount().longValue();
+
+        senderAccount.updateBalance(-amount);
+        recipentAccount.updateBalance(amount);
 
         // 계좌가 머니박스일 경우, 파킹 잔액 변경
         if (senderAccount.getProducts().getType() == ProductsType.MONEYBOX) {
             Moneybox moneybox = moneyboxRepository.findByAccount(senderAccount)
                     .orElseThrow(() -> new MoneyboxNotFound());
-            moneybox.updateParkingBalance(-transactionSaveReq.amount());
+            moneybox.updateParkingBalance(-amount);
         }
         else if (recipentAccount.getProducts().getType() == ProductsType.MONEYBOX) {
             Moneybox moneybox = moneyboxRepository.findByAccount(recipentAccount)
                     .orElseThrow(() -> new MoneyboxNotFound());
-            moneybox.updateParkingBalance(transactionSaveReq.amount());
+            moneybox.updateParkingBalance(amount);
         }
 
         Transaction transaction = transactionRepository.save(transactionSaveReq.toEntity(senderAccount, recipentAccount));
@@ -68,11 +70,11 @@ public class TransactionService {
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new AccountNotFound());
 
-        LocalDateTime startDate = LocalDateTime.of(year, month, 1, 0, 0);
-        LocalDateTime endDate = startDate.plusMonths(1).minusDays(1).plusHours(23).plusMinutes(59).plusSeconds(59);
+        LocalDateTime startDateTime = LocalDateTime.of(year, month, 1, 0, 0);
+        LocalDateTime endDateTime = startDateTime.plusMonths(1).minusDays(1).plusHours(23).plusMinutes(59).plusSeconds(59);
 
-        List<Transaction> senderTransactionList =  transactionRepository.findAllBySenderAccountAndCreatedAtBetween(account, startDate, endDate);
-        List<Transaction> recipientTransactionList =  transactionRepository.findAllByRecipientAccountAndCreatedAtBetween(account, startDate, endDate);
+        List<Transaction> senderTransactionList =  transactionRepository.findAllBySenderAccountAndCreatedAtBetween(account, startDateTime, endDateTime);
+        List<Transaction> recipientTransactionList =  transactionRepository.findAllByRecipientAccountAndCreatedAtBetween(account, startDateTime, endDateTime);
 
         List<Transaction> allTransactionList = Stream.concat(senderTransactionList.stream(), recipientTransactionList.stream())
                 .collect(Collectors.toList());
@@ -95,7 +97,7 @@ public class TransactionService {
         Moneybox moneybox = moneyboxRepository.findByAccount(account)
                 .orElseThrow(() -> new MoneyboxNotFound());
 
-        Long amount = transactionMoneyboxSaveReq.amount();
+        Long amount = transactionMoneyboxSaveReq.amount().longValue();
         String senderMoneybox = transactionMoneyboxSaveReq.senderMoneybox();
         switch (senderMoneybox) {
             case "parking":
@@ -130,8 +132,9 @@ public class TransactionService {
         Account account = accountRepository.findByAccountNumber(transactionSpendSaveReq.senderAccount())
                 .orElseThrow(() -> new AccountNotFound());
 
-        Long amount = transactionSpendSaveReq.amount();
-        switch (account.getProducts().getType()) {
+        Long amount = transactionSpendSaveReq.amount().longValue();
+        ProductsType type = account.getProducts().getType();
+        switch (type) {
             case DEPOSITWITHDRAWAL:
                 account.updateBalance(-amount);
                 break;
@@ -148,7 +151,7 @@ public class TransactionService {
                 throw new AccountSpendDenied();
         }
         Transaction transaction = transactionRepository.save(transactionSpendSaveReq.toEntity(account));
-        Spend spend = spendRepository.save(transactionSpendSaveReq.toSpend());
+        Spend spend = spendRepository.save(transactionSpendSaveReq.toSpend(transaction));
 
         return new TransactionSpendSaveRes(transaction, spend);
     }

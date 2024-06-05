@@ -24,6 +24,9 @@ public class Spend extends BaseEntity {
     @Column(name = "spend_id")
     private Long spendId;
 
+    @Column(name = "amount", nullable = false)
+    private Integer amount;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     private SpendType type;

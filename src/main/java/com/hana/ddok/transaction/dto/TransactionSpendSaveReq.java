@@ -7,7 +7,7 @@ import com.hana.ddok.transaction.domain.Transaction;
 import com.hana.ddok.transaction.domain.TransactionType;
 
 public record TransactionSpendSaveReq(
-        Long amount,
+        Integer amount,
         String senderTitle,
         String senderAccount,
         SpendType spendType
@@ -21,9 +21,11 @@ public record TransactionSpendSaveReq(
                 .build();
     }
 
-    public Spend toSpend() {
+    public Spend toSpend(Transaction transaction) {
         return Spend.builder()
+                .amount(amount)
                 .type(spendType)
+                .transaction(transaction)
                 .build();
     }
 }
