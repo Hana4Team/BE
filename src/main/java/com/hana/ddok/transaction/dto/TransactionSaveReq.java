@@ -2,6 +2,7 @@ package com.hana.ddok.transaction.dto;
 
 import com.hana.ddok.account.domain.Account;
 import com.hana.ddok.transaction.domain.Transaction;
+import com.hana.ddok.transaction.domain.TransactionType;
 
 public record TransactionSaveReq(
         Long amount,
@@ -13,7 +14,7 @@ public record TransactionSaveReq(
     public Transaction toEntity(Account senderAccount, Account recipientAccount) {
         return Transaction.builder()
                 .amount(amount)
-                .type(1)
+                .type(TransactionType.REMITTANCE)
                 .senderTitle(senderTitle)
                 .recipientTitle(recipientTitle)
                 .senderAccount(senderAccount)

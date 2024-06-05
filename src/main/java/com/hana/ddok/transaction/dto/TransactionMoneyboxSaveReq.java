@@ -2,6 +2,7 @@ package com.hana.ddok.transaction.dto;
 
 import com.hana.ddok.account.domain.Account;
 import com.hana.ddok.transaction.domain.Transaction;
+import com.hana.ddok.transaction.domain.TransactionType;
 
 public record TransactionMoneyboxSaveReq(
         Long amount,
@@ -13,7 +14,7 @@ public record TransactionMoneyboxSaveReq(
     public Transaction toEntity(Account account) {
         return Transaction.builder()
                 .amount(amount)
-                .type(4)
+                .type(TransactionType.MONEYBOX)
                 .senderTitle(senderTitle)
                 .recipientTitle(recipientTitle)
                 .senderAccount(account)

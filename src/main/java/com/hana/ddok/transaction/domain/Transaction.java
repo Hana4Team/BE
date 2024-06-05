@@ -23,8 +23,9 @@ public class Transaction extends BaseEntity {
     @Column(name = "amount", nullable = false)
     private Long amount;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
-    private Integer type;
+    private TransactionType type;
 
     @Column(name = "sender_title")
     private String senderTitle;
