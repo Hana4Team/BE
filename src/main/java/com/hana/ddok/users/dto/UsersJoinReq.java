@@ -24,10 +24,10 @@ public record UsersJoinReq(String name, LocalDate birthDate, String phoneNumber,
                 .build();
     }
 
-    public Account toAccount(Users users, Products products, String accountNumber, String password) {
+    public Account toAccount(Users users, Products products, String accountNumber, String password, Long balance) {
         return Account.builder()
                 .accountNumber(accountNumber)
-                .balance(10000000L)
+                .balance(balance)
                 .interest(products.getInterest2())
                 .password(password)
                 .isDeleted(false)

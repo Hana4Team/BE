@@ -6,28 +6,28 @@ import com.hana.ddok.transaction.domain.Transaction;
 
 import java.time.LocalDate;
 
-public record DepositsavingFindbySavingRes(
+public record DepositsavingFindbyTypeRes(
         Long accountId,
         String ProductName,
         Long balance,
         Float interest,
-        Long initialAmount,
-        Integer payment,
         LocalDate startDate,
         LocalDate endDate,
+        Long initialAmount,
+        Integer payment,
         Long targetAmount
         ) {
-    public DepositsavingFindbySavingRes(Account account, Depositsaving depositsaving, Transaction transaction, Integer monthPeriod) {
+    public DepositsavingFindbyTypeRes(Account account, Depositsaving depositsaving, Long initialAmount, Integer payment, Long targetAmount) {
         this(
                 account.getAccountId(),
                 account.getProducts().getName(),
                 account.getBalance(),
                 account.getInterest(),
-                transaction.getAmount(),
-                depositsaving.getPayment(),
                 account.getCreatedAt().toLocalDate(),
                 depositsaving.getEndDate(),
-                depositsaving.getPayment().longValue() * monthPeriod + transaction.getAmount()
+                initialAmount,
+                payment,
+                targetAmount
         );
     }
 }

@@ -6,6 +6,7 @@ import com.hana.ddok.alarm.dto.AlarmSaveReq;
 import com.hana.ddok.alarm.dto.AlarmSaveRes;
 import com.hana.ddok.alarm.repository.AlarmRepository;
 import com.hana.ddok.users.domain.Users;
+import com.hana.ddok.users.exception.UsersNotFound;
 import com.hana.ddok.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,13 +21,15 @@ public class AlarmService {
     private final UsersRepository usersRepository;
 
     public AlarmSaveRes alarmSave(String phoneNumber, AlarmSaveReq req) {
-        Users user = usersRepository.findByPhoneNumber(phoneNumber);
+        Users user = usersRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsersNotFound());
         alarmRepository.save(AlarmSaveReq.toEntity(req, user));
         return new AlarmSaveRes(true);
     }
 
     public List<AlarmGetRes> alarmGet(String phoneNumber) {
-        Users user = usersRepository.findByPhoneNumber(phoneNumber);
+        Users user = usersRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsersNotFound());
         List<Alarm> alarms = alarmRepository.findTop10ByUsersOrderByCreatedAtDesc(user);
         return alarms.stream()
                 .map(alarm -> new AlarmGetRes(alarm.getContents(), alarm.getCreatedAt()))
