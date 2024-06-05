@@ -1,13 +1,13 @@
-package com.hana.ddok.moneybox.dto;
+package com.hana.ddok.account.dto;
 
 import com.hana.ddok.account.domain.Account;
 import com.hana.ddok.moneybox.domain.Moneybox;
 
-public record MoneyboxSaveRes(
+public record AccountMoneyboxSaveRes(
         Long accountId,
         Long moneyboxId
 ) {
-    public MoneyboxSaveRes(Account account, Moneybox moneybox) {
+    public AccountMoneyboxSaveRes(Account account, Moneybox moneybox) {
         this(
                 account.getAccountId(),
                 moneybox.getMoneyboxId()

@@ -6,8 +6,10 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 public interface UsersRepository extends JpaRepository<Users, Long> {
-    Users findByPhoneNumber(String phoneNumber);
+    Optional<Users> findByPhoneNumber(String phoneNumber);
 
     @Modifying
     @Transactional

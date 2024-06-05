@@ -21,10 +21,11 @@ public class Transaction extends BaseEntity {
     private Long transactionId;
 
     @Column(name = "amount", nullable = false)
-    private Long amount;
+    private Integer amount;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
-    private Integer type;
+    private TransactionType type;
 
     @Column(name = "sender_title")
     private String senderTitle;

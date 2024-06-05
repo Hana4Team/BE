@@ -5,6 +5,7 @@ import com.hana.ddok.budget.dto.*;
 import com.hana.ddok.budget.exception.BudgetNotFound;
 import com.hana.ddok.budget.repository.BudgetRepository;
 import com.hana.ddok.users.domain.Users;
+import com.hana.ddok.users.exception.UsersNotFound;
 import com.hana.ddok.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,9 @@ public class BudgetService {
 
     @Transactional(readOnly = true)
     public BudgetFindRes budgetFind(String phoneNumber) {
-        Users users = usersRepository.findByPhoneNumber(phoneNumber);
+        Users users = usersRepository.findByPhoneNumber(phoneNumber)
+
+                .orElseThrow(() -> new UsersNotFound());
         Budget budget = budgetRepository.findByUsers(users)
                 .orElseThrow(() -> new BudgetNotFound());
 
@@ -28,7 +31,8 @@ public class BudgetService {
 
     @Transactional
     public BudgetUpdateRes budgetUpdate(BudgetUpdateReq budgetUpdateReq, String phoneNumber) {
-        Users users = usersRepository.findByPhoneNumber(phoneNumber);
+        Users users = usersRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsersNotFound());
 
         Budget budget = budgetRepository.findByUsers(users)
                 .orElseGet(() -> budgetRepository.save(Budget.builder()
@@ -54,7 +58,8 @@ public class BudgetService {
 
     @Transactional(readOnly = true)
     public BudgetFindByCategoryRes budgetFindByCategory(String phoneNumber) {
-        Users users = usersRepository.findByPhoneNumber(phoneNumber);
+        Users users = usersRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsersNotFound());
         Budget budget = budgetRepository.findByUsers(users)
                 .orElseThrow(() -> new BudgetNotFound());
 
@@ -63,7 +68,8 @@ public class BudgetService {
 
     @Transactional
     public BudgetByCategoryUpdateRes budgetByCategoryUpdate(BudgetByCategoryUpdateReq budgetByCategoryUpdateReq, String phoneNumber) {
-        Users users = usersRepository.findByPhoneNumber(phoneNumber);
+        Users users = usersRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsersNotFound());
         Budget budget = budgetRepository.findByUsers(users)
                 .orElseThrow(() -> new BudgetNotFound());
 
