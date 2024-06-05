@@ -4,12 +4,11 @@ import com.hana.ddok.account.domain.Account;
 import com.hana.ddok.account.exception.AccountNotFound;
 import com.hana.ddok.account.repository.AccountRepository;
 import com.hana.ddok.depositsaving.domain.Depositsaving;
-import com.hana.ddok.depositsaving.dto.DepositsavingFindbyDepositRes;
-import com.hana.ddok.depositsaving.dto.DepositsavingFindbySaving100Res;
-import com.hana.ddok.depositsaving.dto.DepositsavingFindbySavingRes;
+import com.hana.ddok.depositsaving.dto.DepositsavingFindbyTypeRes;
 import com.hana.ddok.depositsaving.exception.DepositsavingNotFound;
 import com.hana.ddok.depositsaving.repository.DepositsavingRepository;
 import com.hana.ddok.products.domain.ProductsType;
+import com.hana.ddok.products.exception.ProductsTypeInvalid;
 import com.hana.ddok.transaction.domain.Transaction;
 import com.hana.ddok.transaction.exception.TransactionNotFound;
 import com.hana.ddok.transaction.repository.TransactionRepository;
@@ -19,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.Period;
 
 @Service
@@ -32,45 +30,34 @@ public class DepositsavingService {
 
 
     @Transactional(readOnly = true)
-    public DepositsavingFindbySaving100Res depositsavingFindBySaving100(String phoneNumber) {
+    public DepositsavingFindbyTypeRes depositsavingFindByType(ProductsType type, String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber);
-        Account account = accountRepository.findByUsersAndProductsType(users, ProductsType.SAVING100)
-                .orElseThrow(() -> new AccountNotFound());
+        Account account = accountRepository.findByUsersAndProductsType(users, type)
+                        .orElseThrow(() -> new AccountNotFound());
         Depositsaving depositsaving = depositsavingRepository.findByAccount(account)
                 .orElseThrow(() -> new DepositsavingNotFound());
         Transaction transaction = transactionRepository.findFirstByRecipientAccountOrderByCreatedAt(account)
                 .orElseThrow(() -> new TransactionNotFound());
 
-        return new DepositsavingFindbySaving100Res(account, depositsaving, transaction);
-    }
+        Long initialAmount = transaction.getAmount();
+        Integer payment = depositsaving.getPayment();
+        Long targetAmount = 0L;
+        switch (type) {
+            case SAVING100:
+                targetAmount = initialAmount + payment * 100;
+                break;
+            case SAVING:
+                Period period = Period.between(account.getCreatedAt().toLocalDate(), depositsaving.getEndDate());
+                Integer monthPeriod = period.getYears() * 12 + period.getMonths();
+                targetAmount = initialAmount + payment * monthPeriod;
+                break;
+            case DEPOSIT:
+                targetAmount = initialAmount;
+                break;
+            default:
+                throw new ProductsTypeInvalid();
+        }
 
-    @Transactional(readOnly = true)
-    public DepositsavingFindbySavingRes depositsavingFindBySaving(String phoneNumber) {
-        Users users = usersRepository.findByPhoneNumber(phoneNumber);
-        Account account = accountRepository.findByUsersAndProductsType(users, ProductsType.SAVING)
-                .orElseThrow(() -> new AccountNotFound());
-        Depositsaving depositsaving = depositsavingRepository.findByAccount(account)
-                .orElseThrow(() -> new DepositsavingNotFound());
-        Transaction transaction = transactionRepository.findFirstByRecipientAccountOrderByCreatedAt(account)
-                .orElseThrow(() -> new TransactionNotFound());
-
-        // 납입기간(월) 계산
-        Period period = Period.between(account.getCreatedAt().toLocalDate(),depositsaving.getEndDate());
-        Integer monthPeriod = period.getYears() * 12 + period.getMonths();
-
-        return new DepositsavingFindbySavingRes(account, depositsaving, transaction, monthPeriod);
-    }
-
-    @Transactional(readOnly = true)
-    public DepositsavingFindbyDepositRes depositsavingFindByDeposit(String phoneNumber) {
-        Users users = usersRepository.findByPhoneNumber(phoneNumber);
-        Account account = accountRepository.findByUsersAndProductsType(users, ProductsType.DEPOSIT)
-                .orElseThrow(() -> new AccountNotFound());
-        Depositsaving depositsaving = depositsavingRepository.findByAccount(account)
-                .orElseThrow(() -> new DepositsavingNotFound());
-        Transaction transaction = transactionRepository.findFirstByRecipientAccountOrderByCreatedAt(account)
-                .orElseThrow(() -> new TransactionNotFound());
-
-        return new DepositsavingFindbyDepositRes(account, depositsaving, transaction);
+        return new DepositsavingFindbyTypeRes(account, depositsaving,  initialAmount, payment, targetAmount);
     }
 }
