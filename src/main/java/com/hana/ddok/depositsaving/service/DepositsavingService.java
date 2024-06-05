@@ -2,60 +2,75 @@ package com.hana.ddok.depositsaving.service;
 
 import com.hana.ddok.account.domain.Account;
 import com.hana.ddok.account.exception.AccountNotFound;
-import com.hana.ddok.account.exception.AccountWithdrawalDenied;
 import com.hana.ddok.account.repository.AccountRepository;
-import com.hana.ddok.account.util.AccountNumberGenerator;
 import com.hana.ddok.depositsaving.domain.Depositsaving;
-import com.hana.ddok.depositsaving.dto.DepositsavingSaveReq;
-import com.hana.ddok.depositsaving.dto.DepositsavingSaveRes;
+import com.hana.ddok.depositsaving.dto.DepositsavingFindbyDepositRes;
+import com.hana.ddok.depositsaving.dto.DepositsavingFindbySaving100Res;
+import com.hana.ddok.depositsaving.dto.DepositsavingFindbySavingRes;
+import com.hana.ddok.depositsaving.exception.DepositsavingNotFound;
 import com.hana.ddok.depositsaving.repository.DepositsavingRepository;
-import com.hana.ddok.products.domain.Products;
-import com.hana.ddok.products.exception.ProductsNotFound;
-import com.hana.ddok.products.exception.ProductsTypeInvalid;
-import com.hana.ddok.products.repository.ProductsRepository;
+import com.hana.ddok.products.domain.ProductsType;
+import com.hana.ddok.transaction.domain.Transaction;
+import com.hana.ddok.transaction.exception.TransactionNotFound;
+import com.hana.ddok.transaction.repository.TransactionRepository;
 import com.hana.ddok.users.domain.Users;
 import com.hana.ddok.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import java.time.LocalDate;
+import java.time.Period;
 
 @Service
 @RequiredArgsConstructor
 public class DepositsavingService {
-    private final DepositsavingRepository depositsavingRepository;
     private final AccountRepository accountRepository;
-    private final ProductsRepository productsRepository;
     private final UsersRepository usersRepository;
+    private final TransactionRepository transactionRepository;
+    private final DepositsavingRepository depositsavingRepository;
 
-    @Transactional
-    public DepositsavingSaveRes depositsavingSave(DepositsavingSaveReq depositsavingSaveReq, String phoneNumber) {
+
+    @Transactional(readOnly = true)
+    public DepositsavingFindbySaving100Res depositsavingFindBySaving100(String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber);
-        Products products = productsRepository.findById(depositsavingSaveReq.productsId())
-                .orElseThrow(() -> new ProductsNotFound());
-        Integer type = products.getType();
-        if (type != 2 && type != 3) {
-            throw new ProductsTypeInvalid();
-        }
-
-        String accountNumber;
-        Optional<Account> existingAccount;
-        do {
-            accountNumber = AccountNumberGenerator.generateAccountNumber();
-            existingAccount = accountRepository.findByAccountNumber(accountNumber);
-        } while (existingAccount.isPresent());
-
-        Account withdrawalAccount = accountRepository.findById(depositsavingSaveReq.withdrawalAccountId())
+        Account account = accountRepository.findByUsersAndProductsType(users, ProductsType.SAVING100)
                 .orElseThrow(() -> new AccountNotFound());
-        if (withdrawalAccount.getProducts().getType() != 1) {
-            throw new AccountWithdrawalDenied();
-        }
+        Depositsaving depositsaving = depositsavingRepository.findByAccount(account)
+                .orElseThrow(() -> new DepositsavingNotFound());
+        Transaction transaction = transactionRepository.findFirstByRecipientAccountOrderByCreatedAt(account)
+                .orElseThrow(() -> new TransactionNotFound());
 
-        String password = withdrawalAccount.getPassword();
+        return new DepositsavingFindbySaving100Res(account, depositsaving, transaction);
+    }
 
-        Account account = accountRepository.save(depositsavingSaveReq.toAccount(users, products, accountNumber, password));
-        Depositsaving depositsaving = depositsavingRepository.save(depositsavingSaveReq.toEntity(account, withdrawalAccount));
-        return new DepositsavingSaveRes(depositsaving, account);
+    @Transactional(readOnly = true)
+    public DepositsavingFindbySavingRes depositsavingFindBySaving(String phoneNumber) {
+        Users users = usersRepository.findByPhoneNumber(phoneNumber);
+        Account account = accountRepository.findByUsersAndProductsType(users, ProductsType.SAVING)
+                .orElseThrow(() -> new AccountNotFound());
+        Depositsaving depositsaving = depositsavingRepository.findByAccount(account)
+                .orElseThrow(() -> new DepositsavingNotFound());
+        Transaction transaction = transactionRepository.findFirstByRecipientAccountOrderByCreatedAt(account)
+                .orElseThrow(() -> new TransactionNotFound());
+
+        // 납입기간(월) 계산
+        Period period = Period.between(account.getCreatedAt().toLocalDate(),depositsaving.getEndDate());
+        Integer monthPeriod = period.getYears() * 12 + period.getMonths();
+
+        return new DepositsavingFindbySavingRes(account, depositsaving, transaction, monthPeriod);
+    }
+
+    @Transactional(readOnly = true)
+    public DepositsavingFindbyDepositRes depositsavingFindByDeposit(String phoneNumber) {
+        Users users = usersRepository.findByPhoneNumber(phoneNumber);
+        Account account = accountRepository.findByUsersAndProductsType(users, ProductsType.DEPOSIT)
+                .orElseThrow(() -> new AccountNotFound());
+        Depositsaving depositsaving = depositsavingRepository.findByAccount(account)
+                .orElseThrow(() -> new DepositsavingNotFound());
+        Transaction transaction = transactionRepository.findFirstByRecipientAccountOrderByCreatedAt(account)
+                .orElseThrow(() -> new TransactionNotFound());
+
+        return new DepositsavingFindbyDepositRes(account, depositsaving, transaction);
     }
 }

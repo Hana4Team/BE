@@ -31,11 +31,11 @@ public class Account extends BaseEntity {
     @Column(name = "balance", nullable = false)
     private Long balance;
 
+    @Column(name = "interest", nullable = false)
+    private Float interest;
+
     @Column(name = "password", nullable = false)
     private String password;
-
-    @Column(name = "is_mission_connected")
-    private Boolean isMissionConnected;
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;

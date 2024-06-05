@@ -7,6 +7,7 @@ import com.hana.ddok.account.repository.AccountRepository;
 import com.hana.ddok.moneybox.domain.Moneybox;
 import com.hana.ddok.moneybox.exception.MoneyboxNotFound;
 import com.hana.ddok.moneybox.repository.MoneyboxRepository;
+import com.hana.ddok.products.domain.ProductsType;
 import com.hana.ddok.transaction.domain.Transaction;
 import com.hana.ddok.transaction.dto.*;
 import com.hana.ddok.transaction.repository.TransactionRepository;
@@ -15,6 +16,13 @@ import com.hana.ddok.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -35,12 +43,12 @@ public class TransactionService {
         recipentAccount.updateBalance(transactionSaveReq.amount());
 
         // 계좌가 머니박스일 경우, 파킹 잔액 변경
-        if (senderAccount.getProducts().getType() == 4) {
+        if (senderAccount.getProducts().getType() == ProductsType.MONEYBOX) {
             Moneybox moneybox = moneyboxRepository.findByAccount(senderAccount)
                     .orElseThrow(() -> new MoneyboxNotFound());
-            moneybox.updateParkingBalance(transactionSaveReq.amount());
+            moneybox.updateParkingBalance(-transactionSaveReq.amount());
         }
-        else if (recipentAccount.getProducts().getType() == 4) {
+        else if (recipentAccount.getProducts().getType() == ProductsType.MONEYBOX) {
             Moneybox moneybox = moneyboxRepository.findByAccount(recipentAccount)
                     .orElseThrow(() -> new MoneyboxNotFound());
             moneybox.updateParkingBalance(transactionSaveReq.amount());
@@ -50,23 +58,48 @@ public class TransactionService {
         return new TransactionSaveRes(transaction);
     }
 
+    @Transactional(readOnly = true)
+    public List<TransactionFindAllRes> transactionFindAll(Long accountId, Integer year, Integer month) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new AccountNotFound());
+
+        LocalDateTime startDate = LocalDateTime.of(year, month, 1, 0, 0);
+        LocalDateTime endDate = startDate.plusMonths(1).minusDays(1).plusHours(23).plusMinutes(59).plusSeconds(59);
+
+        List<Transaction> senderTransactionList =  transactionRepository.findAllBySenderAccountAndCreatedAtBetween(account, startDate, endDate);
+        List<Transaction> recipientTransactionList =  transactionRepository.findAllByRecipientAccountAndCreatedAtBetween(account, startDate, endDate);
+
+        List<Transaction> allTransactionList = Stream.concat(senderTransactionList.stream(), recipientTransactionList.stream())
+                .collect(Collectors.toList());
+        Collections.sort(allTransactionList, Comparator.comparing(Transaction::getCreatedAt));
+
+        List<TransactionFindAllRes> transactionFindAllResList = allTransactionList.stream()
+                .map(transaction -> new TransactionFindAllRes(transaction, accountId == transaction.getSenderAccount().getAccountId()))
+                .collect(Collectors.toList());
+
+        return transactionFindAllResList;
+    }
+
+
     @Transactional
     public TransactionSpendSaveRes transactionSpendSave(TransactionSpendSaveReq transactionSpendSaveReq) {
         Account account = accountRepository.findByAccountNumber(transactionSpendSaveReq.senderAccount())
                 .orElseThrow(() -> new AccountNotFound());
 
         Long amount = transactionSpendSaveReq.amount();
-        Integer type = account.getProducts().getType();
+        ProductsType type = account.getProducts().getType();
         switch (type) {
-            case 1: // 입출금통장
+            case DEPOSITWITHDRAWAL:
                 account.updateBalance(-amount);
                 break;
-            case 5: // 머니박스
+            case MONEYBOX:
                 account.updateBalance(-amount);
-                // 소비공간 잔액 변경
+                // 소비공간 잔액 업데이트
                 Moneybox moneybox = moneyboxRepository.findByAccount(account)
                         .orElseThrow(() -> new MoneyboxNotFound());
                 moneybox.updateExpenseBalance(-amount);
+                // 소비합계 업데이트
+                moneybox.updateExpenseTotal(amount);
                 break;
             default:
                 throw new AccountWithdrawalDenied();
@@ -78,7 +111,7 @@ public class TransactionService {
     @Transactional
     public TransactionMoneyboxSaveRes transactionMoneyboxSave(TransactionMoneyboxSaveReq transactionMoneyboxSaveReq, String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber);
-        Account account = accountRepository.findByUsersAndProductsType(users, 4)
+        Account account = accountRepository.findByUsersAndProductsType(users, ProductsType.MONEYBOX)
                 .orElseThrow(() -> new AccountNotFound());
 
         Moneybox moneybox = moneyboxRepository.findByAccount(account)

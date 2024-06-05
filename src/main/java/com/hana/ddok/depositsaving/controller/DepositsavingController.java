@@ -1,7 +1,8 @@
 package com.hana.ddok.depositsaving.controller;
 
-import com.hana.ddok.depositsaving.dto.DepositsavingSaveReq;
-import com.hana.ddok.depositsaving.dto.DepositsavingSaveRes;
+import com.hana.ddok.depositsaving.dto.DepositsavingFindbyDepositRes;
+import com.hana.ddok.depositsaving.dto.DepositsavingFindbySaving100Res;
+import com.hana.ddok.depositsaving.dto.DepositsavingFindbySavingRes;
 import com.hana.ddok.depositsaving.service.DepositsavingService;
 import com.hana.ddok.users.domain.UsersDetails;
 import lombok.RequiredArgsConstructor;
@@ -15,9 +16,21 @@ import org.springframework.web.bind.annotation.*;
 public class DepositsavingController {
     private final DepositsavingService depositsavingService;
 
-    @PostMapping("/depositsaving")
-    public ResponseEntity<DepositsavingSaveRes> depositsavingSave(@RequestBody DepositsavingSaveReq depositsavingSaveReq, @AuthenticationPrincipal UsersDetails usersDetails) {
-        DepositsavingSaveRes depositsavingSaveRes = depositsavingService.depositsavingSave(depositsavingSaveReq, usersDetails.getUsername());
-        return ResponseEntity.ok(depositsavingSaveRes);
+    @GetMapping("/depositsaving/saving100")
+    public ResponseEntity<DepositsavingFindbySaving100Res> depositsavingFindBySaving100(@AuthenticationPrincipal UsersDetails usersDetails) {
+        DepositsavingFindbySaving100Res depositsavingFindbySaving100Res = depositsavingService.depositsavingFindBySaving100(usersDetails.getUsername());
+        return ResponseEntity.ok(depositsavingFindbySaving100Res);
+    }
+
+    @GetMapping("/depositsaving/saving")
+    public ResponseEntity<DepositsavingFindbySavingRes> depositsavingFindBySaving(@AuthenticationPrincipal UsersDetails usersDetails) {
+        DepositsavingFindbySavingRes depositsavingFindbySavingRes = depositsavingService.depositsavingFindBySaving(usersDetails.getUsername());
+        return ResponseEntity.ok(depositsavingFindbySavingRes);
+    }
+
+    @GetMapping("/depositsaving/deposit")
+    public ResponseEntity<DepositsavingFindbyDepositRes> depositsavingFindByDeposit(@AuthenticationPrincipal UsersDetails usersDetails) {
+        DepositsavingFindbyDepositRes depositsavingFindbyDepositRes = depositsavingService.depositsavingFindByDeposit(usersDetails.getUsername());
+        return ResponseEntity.ok(depositsavingFindbyDepositRes);
     }
 }

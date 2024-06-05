@@ -9,4 +9,5 @@ import java.util.List;
 import java.util.Optional;
 
 public interface DepositsavingRepository extends JpaRepository<Depositsaving, Long> {
+    Optional<Depositsaving> findByAccount(Account account);
 }

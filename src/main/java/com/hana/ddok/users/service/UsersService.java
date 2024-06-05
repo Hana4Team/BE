@@ -1,15 +1,15 @@
 package com.hana.ddok.users.service;
 
 import com.hana.ddok.account.domain.Account;
-import com.hana.ddok.account.exception.AccountNotFound;
 import com.hana.ddok.account.repository.AccountRepository;
-import com.hana.ddok.account.util.AccountNumberGenerator;
+import com.hana.ddok.account.service.AccountService;
 import com.hana.ddok.common.exception.EntityNotFoundException;
 import com.hana.ddok.common.exception.ValueInvalidException;
 import com.hana.ddok.common.jwt.JWTUtil;
 import com.hana.ddok.home.domain.Home;
 import com.hana.ddok.home.repository.HomeRepository;
 import com.hana.ddok.products.domain.Products;
+import com.hana.ddok.products.domain.ProductsType;
 import com.hana.ddok.products.exception.ProductsNotFound;
 import com.hana.ddok.products.repository.ProductsRepository;
 import com.hana.ddok.users.domain.Users;
@@ -40,6 +40,7 @@ public class UsersService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JWTUtil jwtUtil;
     private final DefaultMessageService messageService;
+    private final AccountService accountService;
 
     @Value("${jwt.expired.time}")
     private Long expiredTime;
@@ -72,17 +73,10 @@ public class UsersService {
         Home home = homeRepository.findById(1L).orElseThrow(() -> new EntityNotFoundException("집을 찾을 수 없습니다"));
         Users users = usersRepository.save(UsersJoinReq.toEntity(req, encodedPwd, home));
 
-        // 입출금계좌 자동 개설
-        Products products = productsRepository.findByType(1)
+        // 입출금계좌 더미로 자동 개설
+        Products products = productsRepository.findByType(ProductsType.DEPOSITWITHDRAWAL)
                 .orElseThrow(() -> new ProductsNotFound());
-        String accountNumber;
-        Optional<Account> existingAccount;
-        do {
-            accountNumber = AccountNumberGenerator.generateAccountNumber();
-            existingAccount = accountRepository.findByAccountNumber(accountNumber);
-        } while (existingAccount.isPresent());
-        String password = "1234";
-        accountRepository.save(req.toAccount(users, products, accountNumber, password));
+        accountRepository.save(req.toAccount(users, products, accountService.generateAccountNumber(), "1234"));
 
         return new UsersJoinRes(true, users.getUsersId(), users.getPhoneNumber());
     }
