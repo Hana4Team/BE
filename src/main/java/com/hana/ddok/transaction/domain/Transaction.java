@@ -23,7 +23,7 @@ public class Transaction extends BaseEntity {
     @Column(name = "amount", nullable = false)
     private Integer amount;
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     @Column(name = "type", nullable = false)
     private TransactionType type;
 

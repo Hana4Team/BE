@@ -27,7 +27,7 @@ public class Spend extends BaseEntity {
     @Column(name = "amount", nullable = false)
     private Integer amount;
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     @Column(name = "type", nullable = false)
     private SpendType type;
 
