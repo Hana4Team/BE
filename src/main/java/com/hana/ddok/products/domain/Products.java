@@ -22,7 +22,7 @@ public class Products extends BaseEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     private ProductsType type;
 
