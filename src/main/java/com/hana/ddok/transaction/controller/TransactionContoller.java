@@ -29,15 +29,15 @@ public class TransactionContoller {
         return ResponseEntity.ok(transactionFindAllResList);
     }
 
-    @PostMapping("transaction/spend")
-    public ResponseEntity<TransactionSpendSaveRes> transactionSpendSave(@RequestBody TransactionSpendSaveReq transactionSpendSaveReq) {
-        TransactionSpendSaveRes transactionSpendSaveRes = transactionService.transactionSpendSave(transactionSpendSaveReq);
-        return ResponseEntity.ok(transactionSpendSaveRes);
-    }
-
     @PostMapping("transaction/moneybox")
     public ResponseEntity<TransactionMoneyboxSaveRes> transactionMoneyboxSave(@RequestBody TransactionMoneyboxSaveReq transactionMoneyboxSaveReq, @AuthenticationPrincipal UsersDetails usersDetails) {
         TransactionMoneyboxSaveRes transactionMoneyboxSaveRes = transactionService.transactionMoneyboxSave(transactionMoneyboxSaveReq, usersDetails.getUsername());
         return ResponseEntity.ok(transactionMoneyboxSaveRes);
+    }
+
+    @PostMapping("transaction/spend")
+    public ResponseEntity<TransactionSpendSaveRes> transactionSpendSave(@RequestBody TransactionSpendSaveReq transactionSpendSaveReq) {
+        TransactionSpendSaveRes transactionSpendSaveRes = transactionService.transactionSpendSave(transactionSpendSaveReq);
+        return ResponseEntity.ok(transactionSpendSaveRes);
     }
 }

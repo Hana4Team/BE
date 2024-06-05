@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 public record DepositsavingFindbyTypeRes(
         Long accountId,
-        String ProductName,
+        String productName,
         Long balance,
         Float interest,
         LocalDate startDate,

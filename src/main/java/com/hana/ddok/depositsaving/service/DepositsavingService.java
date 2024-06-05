@@ -41,7 +41,7 @@ public class DepositsavingService {
         Transaction transaction = transactionRepository.findFirstByRecipientAccountOrderByCreatedAt(account)
                 .orElseThrow(() -> new TransactionNotFound());
 
-        Long initialAmount = transaction.getAmount();
+        Long initialAmount = transaction.getAmount().longValue();
         Integer payment = depositsaving.getPayment();
         Long targetAmount = 0L;
         switch (type) {
