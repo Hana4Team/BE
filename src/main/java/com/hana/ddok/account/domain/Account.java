@@ -57,4 +57,13 @@ public class Account extends BaseEntity {
             throw new AccountBalanceInvalid();
         }
     }
+
+    public void updateInterest(Float interest) {
+        this.interest = interest;
+    }
+
+    public void deleteAccount() {
+        deletedAt = LocalDateTime.now();
+        isDeleted = true;
+    }
 }

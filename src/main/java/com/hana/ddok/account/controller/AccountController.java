@@ -43,4 +43,10 @@ public class AccountController {
         AccountDepositsavingSaveRes accountDepositsavingSaveRes = accountService.accountDepositsavingSave(accountDepositsavingSaveReq, usersDetails.getUsername());
         return ResponseEntity.ok(accountDepositsavingSaveRes);
     }
+
+    @DeleteMapping("/account/depositsaving/{accountId}")
+    public ResponseEntity<AccountDepositDeleteRes> accountDepositDelete(@PathVariable Long accountId) {
+        AccountDepositDeleteRes accountDepositDeleteRes = accountService.accountDepositDelete(accountId);
+        return ResponseEntity.ok(accountDepositDeleteRes);
+    }
 }

@@ -81,7 +81,13 @@ public class TransactionService {
         Collections.sort(allTransactionList, Comparator.comparing(Transaction::getCreatedAt));
 
         List<TransactionFindAllRes> transactionFindAllResList = allTransactionList.stream()
-                .map(transaction -> new TransactionFindAllRes(transaction, accountId == transaction.getSenderAccount().getAccountId()))
+                .map(transaction -> {
+                    boolean isSender = false;
+                    if (transaction.getSenderAccount() != null) {
+                        isSender = accountId.equals(transaction.getSenderAccount().getAccountId());
+                    }
+                    return new TransactionFindAllRes(transaction, isSender);
+                })
                 .collect(Collectors.toList());
 
         return transactionFindAllResList;
@@ -154,5 +160,15 @@ public class TransactionService {
         Spend spend = spendRepository.save(transactionSpendSaveReq.toSpend(transaction));
 
         return new TransactionSpendSaveRes(transaction, spend);
+    }
+
+    @Transactional
+    public TransactionInterestSaveRes transactionInterestSave(TransactionInterestSaveReq transactionInterestSaveReq) {
+        Account recipentAccount = accountRepository.findByAccountNumber(transactionInterestSaveReq.recipientAccount())
+                .orElseThrow(() -> new AccountNotFound());
+
+        recipentAccount.updateBalance(transactionInterestSaveReq.amount().longValue());
+        Transaction transaction = transactionRepository.save(transactionInterestSaveReq.toEntity(recipentAccount));
+        return new TransactionInterestSaveRes(transaction);
     }
 }
