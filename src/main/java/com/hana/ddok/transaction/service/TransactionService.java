@@ -12,6 +12,7 @@ import com.hana.ddok.transaction.domain.Transaction;
 import com.hana.ddok.transaction.dto.*;
 import com.hana.ddok.transaction.repository.TransactionRepository;
 import com.hana.ddok.users.domain.Users;
+import com.hana.ddok.users.exception.UsersNotFound;
 import com.hana.ddok.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -110,7 +111,8 @@ public class TransactionService {
 
     @Transactional
     public TransactionMoneyboxSaveRes transactionMoneyboxSave(TransactionMoneyboxSaveReq transactionMoneyboxSaveReq, String phoneNumber) {
-        Users users = usersRepository.findByPhoneNumber(phoneNumber);
+        Users users = usersRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsersNotFound());
         Account account = accountRepository.findByUsersAndProductsType(users, ProductsType.MONEYBOX)
                 .orElseThrow(() -> new AccountNotFound());
 

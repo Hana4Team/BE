@@ -14,6 +14,7 @@ import com.hana.ddok.products.exception.ProductsNotFound;
 import com.hana.ddok.products.repository.ProductsRepository;
 import com.hana.ddok.users.domain.Users;
 import com.hana.ddok.users.dto.*;
+import com.hana.ddok.users.exception.UsersExistPhoneNumber;
 import com.hana.ddok.users.exception.UsersInvalidPwd;
 import com.hana.ddok.users.exception.UsersNotFound;
 import com.hana.ddok.users.repository.UsersRepository;
@@ -22,10 +23,12 @@ import net.nurigo.sdk.message.model.Message;
 import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
 import net.nurigo.sdk.message.response.SingleMessageSentResponse;
 import net.nurigo.sdk.message.service.DefaultMessageService;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
@@ -48,11 +51,8 @@ public class UsersService {
     private String from;
 
     public UsersLoginRes usersLogin(UsersLoginReq req) {
-
-        Users user = usersRepository.findByPhoneNumber(req.phoneNumber());
-        if (user == null) {
-            throw new UsersNotFound();
-        }
+        Users user = usersRepository.findByPhoneNumber(req.phoneNumber())
+                .orElseThrow(() -> new UsersNotFound());
         String targetPwd = req.password();
         String originPwd = user.getPassword();
 
@@ -66,6 +66,11 @@ public class UsersService {
 
 
     public UsersJoinRes usersJoin(UsersJoinReq req) {
+        Optional<Users> existingUser = usersRepository.findByPhoneNumber(req.phoneNumber());
+        if (existingUser.isPresent()) {
+            throw new UsersExistPhoneNumber();
+        }
+
         if(!req.password().equals(req.confirmPassword()))
             throw new UsersInvalidPwd();
 
@@ -74,9 +79,16 @@ public class UsersService {
         Users users = usersRepository.save(UsersJoinReq.toEntity(req, encodedPwd, home));
 
         // 입출금계좌 더미로 자동 개설
-        Products products = productsRepository.findByType(ProductsType.DEPOSITWITHDRAWAL)
-                .orElseThrow(() -> new ProductsNotFound());
-        accountRepository.save(req.toAccount(users, products, accountService.generateAccountNumber(), "1234"));
+        List<Products> productsList = productsRepository.findAllByType(ProductsType.DEPOSITWITHDRAWAL);
+        if (productsList.isEmpty()) {
+            throw new ProductsNotFound();
+        }
+        Random random = new Random();
+        Integer randomIndex = random.nextInt(productsList.size());
+        Products products = productsList.get(randomIndex);
+        String password = String.format("%04d", random.nextInt(10000));   // 0000~9999
+
+        accountRepository.save(req.toAccount(users, products, accountService.generateAccountNumber(), password, 10000000L));
 
         return new UsersJoinRes(true, users.getUsersId(), users.getPhoneNumber());
     }
@@ -102,17 +114,20 @@ public class UsersService {
     }
 
     public UsersGetRes usersGet(String phoneNumber) {
-        Users user = usersRepository.findByPhoneNumber(phoneNumber);
+        Users user = usersRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsersNotFound());
         return new UsersGetRes(user.getName(), user.getPhoneNumber(), user.getStep(), user.getStepStatus());
     }
 
     public UsersGetPointRes usersGetPoint(String phoneNumber) {
-        Users user = usersRepository.findByPhoneNumber(phoneNumber);
+        Users user = usersRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsersNotFound());
         return new UsersGetPointRes(user.getPoints());
     }
 
     public UsersSavePointRes usersSavePoint(String phoneNumber, UsersSavePointReq req) {
-        Users user = usersRepository.findByPhoneNumber(phoneNumber);
+        Users user = usersRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsersNotFound());
         Random random = new Random();
         Integer points = 0;
         Integer curStep = user.getStep();
@@ -143,7 +158,8 @@ public class UsersService {
     //3 : 성공확인
     //4 : 실패
     public UsersMissionRes usersMissionStart(String phoneNumber) {
-        Users user = usersRepository.findByPhoneNumber(phoneNumber);
+        Users user = usersRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsersNotFound());
         user.updateStepStatus(1); //진행중
         usersRepository.save(user);
         return new UsersMissionRes(user.getPhoneNumber(), user.getStep(), user.getStepStatus());
@@ -151,7 +167,8 @@ public class UsersService {
 
 
     public UsersMissionRes usersMove(String phoneNumber) {
-        Users user = usersRepository.findByPhoneNumber(phoneNumber);
+        Users user = usersRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsersNotFound());
         Home home = homeRepository.findById(user.getHome().getHomeId() + 1).orElseThrow(() -> new EntityNotFoundException("집을 찾을 수 없습니다."));
         user.updateHome(home);
         user.updateStepStatus(2); //성공
@@ -160,7 +177,8 @@ public class UsersService {
     }
 
     public UsersMissionRes usersMissionCheck(String phoneNumber) {
-        Users user = usersRepository.findByPhoneNumber(phoneNumber);
+        Users user = usersRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsersNotFound());
         if (user.getStepStatus() == 3) { //실패시
             if (user.getStep() == 2) {
                 user.updateStepStatus(1);
@@ -174,7 +192,8 @@ public class UsersService {
     }
 
     public UsersReadNewsRes usersReadNews(String phoneNumber) {
-        Users user = usersRepository.findByPhoneNumber(phoneNumber);
+        Users user = usersRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsersNotFound());
         if (user.getReadNews())
             throw new ValueInvalidException("이미 읽은 회원입니다.");
         user.updateReadNews(true);

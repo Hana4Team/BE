@@ -13,6 +13,7 @@ import com.hana.ddok.transaction.domain.Transaction;
 import com.hana.ddok.transaction.exception.TransactionNotFound;
 import com.hana.ddok.transaction.repository.TransactionRepository;
 import com.hana.ddok.users.domain.Users;
+import com.hana.ddok.users.exception.UsersNotFound;
 import com.hana.ddok.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,8 @@ public class DepositsavingService {
 
     @Transactional(readOnly = true)
     public DepositsavingFindbyTypeRes depositsavingFindByType(ProductsType type, String phoneNumber) {
-        Users users = usersRepository.findByPhoneNumber(phoneNumber);
+        Users users = usersRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsersNotFound());
         Account account = accountRepository.findByUsersAndProductsType(users, type)
                         .orElseThrow(() -> new AccountNotFound());
         Depositsaving depositsaving = depositsavingRepository.findByAccount(account)

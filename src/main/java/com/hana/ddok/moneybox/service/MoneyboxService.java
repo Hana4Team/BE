@@ -11,6 +11,7 @@ import com.hana.ddok.moneybox.repository.MoneyboxRepository;
 import com.hana.ddok.products.domain.ProductsType;
 import com.hana.ddok.products.repository.ProductsRepository;
 import com.hana.ddok.users.domain.Users;
+import com.hana.ddok.users.exception.UsersNotFound;
 import com.hana.ddok.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,8 @@ public class MoneyboxService {
 
     @Transactional(readOnly = true)
     public MoneyboxFindAllRes moneyboxFindAll(String phoneNumber) {
-        Users users = usersRepository.findByPhoneNumber(phoneNumber);
+        Users users = usersRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsersNotFound());
         Account account = accountRepository.findByUsersAndProductsType(users, ProductsType.MONEYBOX)
                 .orElseThrow(() -> new AccountNotFound());
         Moneybox moneybox = moneyboxRepository.findByAccount(account)
@@ -36,7 +38,8 @@ public class MoneyboxService {
 
     @Transactional(readOnly = true)
     public MoneyboxFindBySavingRes moneyboxFindBySavingRes(String phoneNumber) {
-        Users users = usersRepository.findByPhoneNumber(phoneNumber);
+        Users users = usersRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsersNotFound());
         Account account = accountRepository.findByUsersAndProductsType(users, ProductsType.MONEYBOX)
                 .orElseThrow(() -> new AccountNotFound());
         Moneybox moneybox = moneyboxRepository.findByAccount(account)

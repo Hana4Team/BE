@@ -24,6 +24,7 @@ import com.hana.ddok.transaction.dto.TransactionSaveReq;
 import com.hana.ddok.transaction.repository.TransactionRepository;
 import com.hana.ddok.transaction.service.TransactionService;
 import com.hana.ddok.users.domain.Users;
+import com.hana.ddok.users.exception.UsersNotFound;
 import com.hana.ddok.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -45,7 +46,8 @@ public class AccountService {
 
     @Transactional(readOnly = true)
     public List<AccountFindAllRes> accountFindAll(AccountFindAllReq accountFindAllReq, String phoneNumber) {
-        Users users = usersRepository.findByPhoneNumber(phoneNumber);
+        Users users = usersRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsersNotFound());
         List<AccountFindAllRes> accountFindAllResList = accountRepository.findAllByUsers(users).stream()
                 .filter(account -> (accountFindAllReq.depositWithdrawalAccount() && account.getProducts().getType().equals(ProductsType.DEPOSITWITHDRAWAL)) ||
                         (accountFindAllReq.moneyboxAccount() && account.getProducts().getType().equals(ProductsType.MONEYBOX)) ||
@@ -61,7 +63,8 @@ public class AccountService {
 
     @Transactional
     public AccountMoneyboxSaveRes accountMoneyboxSave(AccountMoneyboxSaveReq accountMoneyboxSaveReq, String phoneNumber) {
-        Users users = usersRepository.findByPhoneNumber(phoneNumber);
+        Users users = usersRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsersNotFound());
         Products products = productsRepository.findById(accountMoneyboxSaveReq.productsId())
                 .orElseThrow(() -> new ProductsNotFound());
         if (products.getType() != ProductsType.MONEYBOX) {
@@ -75,7 +78,8 @@ public class AccountService {
 
     @Transactional
     public AccountSaving100SaveRes accountSaving100Save(AccountSaving100SaveReq accountSaving100SaveReq, String phoneNumber) {
-        Users users = usersRepository.findByPhoneNumber(phoneNumber);
+        Users users = usersRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsersNotFound());
         Products products = productsRepository.findById(accountSaving100SaveReq.productsId())
                 .orElseThrow(() -> new ProductsNotFound());
         if (products.getType() != ProductsType.SAVING100) {
@@ -116,7 +120,8 @@ public class AccountService {
 
     @Transactional
     public AccountDepositsavingSaveRes accountDepositsavingSave(AccountDepositsavingSaveReq accountDepositsavingSaveReq, String phoneNumber) {
-        Users users = usersRepository.findByPhoneNumber(phoneNumber);
+        Users users = usersRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsersNotFound());
         Products products = productsRepository.findById(accountDepositsavingSaveReq.productsId())
                 .orElseThrow(() -> new ProductsNotFound());
         if (products.getType() != ProductsType.DEPOSIT && products.getType() != ProductsType.SAVING) {
