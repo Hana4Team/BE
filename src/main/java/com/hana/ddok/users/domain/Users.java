@@ -3,6 +3,7 @@ import com.hana.ddok.budget.domain.Budget;
 import com.hana.ddok.common.exception.EntityNotFoundException;
 import com.hana.ddok.common.exception.ValueInvalidException;
 import com.hana.ddok.home.domain.Home;
+import com.hana.ddok.home.exception.HomeNotFound;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -73,7 +74,7 @@ public class Users {
 
     public void updateHome(Home home) {
         if (home == null) {
-            throw new EntityNotFoundException("집을 찾을 수 없습니다.");
+            throw new HomeNotFound();
         }
         this.home = home;
     }
