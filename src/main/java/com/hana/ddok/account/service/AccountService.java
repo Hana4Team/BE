@@ -2,12 +2,14 @@ package com.hana.ddok.account.service;
 
 import com.hana.ddok.account.domain.Account;
 import com.hana.ddok.account.dto.*;
+import com.hana.ddok.account.exception.AccountDeleteDenied;
 import com.hana.ddok.account.exception.AccountNotFound;
 import com.hana.ddok.account.exception.AccountWithdrawalDenied;
 import com.hana.ddok.account.repository.AccountRepository;
 import com.hana.ddok.depositsaving.domain.Depositsaving;
 import com.hana.ddok.account.dto.AccountDepositsavingSaveReq;
 import com.hana.ddok.account.dto.AccountDepositsavingSaveRes;
+import com.hana.ddok.depositsaving.exception.DepositsavingNotFound;
 import com.hana.ddok.depositsaving.repository.DepositsavingRepository;
 import com.hana.ddok.moneybox.domain.Moneybox;
 import com.hana.ddok.account.dto.AccountMoneyboxSaveReq;
@@ -19,9 +21,9 @@ import com.hana.ddok.products.domain.ProductsType;
 import com.hana.ddok.products.exception.ProductsNotFound;
 import com.hana.ddok.products.exception.ProductsTypeInvalid;
 import com.hana.ddok.products.repository.ProductsRepository;
+import com.hana.ddok.transaction.dto.TransactionInterestSaveReq;
 import com.hana.ddok.transaction.dto.TransactionMoneyboxSaveReq;
 import com.hana.ddok.transaction.dto.TransactionSaveReq;
-import com.hana.ddok.transaction.repository.TransactionRepository;
 import com.hana.ddok.transaction.service.TransactionService;
 import com.hana.ddok.users.domain.Users;
 import com.hana.ddok.users.exception.UsersNotFound;
@@ -30,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -38,7 +41,6 @@ import java.util.stream.Collectors;
 public class AccountService {
     private final AccountRepository accountRepository;
     private final UsersRepository usersRepository;
-    private final TransactionRepository transactionRepository;
     private final DepositsavingRepository depositsavingRepository;
     private final ProductsRepository productsRepository;
     private final MoneyboxRepository moneyboxRepository;
@@ -148,6 +150,50 @@ public class AccountService {
         );
 
         return new AccountDepositsavingSaveRes(depositsaving, account);
+    }
+
+    @Transactional
+    public AccountDepositDeleteRes accountDepositDelete(Long accountId) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new AccountNotFound());
+        Products products = account.getProducts();
+
+        // 100일적금, 적금, 예금만 해지 가능
+        if (products.getType() == ProductsType.DEPOSITWITHDRAWAL || products.getType() == ProductsType.MONEYBOX) {
+            throw new AccountDeleteDenied();
+        }
+        Depositsaving depositsaving = depositsavingRepository.findByAccount(account)
+                .orElseThrow(() -> new DepositsavingNotFound());
+
+        // 이율 수정
+        LocalDate currentDate = LocalDate.now();
+        LocalDate endDate = depositsaving.getEndDate();
+        Float interest = 0f;
+        if (currentDate.isBefore(endDate)) {    // 만기일 이전 : 중도해지 최저금리
+            interest = products.getInterest1();
+        } else if (currentDate.isEqual(endDate) || currentDate.isAfter(endDate)) {  // 만기일 이전 : 만기해지 최고금리
+            interest = (products.getInterest2());
+        }
+        account.updateInterest(interest);
+
+        // 계좌 간 송금 [예적금계좌 -> 출금계좌]
+        transactionService.transactionSave(
+                new TransactionSaveReq(
+                        account.getBalance().intValue(), "예적금해지", "예적금해지", account.getAccountNumber(), depositsaving.getWithdrawalAccount().getAccountNumber()
+                )
+        );
+
+        // 이자입금 [ -> 출금계좌]
+        transactionService.transactionInterestSave(
+                new TransactionInterestSaveReq(
+                        (int)(account.getBalance() * interest)/100, "예적금이자", depositsaving.getWithdrawalAccount().getAccountNumber()
+                )
+        );
+
+        // 해지
+        account.deleteAccount();
+
+        return new AccountDepositDeleteRes(account);
     }
 
     @Transactional(readOnly = true)
