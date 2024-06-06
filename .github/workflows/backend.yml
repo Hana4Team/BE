@@ -51,7 +51,5 @@ jobs:
         echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
         ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME}
         docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/ddokddokhana-backend:latest
-        docker stop ddokddokhana-backend || true
-        docker rm ddokddokhana-backend || true
         docker run -d --name backend -p 8080:8080 ${{ secrets.DOCKER_HUB_USERNAME }}/ddokddokhana-backend:latest
   
