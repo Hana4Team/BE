@@ -12,14 +12,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:5173")
-                .allowedOrigins("http://localhost:3000")
-                .allowedOrigins("http://localhost:80")
-                .allowedOrigins("http://localhost")
-                .allowedOrigins("http://ec2-43-201-217-228.ap-northeast-2.compute.amazonaws.com")
-                .allowedOrigins("http://ec2-43-201-217-228.ap-northeast-2.compute.amazonaws.com:80")
-                .allowedOrigins("http://ec2-43-201-217-228.ap-northeast-2.compute.amazonaws.com:3000")
-                .allowedOrigins("http://ec2-43-201-217-228.ap-northeast-2.compute.amazonaws.com:5173")
-                .allowedMethods("OPTIONS", "GET", "POST", "PUT", "DELETE");
+                .allowedOrigins("http://localhost:3000","http://localhost:80","http://localhost","http://ec2-43-201-217-228.ap-northeast-2.compute.amazonaws.com","http://ec2-43-201-217-228.ap-northeast-2.compute.amazonaws.com:3000","http://ec2-43-201-217-228.ap-northeast-2.compute.amazonaws.com:8080")
+                .allowedMethods("OPTIONS", "GET", "POST", "PUT", "DELETE")
+                .allowCredentials(true);
     }
 }

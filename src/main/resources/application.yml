@@ -6,7 +6,7 @@ spring:
     show-sql: true
   datasource:
     # url: jdbc:mysql://localhost:3306/ddok
-   url: jdbc:mysql://database-ec2-loginjoindb-21.cbmoo6w6k67n.ap-northeast-2.rds.amazonaws.com:3306/ddok
+    url: jdbc:mysql://database-ec2-loginjoindb-21.cbmoo6w6k67n.ap-northeast-2.rds.amazonaws.com:3306/ddok
     username: root
     password: mysql123
     driver-class-name: com.mysql.cj.jdbc.Driver
