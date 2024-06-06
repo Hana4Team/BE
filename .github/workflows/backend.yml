@@ -40,27 +40,18 @@ jobs:
     needs: build
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+    - uses: actions/checkout@v2 
+    - name: Build & Deploy
+      env:
+          PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          HOSTNAME: ${{secrets.SSH_HOST}}
+          USER_NAME: ${{secrets.USER_NAME}}
+    
+      run: |
+        echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+        ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME}
+        docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/ddokddokhana-backend:latest
+        docker stop ddokddokhana-backend || true
+        docker rm ddokddokhana-backend || true
+        docker run -d --name backend -p 8080:8080 ${{ secrets.DOCKER_HUB_USERNAME }}/ddokddokhana-backend:latest
   
-      - name: Deploy to AWS EC2
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ap-northeast-2
-          INSTANCE_ID: i-0952073b650f7cae2
-          EC2_PUBLIC_IP: ${{ secrets.EC2_PUBLIC_IP }}
-          PEM_FILE: ${{ secrets.EC2_PEM_FILE }}
-        run: |
-          # 임시 PEM 파일 생성
-          echo "$PEM_FILE" > ec2.pem
-          chmod 400 ec2.pem
-          ssh -i ec2.pem ec2-user@$EC2_PUBLIC_IP << 'EOF'
-            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/ddokddokhana-backend:latest
-            docker stop ddokddokhana-backend || true
-            docker rm ddokddokhana-backend || true
-            docker run -d --name backend -p 8080:8080 ${{ secrets.DOCKER_HUB_USERNAME }}/ddokddokhana-backend:latest
-          EOF
-  
-          # 임시 PEM 파일 삭제
-          rm ec2.pem
