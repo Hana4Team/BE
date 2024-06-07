@@ -17,7 +17,7 @@ import java.util.List;
 public class TransactionContoller {
     private final TransactionService transactionService;
 
-    @PostMapping("transaction")
+    @PostMapping("/transaction")
     public ResponseEntity<TransactionSaveRes> transactionSave(@RequestBody TransactionSaveReq transactionSaveReq) {
         TransactionSaveRes transactionSaveRes = transactionService.transactionSave(transactionSaveReq);
         return ResponseEntity.ok(transactionSaveRes);
@@ -29,7 +29,7 @@ public class TransactionContoller {
         return ResponseEntity.ok(transactionFindAllRes);
     }
 
-    @PostMapping("transaction/moneybox")
+    @PostMapping("/transaction/moneybox")
     public ResponseEntity<TransactionMoneyboxSaveRes> transactionMoneyboxSave(@RequestBody TransactionMoneyboxSaveReq transactionMoneyboxSaveReq, @AuthenticationPrincipal UsersDetails usersDetails) {
         TransactionMoneyboxSaveRes transactionMoneyboxSaveRes = transactionService.transactionMoneyboxSave(transactionMoneyboxSaveReq, usersDetails.getUsername());
         return ResponseEntity.ok(transactionMoneyboxSaveRes);
@@ -41,7 +41,7 @@ public class TransactionContoller {
         return ResponseEntity.ok(transactionMoneyboxFindAllRes);
     }
 
-    @PostMapping("transaction/spend")
+    @PostMapping("/transaction/spend")
     public ResponseEntity<TransactionSpendSaveRes> transactionSpendSave(@RequestBody TransactionSpendSaveReq transactionSpendSaveReq) {
         TransactionSpendSaveRes transactionSpendSaveRes = transactionService.transactionSpendSave(transactionSpendSaveReq);
         return ResponseEntity.ok(transactionSpendSaveRes);
