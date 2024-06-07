@@ -3,9 +3,9 @@ package com.hana.ddok.transaction.service;
 import com.hana.ddok.account.domain.Account;
 import com.hana.ddok.account.exception.AccountNotFound;
 import com.hana.ddok.account.exception.AccountSpendDenied;
-import com.hana.ddok.account.exception.AccountWithdrawalDenied;
 import com.hana.ddok.account.repository.AccountRepository;
 import com.hana.ddok.moneybox.domain.Moneybox;
+import com.hana.ddok.moneybox.domain.MoneyboxType;
 import com.hana.ddok.moneybox.exception.MoneyboxNotFound;
 import com.hana.ddok.moneybox.repository.MoneyboxRepository;
 import com.hana.ddok.products.domain.ProductsType;
@@ -65,7 +65,7 @@ public class TransactionService {
     }
 
     @Transactional(readOnly = true)
-    public List<TransactionFindAllRes> transactionFindAll(Long accountId, Integer year, Integer month) {
+    public TransactionFindAllRes transactionFindAll(Long accountId, Integer year, Integer month) {
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new AccountNotFound());
 
@@ -78,13 +78,13 @@ public class TransactionService {
         List<Transaction> recipientTransactionList =  transactionRepository.findAllByTypeInAndRecipientAccountAndCreatedAtBetween(typeList, account, startDateTime, endDateTime);
 
         // 시간순 정렬
-        List<TransactionFindAllRes> transactionFindAllResList = Stream.concat(
-                        senderTransactionList.stream().map(transaction -> new TransactionFindAllRes(transaction, true)),
-                        recipientTransactionList.stream().map(transaction -> new TransactionFindAllRes(transaction, false)))
-                .sorted(Comparator.comparing(TransactionFindAllRes::dateTime))
+        List<TransactionFindByIdRes> transactionFindByIdResList = Stream.concat(
+                        senderTransactionList.stream().map(transaction -> new TransactionFindByIdRes(transaction, true)),
+                        recipientTransactionList.stream().map(transaction -> new TransactionFindByIdRes(transaction, false)))
+                .sorted(Comparator.comparing(TransactionFindByIdRes::dateTime))
                 .collect(Collectors.toList());
 
-        return transactionFindAllResList;
+        return new TransactionFindAllRes(account, transactionFindByIdResList);
     }
 
     @Transactional
@@ -98,37 +98,39 @@ public class TransactionService {
                 .orElseThrow(() -> new MoneyboxNotFound());
 
         Long amount = transactionMoneyboxSaveReq.amount().longValue();
-        String senderMoneybox = transactionMoneyboxSaveReq.senderMoneybox();
-        switch (senderMoneybox) {
-            case "parking":
+        MoneyboxType senderMoneyboxType = transactionMoneyboxSaveReq.senderMoneybox();
+        switch (senderMoneyboxType) {
+            case PARKING:
                 moneybox.updateParkingBalance(-amount);
                 break;
-            case "expense":
+            case EXPENSE:
                 moneybox.updateExpenseBalance(-amount);
                 break;
-            case "saving":
+            case SAVING:
                 moneybox.updateSavingBalance(-amount);
                 break;
         }
-        String recipientMoneybox = transactionMoneyboxSaveReq.recipientMoneybox();
-        switch (recipientMoneybox) {
-            case "parking":
+        MoneyboxType recipientMoneyboxType = transactionMoneyboxSaveReq.recipientMoneybox();
+        switch (recipientMoneyboxType) {
+            case PARKING:
                 moneybox.updateParkingBalance(amount);
                 break;
-            case "expense":
+            case EXPENSE:
                 moneybox.updateExpenseBalance(amount);
                 break;
-            case "saving":
+            case SAVING:
                 moneybox.updateSavingBalance(amount);
                 break;
         }
 
-        Transaction transaction = transactionRepository.save(transactionMoneyboxSaveReq.toEntity(account));
+        String title = senderMoneyboxType + "->" + recipientMoneyboxType;
+
+        Transaction transaction = transactionRepository.save(transactionMoneyboxSaveReq.toEntity(account, title));
         return new TransactionMoneyboxSaveRes(transaction);
     }
 
     @Transactional(readOnly = true)
-    public List<TransactionMoneyboxFindAllRes> transactionMoneyboxFindAll(Integer year, Integer month, String phoneNumber) {
+    public List<TransactionMoneyboxFindAllRes> transactionMoneyboxFindAll(MoneyboxType type, Integer year, Integer month, String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
         Account account = accountRepository.findByUsersAndProductsType(users, ProductsType.MONEYBOX)

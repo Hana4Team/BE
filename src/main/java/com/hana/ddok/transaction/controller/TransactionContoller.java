@@ -1,6 +1,7 @@
 package com.hana.ddok.transaction.controller;
 
-import com.hana.ddok.transaction.dto.TransactionFindAllRes;
+import com.hana.ddok.moneybox.domain.MoneyboxType;
+import com.hana.ddok.transaction.dto.TransactionFindByIdRes;
 import com.hana.ddok.transaction.dto.*;
 import com.hana.ddok.transaction.service.TransactionService;
 import com.hana.ddok.users.domain.UsersDetails;
@@ -24,9 +25,9 @@ public class TransactionContoller {
     }
 
     @GetMapping("/transaction/{accountId}")
-    public ResponseEntity<List<TransactionFindAllRes>> transactionFindAll(@PathVariable Long accountId, @RequestParam Integer year, @RequestParam Integer month) {
-        List<TransactionFindAllRes> transactionFindAllResList = transactionService.transactionFindAll(accountId, year, month);
-        return ResponseEntity.ok(transactionFindAllResList);
+    public ResponseEntity<TransactionFindAllRes> transactionFindAll(@PathVariable Long accountId, @RequestParam Integer year, @RequestParam Integer month) {
+        TransactionFindAllRes transactionFindAllRes = transactionService.transactionFindAll(accountId, year, month);
+        return ResponseEntity.ok(transactionFindAllRes);
     }
 
     @PostMapping("transaction/moneybox")
@@ -36,8 +37,8 @@ public class TransactionContoller {
     }
 
     @GetMapping("/transaction/moneybox")
-    public ResponseEntity<List<TransactionMoneyboxFindAllRes>> transactionMoneyboxFindAll(@RequestParam Integer year, @RequestParam Integer month, @AuthenticationPrincipal UsersDetails usersDetails) {
-        List<TransactionMoneyboxFindAllRes> transactionMoneyboxFindAllResList = transactionService.transactionMoneyboxFindAll(year, month, usersDetails.getUsername());
+    public ResponseEntity<List<TransactionMoneyboxFindAllRes>> transactionMoneyboxFindAll(@RequestParam MoneyboxType type, @RequestParam Integer year, @RequestParam Integer month, @AuthenticationPrincipal UsersDetails usersDetails) {
+        List<TransactionMoneyboxFindAllRes> transactionMoneyboxFindAllResList = transactionService.transactionMoneyboxFindAll(type, year, month, usersDetails.getUsername());
         return ResponseEntity.ok(transactionMoneyboxFindAllResList);
     }
 

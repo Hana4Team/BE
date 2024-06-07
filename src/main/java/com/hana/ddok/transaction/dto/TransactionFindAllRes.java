@@ -1,21 +1,23 @@
 package com.hana.ddok.transaction.dto;
 
+import com.hana.ddok.account.domain.Account;
 import com.hana.ddok.transaction.domain.Transaction;
 
-import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public record TransactionFindAllRes(
-        Boolean isSender,
-        String title,
-        Long amount,
-        LocalDateTime dateTime
+        String name,
+        String accountNumber,
+        Long balance,
+        List<TransactionFindByIdRes> transactionList
 ) {
-    public TransactionFindAllRes(Transaction transaction, Boolean isSender) {
+    public TransactionFindAllRes(Account account, List<TransactionFindByIdRes> transactionFindByIdResList) {
         this(
-                isSender,
-                isSender ? transaction.getSenderTitle() : transaction.getRecipientTitle(),
-                transaction.getAmount().longValue(),
-                transaction.getCreatedAt()
+                account.getProducts().getName(),
+                account.getAccountNumber(),
+                account.getBalance(),
+                transactionFindByIdResList
         );
     }
 }
