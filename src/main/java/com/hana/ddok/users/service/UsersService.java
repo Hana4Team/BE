@@ -88,7 +88,6 @@ public class UsersService {
         Integer randomIndex = random.nextInt(productsList.size());
         Products products = productsList.get(randomIndex);
         String password = String.format("%04d", random.nextInt(10000));   // 0000~9999
-
         accountRepository.save(req.toAccount(users, products, accountService.generateAccountNumber(), password, 10000000L));
 
         return new UsersJoinRes(true, users.getUsersId(), users.getPhoneNumber());

@@ -16,7 +16,7 @@ public record UsersJoinReq(String name, LocalDate birthDate, String phoneNumber,
                 .birthDate(req.birthDate)
                 .phoneNumber(req.phoneNumber)
                 .password(encodedPwd)
-                .step(0)
+                .step(1)
                 .stepStatus(null)
                 .points(0)
                 .readNews(false)
