@@ -44,9 +44,9 @@ public class AccountController {
         return ResponseEntity.ok(accountDepositsavingSaveRes);
     }
 
-    @DeleteMapping("/account/depositsaving/{accountId}")
-    public ResponseEntity<AccountDepositDeleteRes> accountDepositDelete(@PathVariable Long accountId) {
-        AccountDepositDeleteRes accountDepositDeleteRes = accountService.accountDepositDelete(accountId);
+    @DeleteMapping("/account/depositsaving")
+    public ResponseEntity<AccountDepositDeleteRes> accountDepositDelete(@RequestBody AccountDepositsavingDeleteReq accountDepositsavingDeleteReq) {
+        AccountDepositDeleteRes accountDepositDeleteRes = accountService.accountDepositDelete(accountDepositsavingDeleteReq);
         return ResponseEntity.ok(accountDepositDeleteRes);
     }
 }
