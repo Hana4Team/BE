@@ -21,7 +21,7 @@ public class AccountController {
     private final AccountService accountService;
 
     @GetMapping("/account")
-    public ResponseEntity<List<AccountFindAllRes>> accountFindAll(@RequestBody AccountFindAllReq accountFindAllReq, @AuthenticationPrincipal UsersDetails usersDetails) {
+    public ResponseEntity<List<AccountFindAllRes>> accountFindAll(@ModelAttribute AccountFindAllReq accountFindAllReq, @AuthenticationPrincipal UsersDetails usersDetails) {
         List<AccountFindAllRes> accountFindAllResList = accountService.accountFindAll(accountFindAllReq, usersDetails.getUsername());
         return ResponseEntity.ok(accountFindAllResList);
     }
