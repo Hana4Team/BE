@@ -1,4 +1,6 @@
 package com.hana.ddok.users.dto;
 
-public record UsersMissionRes(String phoneNumber, Integer step, Integer stepStatus) {
+import com.hana.ddok.users.domain.UsersStepStatus;
+
+public record UsersMissionRes(String phoneNumber, Integer step, UsersStepStatus stepStatus) {
 }

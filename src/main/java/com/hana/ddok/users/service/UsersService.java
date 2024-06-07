@@ -13,6 +13,7 @@ import com.hana.ddok.products.domain.ProductsType;
 import com.hana.ddok.products.exception.ProductsNotFound;
 import com.hana.ddok.products.repository.ProductsRepository;
 import com.hana.ddok.users.domain.Users;
+import com.hana.ddok.users.domain.UsersStepStatus;
 import com.hana.ddok.users.dto.*;
 import com.hana.ddok.users.exception.UsersExistPhoneNumber;
 import com.hana.ddok.users.exception.UsersInvalidPwd;
@@ -160,7 +161,7 @@ public class UsersService {
     public UsersMissionRes usersMissionStart(String phoneNumber) {
         Users user = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
-        user.updateStepStatus(1); //진행중
+        user.updateStepStatus(UsersStepStatus.PROCEEDING);
         usersRepository.save(user);
         return new UsersMissionRes(user.getPhoneNumber(), user.getStep(), user.getStepStatus());
     }
@@ -171,7 +172,7 @@ public class UsersService {
                 .orElseThrow(() -> new UsersNotFound());
         Home home = homeRepository.findById(user.getHome().getHomeId() + 1).orElseThrow(() -> new EntityNotFoundException("집을 찾을 수 없습니다."));
         user.updateHome(home);
-        user.updateStepStatus(2); //성공
+        user.updateStepStatus(UsersStepStatus.SUCCESS);
         usersRepository.save(user);
         return new UsersMissionRes(user.getPhoneNumber(), user.getStep(), user.getStepStatus());
     }
@@ -179,9 +180,9 @@ public class UsersService {
     public UsersMissionRes usersMissionCheck(String phoneNumber) {
         Users user = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
-        if (user.getStepStatus() == 3) { //실패시
+        if (user.getStepStatus() == UsersStepStatus.FAIL) {
             if (user.getStep() == 2) {
-                user.updateStepStatus(1);
+                user.updateStepStatus(UsersStepStatus.PROCEEDING);
             } else user.updateStepStatus(null);
         } else { //성공시
             user.updateStep(user.getStep() + 1);
