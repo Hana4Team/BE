@@ -13,7 +13,7 @@ public class UsersScheduler {
     // 매일 자정에 실행
     // @Scheduled(cron = "0 0 0 * * ?")
     @Scheduled(cron = "0 * * * * ?") // test용 1분
-    public void resetNewsRead() {
-        usersRepository.resetReadNews();
+    public void updateNewsRead() {
+        usersRepository.updateReadNews();
     }
 }
