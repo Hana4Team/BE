@@ -97,7 +97,8 @@ public class UsersService {
         Message message = new Message();
 
         Random random = new Random();
-        Integer code = 1000000 + random.nextInt(9000000);
+        int codeValue = random.nextInt(10000000); // 0~9999999
+        String code = String.format("%07d", codeValue);
 
         message.setFrom(from);
         message.setTo(req.phoneNumber());
