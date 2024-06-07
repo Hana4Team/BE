@@ -130,7 +130,7 @@ public class TransactionService {
     }
 
     @Transactional(readOnly = true)
-    public List<TransactionMoneyboxFindAllRes> transactionMoneyboxFindAll(MoneyboxType type, Integer year, Integer month, String phoneNumber) {
+    public TransactionMoneyboxFindAllRes transactionMoneyboxFindAll(MoneyboxType type, Integer year, Integer month, String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
         Account account = accountRepository.findByUsersAndProductsType(users, ProductsType.MONEYBOX)
@@ -144,13 +144,13 @@ public class TransactionService {
         List<Transaction> recipientTransactionList =  transactionRepository.findAllByTypeInAndRecipientAccountAndCreatedAtBetween(typeList, account, startDateTime, endDateTime);
 
         // 시간순 정렬
-        List<TransactionMoneyboxFindAllRes> transactionMoneyboxFindAllResList = Stream.concat(
-                        senderTransactionList.stream().map(transaction -> new TransactionMoneyboxFindAllRes(transaction, true)),
-                        recipientTransactionList.stream().map(transaction -> new TransactionMoneyboxFindAllRes(transaction, false)))
-                .sorted(Comparator.comparing(TransactionMoneyboxFindAllRes::dateTime))
+        List<TransactionMoneyboxFindByIdRes> transactionMoneyboxFindByIdResList = Stream.concat(
+                        senderTransactionList.stream().map(transaction -> new TransactionMoneyboxFindByIdRes(transaction, true)),
+                        recipientTransactionList.stream().map(transaction -> new TransactionMoneyboxFindByIdRes(transaction, false)))
+                .sorted(Comparator.comparing(TransactionMoneyboxFindByIdRes::dateTime))
                 .collect(Collectors.toList());
 
-        return transactionMoneyboxFindAllResList;
+        return new TransactionMoneyboxFindAllRes(account, transactionMoneyboxFindByIdResList);
     }
 
     @Transactional

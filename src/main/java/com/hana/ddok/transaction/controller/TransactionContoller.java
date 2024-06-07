@@ -1,7 +1,6 @@
 package com.hana.ddok.transaction.controller;
 
 import com.hana.ddok.moneybox.domain.MoneyboxType;
-import com.hana.ddok.transaction.dto.TransactionFindByIdRes;
 import com.hana.ddok.transaction.dto.*;
 import com.hana.ddok.transaction.service.TransactionService;
 import com.hana.ddok.users.domain.UsersDetails;
@@ -37,9 +36,9 @@ public class TransactionContoller {
     }
 
     @GetMapping("/transaction/moneybox")
-    public ResponseEntity<List<TransactionMoneyboxFindAllRes>> transactionMoneyboxFindAll(@RequestParam MoneyboxType type, @RequestParam Integer year, @RequestParam Integer month, @AuthenticationPrincipal UsersDetails usersDetails) {
-        List<TransactionMoneyboxFindAllRes> transactionMoneyboxFindAllResList = transactionService.transactionMoneyboxFindAll(type, year, month, usersDetails.getUsername());
-        return ResponseEntity.ok(transactionMoneyboxFindAllResList);
+    public ResponseEntity<TransactionMoneyboxFindAllRes> transactionMoneyboxFindAll(@RequestParam MoneyboxType type, @RequestParam Integer year, @RequestParam Integer month, @AuthenticationPrincipal UsersDetails usersDetails) {
+        TransactionMoneyboxFindAllRes transactionMoneyboxFindAllRes = transactionService.transactionMoneyboxFindAll(type, year, month, usersDetails.getUsername());
+        return ResponseEntity.ok(transactionMoneyboxFindAllRes);
     }
 
     @PostMapping("transaction/spend")
