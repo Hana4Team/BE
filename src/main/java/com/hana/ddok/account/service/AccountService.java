@@ -14,6 +14,7 @@ import com.hana.ddok.depositsaving.repository.DepositsavingRepository;
 import com.hana.ddok.moneybox.domain.Moneybox;
 import com.hana.ddok.account.dto.AccountMoneyboxSaveReq;
 import com.hana.ddok.account.dto.AccountMoneyboxSaveRes;
+import com.hana.ddok.moneybox.domain.MoneyboxType;
 import com.hana.ddok.moneybox.exception.MoneyboxNotFound;
 import com.hana.ddok.moneybox.repository.MoneyboxRepository;
 import com.hana.ddok.products.domain.Products;
@@ -107,7 +108,7 @@ public class AccountService {
         // 머니박스 간 송금 [머니박스(저축) -> 머니박스(파킹)]
         transactionService.transactionMoneyboxSave(
                 new TransactionMoneyboxSaveReq(
-                        initialAmount, "저축->파킹", "저축->파킹", "saving", "parking"
+                        initialAmount,  MoneyboxType.SAVING, MoneyboxType.PARKING
                 ), phoneNumber
         );
         // 계좌 간 송금 [머니박스 -> 100일적금]

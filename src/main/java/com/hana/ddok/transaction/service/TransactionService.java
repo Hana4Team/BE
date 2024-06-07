@@ -3,15 +3,16 @@ package com.hana.ddok.transaction.service;
 import com.hana.ddok.account.domain.Account;
 import com.hana.ddok.account.exception.AccountNotFound;
 import com.hana.ddok.account.exception.AccountSpendDenied;
-import com.hana.ddok.account.exception.AccountWithdrawalDenied;
 import com.hana.ddok.account.repository.AccountRepository;
 import com.hana.ddok.moneybox.domain.Moneybox;
+import com.hana.ddok.moneybox.domain.MoneyboxType;
 import com.hana.ddok.moneybox.exception.MoneyboxNotFound;
 import com.hana.ddok.moneybox.repository.MoneyboxRepository;
 import com.hana.ddok.products.domain.ProductsType;
 import com.hana.ddok.spend.domain.Spend;
 import com.hana.ddok.spend.repository.SpendRepository;
 import com.hana.ddok.transaction.domain.Transaction;
+import com.hana.ddok.transaction.domain.TransactionType;
 import com.hana.ddok.transaction.dto.*;
 import com.hana.ddok.transaction.repository.TransactionRepository;
 import com.hana.ddok.users.domain.Users;
@@ -22,9 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -66,31 +65,26 @@ public class TransactionService {
     }
 
     @Transactional(readOnly = true)
-    public List<TransactionFindAllRes> transactionFindAll(Long accountId, Integer year, Integer month) {
+    public TransactionFindAllRes transactionFindAll(Long accountId, Integer year, Integer month) {
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new AccountNotFound());
 
+        List<TransactionType> typeList = Arrays.asList(TransactionType.REMITTANCE, TransactionType.SPEND, TransactionType.INTEREST);
         LocalDateTime startDateTime = LocalDateTime.of(year, month, 1, 0, 0);
         LocalDateTime endDateTime = startDateTime.plusMonths(1).minusDays(1).plusHours(23).plusMinutes(59).plusSeconds(59);
 
-        List<Transaction> senderTransactionList =  transactionRepository.findAllBySenderAccountAndCreatedAtBetween(account, startDateTime, endDateTime);
-        List<Transaction> recipientTransactionList =  transactionRepository.findAllByRecipientAccountAndCreatedAtBetween(account, startDateTime, endDateTime);
 
-        List<Transaction> allTransactionList = Stream.concat(senderTransactionList.stream(), recipientTransactionList.stream())
-                .collect(Collectors.toList());
-        Collections.sort(allTransactionList, Comparator.comparing(Transaction::getCreatedAt));
+        List<Transaction> senderTransactionList =  transactionRepository.findAllByTypeInAndSenderAccountAndCreatedAtBetween(typeList, account, startDateTime, endDateTime);
+        List<Transaction> recipientTransactionList =  transactionRepository.findAllByTypeInAndRecipientAccountAndCreatedAtBetween(typeList, account, startDateTime, endDateTime);
 
-        List<TransactionFindAllRes> transactionFindAllResList = allTransactionList.stream()
-                .map(transaction -> {
-                    boolean isSender = false;
-                    if (transaction.getSenderAccount() != null) {
-                        isSender = accountId.equals(transaction.getSenderAccount().getAccountId());
-                    }
-                    return new TransactionFindAllRes(transaction, isSender);
-                })
+        // 시간순 정렬
+        List<TransactionFindByIdRes> transactionFindByIdResList = Stream.concat(
+                        senderTransactionList.stream().map(transaction -> new TransactionFindByIdRes(transaction, true)),
+                        recipientTransactionList.stream().map(transaction -> new TransactionFindByIdRes(transaction, false)))
+                .sorted(Comparator.comparing(TransactionFindByIdRes::dateTime))
                 .collect(Collectors.toList());
 
-        return transactionFindAllResList;
+        return new TransactionFindAllRes(account, transactionFindByIdResList);
     }
 
     @Transactional
@@ -104,33 +98,59 @@ public class TransactionService {
                 .orElseThrow(() -> new MoneyboxNotFound());
 
         Long amount = transactionMoneyboxSaveReq.amount().longValue();
-        String senderMoneybox = transactionMoneyboxSaveReq.senderMoneybox();
-        switch (senderMoneybox) {
-            case "parking":
+        MoneyboxType senderMoneyboxType = transactionMoneyboxSaveReq.senderMoneybox();
+        switch (senderMoneyboxType) {
+            case PARKING:
                 moneybox.updateParkingBalance(-amount);
                 break;
-            case "expense":
+            case EXPENSE:
                 moneybox.updateExpenseBalance(-amount);
                 break;
-            case "saving":
+            case SAVING:
                 moneybox.updateSavingBalance(-amount);
                 break;
         }
-        String recipientMoneybox = transactionMoneyboxSaveReq.recipientMoneybox();
-        switch (recipientMoneybox) {
-            case "parking":
+        MoneyboxType recipientMoneyboxType = transactionMoneyboxSaveReq.recipientMoneybox();
+        switch (recipientMoneyboxType) {
+            case PARKING:
                 moneybox.updateParkingBalance(amount);
                 break;
-            case "expense":
+            case EXPENSE:
                 moneybox.updateExpenseBalance(amount);
                 break;
-            case "saving":
+            case SAVING:
                 moneybox.updateSavingBalance(amount);
                 break;
         }
 
-        Transaction transaction = transactionRepository.save(transactionMoneyboxSaveReq.toEntity(account));
+        String title = senderMoneyboxType + "->" + recipientMoneyboxType;
+
+        Transaction transaction = transactionRepository.save(transactionMoneyboxSaveReq.toEntity(account, title));
         return new TransactionMoneyboxSaveRes(transaction);
+    }
+
+    @Transactional(readOnly = true)
+    public TransactionMoneyboxFindAllRes transactionMoneyboxFindAll(MoneyboxType type, Integer year, Integer month, String phoneNumber) {
+        Users users = usersRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsersNotFound());
+        Account account = accountRepository.findByUsersAndProductsType(users, ProductsType.MONEYBOX)
+                .orElseThrow(() -> new AccountNotFound());
+
+        List<TransactionType> typeList = Collections.singletonList(TransactionType.MONEYBOX);
+        LocalDateTime startDateTime = LocalDateTime.of(year, month, 1, 0, 0);
+        LocalDateTime endDateTime = startDateTime.plusMonths(1).minusDays(1).plusHours(23).plusMinutes(59).plusSeconds(59);
+
+        List<Transaction> senderTransactionList =  transactionRepository.findAllByTypeInAndSenderAccountAndCreatedAtBetween(typeList, account, startDateTime, endDateTime);
+        List<Transaction> recipientTransactionList =  transactionRepository.findAllByTypeInAndRecipientAccountAndCreatedAtBetween(typeList, account, startDateTime, endDateTime);
+
+        // 시간순 정렬
+        List<TransactionMoneyboxFindByIdRes> transactionMoneyboxFindByIdResList = Stream.concat(
+                        senderTransactionList.stream().map(transaction -> new TransactionMoneyboxFindByIdRes(transaction, true)),
+                        recipientTransactionList.stream().map(transaction -> new TransactionMoneyboxFindByIdRes(transaction, false)))
+                .sorted(Comparator.comparing(TransactionMoneyboxFindByIdRes::dateTime))
+                .collect(Collectors.toList());
+
+        return new TransactionMoneyboxFindAllRes(account, transactionMoneyboxFindByIdResList);
     }
 
     @Transactional
