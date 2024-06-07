@@ -49,4 +49,10 @@ public class AccountController {
         AccountDepositDeleteRes accountDepositDeleteRes = accountService.accountDepositDelete(accountDepositsavingDeleteReq);
         return ResponseEntity.ok(accountDepositDeleteRes);
     }
+
+    @PostMapping("/account/password")
+    public ResponseEntity<AccountPasswordCheckRes> accountPasswordCheck(@RequestBody AccountPasswordCheckReq accountPasswordCheckReq) {
+        AccountPasswordCheckRes accountPasswordCheckRes = accountService.accountPasswordCheck(accountPasswordCheckReq);
+        return ResponseEntity.ok(accountPasswordCheckRes);
+    }
 }
