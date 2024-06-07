@@ -106,9 +106,10 @@ public class AccountService {
                 .orElseThrow(() -> new MoneyboxNotFound());
         Integer initialAmount = moneybox.getSavingBalance().intValue();
         // 머니박스 간 송금 [머니박스(저축) -> 머니박스(파킹)]
+        String title = MoneyboxType.SAVING + "->" + MoneyboxType.PARKING;
         transactionService.transactionMoneyboxSave(
                 new TransactionMoneyboxSaveReq(
-                        initialAmount,  MoneyboxType.SAVING, MoneyboxType.PARKING
+                        initialAmount, title, title, MoneyboxType.SAVING, MoneyboxType.PARKING
                 ), phoneNumber
         );
         // 계좌 간 송금 [머니박스 -> 100일적금]

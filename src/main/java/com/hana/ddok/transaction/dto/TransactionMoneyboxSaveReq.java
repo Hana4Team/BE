@@ -7,15 +7,17 @@ import com.hana.ddok.transaction.domain.TransactionType;
 
 public record TransactionMoneyboxSaveReq(
         Integer amount,
+        String senderTitle,
+        String recipientTitle,
         MoneyboxType senderMoneybox,
         MoneyboxType recipientMoneybox
 ) {
-    public Transaction toEntity(Account account, String title) {
+    public Transaction toEntity(Account account) {
         return Transaction.builder()
                 .amount(amount)
                 .type(TransactionType.MONEYBOX)
-                .senderTitle(title)
-                .recipientTitle(title)
+                .senderTitle(senderTitle)
+                .recipientTitle(recipientTitle)
                 .senderAccount(account)
                 .recipientAccount(account)
                 .build();

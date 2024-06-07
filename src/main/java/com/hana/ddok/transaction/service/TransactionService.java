@@ -123,9 +123,7 @@ public class TransactionService {
                 break;
         }
 
-        String title = senderMoneyboxType + "->" + recipientMoneyboxType;
-
-        Transaction transaction = transactionRepository.save(transactionMoneyboxSaveReq.toEntity(account, title));
+        Transaction transaction = transactionRepository.save(transactionMoneyboxSaveReq.toEntity(account));
         return new TransactionMoneyboxSaveRes(transaction);
     }
 
