@@ -35,6 +35,12 @@ public class TransactionContoller {
         return ResponseEntity.ok(transactionMoneyboxSaveRes);
     }
 
+    @GetMapping("/transaction/moneybox")
+    public ResponseEntity<List<TransactionMoneyboxFindAllRes>> transactionMoneyboxFindAll(@RequestParam Integer year, @RequestParam Integer month, @AuthenticationPrincipal UsersDetails usersDetails) {
+        List<TransactionMoneyboxFindAllRes> transactionMoneyboxFindAllResList = transactionService.transactionMoneyboxFindAll(year, month, usersDetails.getUsername());
+        return ResponseEntity.ok(transactionMoneyboxFindAllResList);
+    }
+
     @PostMapping("transaction/spend")
     public ResponseEntity<TransactionSpendSaveRes> transactionSpendSave(@RequestBody TransactionSpendSaveReq transactionSpendSaveReq) {
         TransactionSpendSaveRes transactionSpendSaveRes = transactionService.transactionSpendSave(transactionSpendSaveReq);

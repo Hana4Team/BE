@@ -76,18 +76,11 @@ public class TransactionService {
         List<Transaction> senderTransactionList =  transactionRepository.findAllBySenderAccountAndCreatedAtBetween(account, startDateTime, endDateTime);
         List<Transaction> recipientTransactionList =  transactionRepository.findAllByRecipientAccountAndCreatedAtBetween(account, startDateTime, endDateTime);
 
-        List<Transaction> allTransactionList = Stream.concat(senderTransactionList.stream(), recipientTransactionList.stream())
-                .collect(Collectors.toList());
-        Collections.sort(allTransactionList, Comparator.comparing(Transaction::getCreatedAt));
-
-        List<TransactionFindAllRes> transactionFindAllResList = allTransactionList.stream()
-                .map(transaction -> {
-                    boolean isSender = false;
-                    if (transaction.getSenderAccount() != null) {
-                        isSender = accountId.equals(transaction.getSenderAccount().getAccountId());
-                    }
-                    return new TransactionFindAllRes(transaction, isSender);
-                })
+        // 시간순 정렬
+        List<TransactionFindAllRes> transactionFindAllResList = Stream.concat(
+                        senderTransactionList.stream().map(transaction -> new TransactionFindAllRes(transaction, true)),
+                        recipientTransactionList.stream().map(transaction -> new TransactionFindAllRes(transaction, false)))
+                .sorted(Comparator.comparing(TransactionFindAllRes::dateTime))
                 .collect(Collectors.toList());
 
         return transactionFindAllResList;
@@ -131,6 +124,29 @@ public class TransactionService {
 
         Transaction transaction = transactionRepository.save(transactionMoneyboxSaveReq.toEntity(account));
         return new TransactionMoneyboxSaveRes(transaction);
+    }
+
+    @Transactional(readOnly = true)
+    public List<TransactionMoneyboxFindAllRes> transactionMoneyboxFindAll(Integer year, Integer month, String phoneNumber) {
+        Users users = usersRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsersNotFound());
+        Account account = accountRepository.findByUsersAndProductsType(users, ProductsType.MONEYBOX)
+                .orElseThrow(() -> new AccountNotFound());
+
+        LocalDateTime startDateTime = LocalDateTime.of(year, month, 1, 0, 0);
+        LocalDateTime endDateTime = startDateTime.plusMonths(1).minusDays(1).plusHours(23).plusMinutes(59).plusSeconds(59);
+
+        List<Transaction> senderTransactionList =  transactionRepository.findAllBySenderAccountAndCreatedAtBetween(account, startDateTime, endDateTime);
+        List<Transaction> recipientTransactionList =  transactionRepository.findAllByRecipientAccountAndCreatedAtBetween(account, startDateTime, endDateTime);
+
+        // 시간순 정렬
+        List<TransactionMoneyboxFindAllRes> transactionMoneyboxFindAllResList = Stream.concat(
+                        senderTransactionList.stream().map(transaction -> new TransactionMoneyboxFindAllRes(transaction, true)),
+                        recipientTransactionList.stream().map(transaction -> new TransactionMoneyboxFindAllRes(transaction, false)))
+                .sorted(Comparator.comparing(TransactionMoneyboxFindAllRes::dateTime))
+                .collect(Collectors.toList());
+
+        return transactionMoneyboxFindAllResList;
     }
 
     @Transactional
