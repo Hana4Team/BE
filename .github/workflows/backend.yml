@@ -54,4 +54,5 @@ jobs:
           docker rm backend
           docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/ddokddokhana-backend:latest
           docker run -d --name backend -p 8080:8080 ${{ secrets.DOCKER_HUB_USERNAME }}/ddokddokhana-backend:latest
+          docker image prune -f
         EOF
