@@ -155,16 +155,18 @@ public class AccountService {
     }
 
     @Transactional
-    public AccountDepositDeleteRes accountDepositDelete(Long accountId) {
-        Account account = accountRepository.findById(accountId)
+    public AccountDepositDeleteRes accountDepositDelete(AccountDepositsavingDeleteReq accountDepositsavingDeleteReq) {
+        Account withdrawalAccount = accountRepository.findById(accountDepositsavingDeleteReq.withdrawalAccountId())
                 .orElseThrow(() -> new AccountNotFound());
-        Products products = account.getProducts();
+        Account depositAccount = accountRepository.findById(accountDepositsavingDeleteReq.depositAccountId())
+                .orElseThrow(() -> new AccountNotFound());
 
         // 100일적금, 적금, 예금만 해지 가능
+        Products products = withdrawalAccount.getProducts();
         if (products.getType() == ProductsType.DEPOSITWITHDRAWAL || products.getType() == ProductsType.MONEYBOX) {
             throw new AccountDeleteDenied();
         }
-        Depositsaving depositsaving = depositsavingRepository.findByAccount(account)
+        Depositsaving depositsaving = depositsavingRepository.findByAccount(withdrawalAccount)
                 .orElseThrow(() -> new DepositsavingNotFound());
 
         // 이율 수정
@@ -176,26 +178,26 @@ public class AccountService {
         } else if (currentDate.isEqual(endDate) || currentDate.isAfter(endDate)) {  // 만기일 이전 : 만기해지 최고금리
             interest = (products.getInterest2());
         }
-        account.updateInterest(interest);
+        withdrawalAccount.updateInterest(interest);
 
-        // 계좌 간 송금 [예적금계좌 -> 출금계좌]
+        // 계좌 간 송금 [출금계좌 -> 입금계좌]
         transactionService.transactionSave(
                 new TransactionSaveReq(
-                        account.getBalance().intValue(), "예적금해지", "예적금해지", account.getAccountNumber(), depositsaving.getWithdrawalAccount().getAccountNumber()
+                        withdrawalAccount.getBalance().intValue(), "예적금해지", "예적금해지", withdrawalAccount.getAccountNumber(), depositAccount.getAccountNumber()
                 )
         );
 
-        // 이자입금 [ -> 출금계좌]
+        // 이자입금 [ -> 입금계좌]
         transactionService.transactionInterestSave(
                 new TransactionInterestSaveReq(
-                        (int)(account.getBalance() * interest)/100, "예적금이자", depositsaving.getWithdrawalAccount().getAccountNumber()
+                        (int)(withdrawalAccount.getBalance() * interest)/100, "예적금이자", depositAccount.getAccountNumber()
                 )
         );
 
         // 해지
-        account.deleteAccount();
+        withdrawalAccount.deleteAccount();
 
-        return new AccountDepositDeleteRes(account);
+        return new AccountDepositDeleteRes(withdrawalAccount);
     }
 
     @Transactional(readOnly = true)

@@ -157,7 +157,7 @@ public class TransactionService {
                         recipientTransactionList.stream().map(transaction -> new TransactionMoneyboxFindByIdRes(transaction, false)))
                 .sorted(Comparator.comparing(TransactionMoneyboxFindByIdRes::dateTime))
                 .collect(Collectors.toList());
-        
+
         return new TransactionMoneyboxFindAllRes(account, transactionMoneyboxFindByIdResList);
     }
 
