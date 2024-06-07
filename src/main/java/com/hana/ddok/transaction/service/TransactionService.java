@@ -73,7 +73,6 @@ public class TransactionService {
         LocalDateTime startDateTime = LocalDateTime.of(year, month, 1, 0, 0);
         LocalDateTime endDateTime = startDateTime.plusMonths(1).minusDays(1).plusHours(23).plusMinutes(59).plusSeconds(59);
 
-
         List<Transaction> senderTransactionList =  transactionRepository.findAllByTypeInAndSenderAccountAndCreatedAtBetween(typeList, account, startDateTime, endDateTime);
         List<Transaction> recipientTransactionList =  transactionRepository.findAllByTypeInAndRecipientAccountAndCreatedAtBetween(typeList, account, startDateTime, endDateTime);
 
@@ -123,9 +122,7 @@ public class TransactionService {
                 break;
         }
 
-        String title = senderMoneyboxType + "->" + recipientMoneyboxType;
-
-        Transaction transaction = transactionRepository.save(transactionMoneyboxSaveReq.toEntity(account, title));
+        Transaction transaction = transactionRepository.save(transactionMoneyboxSaveReq.toEntity(account));
         return new TransactionMoneyboxSaveRes(transaction);
     }
 
@@ -140,8 +137,19 @@ public class TransactionService {
         LocalDateTime startDateTime = LocalDateTime.of(year, month, 1, 0, 0);
         LocalDateTime endDateTime = startDateTime.plusMonths(1).minusDays(1).plusHours(23).plusMinutes(59).plusSeconds(59);
 
-        List<Transaction> senderTransactionList =  transactionRepository.findAllByTypeInAndSenderAccountAndCreatedAtBetween(typeList, account, startDateTime, endDateTime);
-        List<Transaction> recipientTransactionList =  transactionRepository.findAllByTypeInAndRecipientAccountAndCreatedAtBetween(typeList, account, startDateTime, endDateTime);
+        List<Transaction> senderTransactionList =  transactionRepository.findAllByTypeInAndSenderAccountAndCreatedAtBetweenAndSenderTitleContaining(typeList, account, startDateTime, endDateTime, type+"->");
+        List<Transaction> recipientTransactionList =  transactionRepository.findAllByTypeInAndRecipientAccountAndCreatedAtBetweenAndRecipientTitleContaining(typeList, account, startDateTime, endDateTime, "->"+type);
+
+        // 파킹 :  계좌 간 송금 내역 포함
+        if (type == MoneyboxType.PARKING) {
+            List<TransactionType> parkingTypeList = Arrays.asList(TransactionType.REMITTANCE, TransactionType.SPEND, TransactionType.INTEREST);
+            senderTransactionList.addAll(
+                    transactionRepository.findAllByTypeInAndSenderAccountAndCreatedAtBetween(parkingTypeList, account, startDateTime, endDateTime)
+            );
+            recipientTransactionList.addAll(
+                    transactionRepository.findAllByTypeInAndRecipientAccountAndCreatedAtBetween(parkingTypeList, account, startDateTime, endDateTime)
+            );
+        }
 
         // 시간순 정렬
         List<TransactionMoneyboxFindByIdRes> transactionMoneyboxFindByIdResList = Stream.concat(
@@ -149,7 +157,7 @@ public class TransactionService {
                         recipientTransactionList.stream().map(transaction -> new TransactionMoneyboxFindByIdRes(transaction, false)))
                 .sorted(Comparator.comparing(TransactionMoneyboxFindByIdRes::dateTime))
                 .collect(Collectors.toList());
-
+        
         return new TransactionMoneyboxFindAllRes(account, transactionMoneyboxFindByIdResList);
     }
 
