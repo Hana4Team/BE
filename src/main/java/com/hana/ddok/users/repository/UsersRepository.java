@@ -14,5 +14,5 @@ public interface UsersRepository extends JpaRepository<Users, Long> {
     @Modifying
     @Transactional
     @Query("UPDATE Users u SET u.readNews = false WHERE u.readNews = true")
-    void resetReadNews();
+    void updateReadNews();
 }

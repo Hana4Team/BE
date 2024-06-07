@@ -7,12 +7,14 @@ import com.hana.ddok.common.exception.EntityNotFoundException;
 import com.hana.ddok.common.exception.ValueInvalidException;
 import com.hana.ddok.common.jwt.JWTUtil;
 import com.hana.ddok.home.domain.Home;
+import com.hana.ddok.home.exception.HomeNotFound;
 import com.hana.ddok.home.repository.HomeRepository;
 import com.hana.ddok.products.domain.Products;
 import com.hana.ddok.products.domain.ProductsType;
 import com.hana.ddok.products.exception.ProductsNotFound;
 import com.hana.ddok.products.repository.ProductsRepository;
 import com.hana.ddok.users.domain.Users;
+import com.hana.ddok.users.domain.UsersStepStatus;
 import com.hana.ddok.users.dto.*;
 import com.hana.ddok.users.exception.UsersExistPhoneNumber;
 import com.hana.ddok.users.exception.UsersInvalidPwd;
@@ -152,43 +154,42 @@ public class UsersService {
         return new UsersSavePointRes(curStep, points);
     }
 
-    //null(시작전)
-    //1 : 진행중
-    //2 : 성공
-    //3 : 성공확인
-    //4 : 실패
+    @Transactional
     public UsersMissionRes usersMissionStart(String phoneNumber) {
-        Users user = usersRepository.findByPhoneNumber(phoneNumber)
+        Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
-        user.updateStepStatus(1); //진행중
-        usersRepository.save(user);
-        return new UsersMissionRes(user.getPhoneNumber(), user.getStep(), user.getStepStatus());
+        users.updateStepStatus(UsersStepStatus.PROCEEDING);
+        usersRepository.save(users);
+        return new UsersMissionRes(users);
     }
 
-
+    @Transactional
     public UsersMissionRes usersMove(String phoneNumber) {
-        Users user = usersRepository.findByPhoneNumber(phoneNumber)
+        Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
-        Home home = homeRepository.findById(user.getHome().getHomeId() + 1).orElseThrow(() -> new EntityNotFoundException("집을 찾을 수 없습니다."));
-        user.updateHome(home);
-        user.updateStepStatus(2); //성공
-        usersRepository.save(user);
-        return new UsersMissionRes(user.getPhoneNumber(), user.getStep(), user.getStepStatus());
+        Home home = homeRepository.findById(users.getHome().getHomeId() + 1)
+                .orElseThrow(() -> new HomeNotFound());
+
+        users.updateHome(home);
+        users.updateStepStatus(UsersStepStatus.SUCCESS);
+        usersRepository.save(users);
+        return new UsersMissionRes(users);
     }
 
+    @Transactional
     public UsersMissionRes usersMissionCheck(String phoneNumber) {
-        Users user = usersRepository.findByPhoneNumber(phoneNumber)
+        Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
-        if (user.getStepStatus() == 3) { //실패시
-            if (user.getStep() == 2) {
-                user.updateStepStatus(1);
-            } else user.updateStepStatus(null);
-        } else { //성공시
-            user.updateStep(user.getStep() + 1);
-            user.updateStepStatus(null);
+        if (users.getStepStatus() == UsersStepStatus.FAIL) {
+            if (users.getStep() == 2) {
+                users.updateStepStatus(UsersStepStatus.PROCEEDING);
+            } else users.updateStepStatus(null);
+        } else {
+            users.updateStep(users.getStep() + 1);
+            users.updateStepStatus(null);
         }
-        usersRepository.save(user);
-        return new UsersMissionRes(user.getPhoneNumber(), user.getStep(), user.getStepStatus());
+        usersRepository.save(users);
+        return new UsersMissionRes(users);
     }
 
     public UsersReadNewsRes usersReadNews(String phoneNumber) {

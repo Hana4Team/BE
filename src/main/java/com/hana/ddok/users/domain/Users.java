@@ -37,8 +37,9 @@ public class Users {
     @Column(name = "step", nullable = false)
     private Integer step;
 
+    @Enumerated(EnumType.ORDINAL)
     @Column(name = "step_status")
-    private Integer stepStatus;
+    private UsersStepStatus stepStatus;
 
     @Column(name = "points", nullable = false)
     private Integer points;
@@ -61,7 +62,7 @@ public class Users {
     public void updateStep(Integer step) {
         this.step = step;
     }
-    public void updateStepStatus(Integer stepStatus) {
+    public void updateStepStatus(UsersStepStatus stepStatus) {
         this.stepStatus = stepStatus;
     }
 

@@ -54,7 +54,8 @@ public class Budget {
     @Column(name = "overseas", nullable = false)
     private Integer overseas;
 
-    @OneToOne(mappedBy = "budget", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne
+    @JoinColumn(name = "users_id")
     private Users users;
 
     public void setSum(Integer sum) {

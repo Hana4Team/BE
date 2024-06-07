@@ -207,7 +207,7 @@ public class AccountService {
     }
 
     public AccountPasswordCheckRes accountPasswordCheck(AccountPasswordCheckReq accountPasswordCheckReq) {
-        Account account = accountRepository.findById(accountPasswordCheckReq.accountId())
+        Account account = accountRepository.findByAccountNumber(accountPasswordCheckReq.accountNumber())
                 .orElseThrow(() -> new AccountNotFound());
         String message = Objects.equals(account.getPassword(), accountPasswordCheckReq.password()) ? "match" : "mismatch";
         return new AccountPasswordCheckRes(message);
