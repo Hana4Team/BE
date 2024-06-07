@@ -14,17 +14,17 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/alarm")
+@RequestMapping("api/v1")
 public class AlarmController {
     private final AlarmService alarmService;
 
-    @PostMapping("")
+    @PostMapping("/alarm")
     public ResponseEntity<AlarmSaveRes> alarmSave(@AuthenticationPrincipal UsersDetails usersDetails,
                                                   @RequestBody AlarmSaveReq req) {
         return ResponseEntity.ok(alarmService.alarmSave(usersDetails.getUsername(), req));
     }
 
-    @GetMapping("")
+    @GetMapping("/alarm")
     public ResponseEntity<List<AlarmGetRes>> alarmGet(@AuthenticationPrincipal UsersDetails usersDetails) {
         List<AlarmGetRes> response = alarmService.alarmGet(usersDetails.getUsername());
         return ResponseEntity.ok(response);

@@ -10,12 +10,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/news")
+@RequestMapping("/api/v1")
 public class NewsController {
 
     private final NewsService newsService;
 
-    @GetMapping("")
+    @GetMapping("/news")
     public ResponseEntity<String> searchNews(@RequestParam String query) {
         String response = newsService.searchNews(query);
         return ResponseEntity.ok(response);
