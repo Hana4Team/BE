@@ -27,6 +27,8 @@ import com.hana.ddok.transaction.dto.TransactionMoneyboxSaveReq;
 import com.hana.ddok.transaction.dto.TransactionSaveReq;
 import com.hana.ddok.transaction.service.TransactionService;
 import com.hana.ddok.users.domain.Users;
+import com.hana.ddok.users.dto.UsersMsgCheckReq;
+import com.hana.ddok.users.dto.UsersMsgCheckRes;
 import com.hana.ddok.users.exception.UsersNotFound;
 import com.hana.ddok.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
@@ -202,6 +204,13 @@ public class AccountService {
         withdrawalAccount.deleteAccount();
 
         return new AccountDepositDeleteRes(withdrawalAccount);
+    }
+
+    public AccountPasswordCheckRes accountPasswordCheck(AccountPasswordCheckReq accountPasswordCheckReq) {
+        Account account = accountRepository.findById(accountPasswordCheckReq.accountId())
+                .orElseThrow(() -> new AccountNotFound());
+        String message = Objects.equals(account.getPassword(), accountPasswordCheckReq.password()) ? "match" : "mismatch";
+        return new AccountPasswordCheckRes(message);
     }
 
     @Transactional(readOnly = true)
