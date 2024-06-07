@@ -9,6 +9,7 @@ import java.time.LocalDate;
 public record DepositsavingFindbyTypeRes(
         Long accountId,
         String productName,
+        String accountNumber,
         Long balance,
         Float interest,
         LocalDate startDate,
@@ -21,6 +22,7 @@ public record DepositsavingFindbyTypeRes(
         this(
                 account.getAccountId(),
                 account.getProducts().getName(),
+                account.getAccountNumber(),
                 account.getBalance(),
                 account.getInterest(),
                 account.getCreatedAt().toLocalDate(),
