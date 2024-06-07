@@ -9,6 +9,7 @@ import java.time.LocalDate;
 
 public record AccountDepositsavingSaveReq(
         Integer payment,
+        Integer payDate,
         LocalDate endDate,
         Long productsId,
         Long withdrawalAccountId,
@@ -29,6 +30,7 @@ public record AccountDepositsavingSaveReq(
     public Depositsaving toDepositsaving(Account account, Account withdrawalAccount) {
         return Depositsaving.builder()
                 .payment(payment)
+                .payDate(payDate)
                 .endDate(endDate)
                 .withdrawalAccount(withdrawalAccount)
                 .account(account)

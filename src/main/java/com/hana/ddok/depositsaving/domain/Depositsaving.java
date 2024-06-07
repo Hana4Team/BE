@@ -25,6 +25,9 @@ public class Depositsaving extends BaseEntity {
     @Column(name = "payment")
     private Integer payment;
 
+    @Column(name = "pay_date")
+    private Integer payDate;
+
     @Column(name = "end_date")
     private LocalDate endDate;
 
