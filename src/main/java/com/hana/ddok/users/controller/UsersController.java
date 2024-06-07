@@ -10,65 +10,63 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/users")
+@RequestMapping("/api/v1")
 public class UsersController {
     private final UsersService usersService;
 
-    @PostMapping("/login")
+    @PostMapping("/users/login")
     public ResponseEntity<UsersLoginRes> usersLogin(@RequestBody UsersLoginReq req) {
-        return ResponseEntity.status(200).body(usersService.usersLogin(req));
+        return ResponseEntity.ok(usersService.usersLogin(req));
     }
 
-    @PostMapping("/join")
+    @PostMapping("/users/join")
     public ResponseEntity<UsersJoinRes> usersJoin(@RequestBody UsersJoinReq req) {
         return ResponseEntity.ok(usersService.usersJoin(req));
     }
 
-    @PostMapping("/message")
+    @PostMapping("/users/message")
     public ResponseEntity<UsersMessageRes> usersMessage(@RequestBody UsersMessageReq req) {
         return ResponseEntity.ok(usersService.usersMessage(req));
     }
 
-    @PostMapping("/msgCheck")
+    @PostMapping("/users/msgCheck")
     public ResponseEntity<UsersMsgCheckRes> usersMsgCheck(@RequestBody UsersMsgCheckReq req) {
         return ResponseEntity.ok(usersService.usersMsgCheck(req));
     }
 
-    @GetMapping()
+    @GetMapping("/users")
     public ResponseEntity<UsersGetRes> usersGet(@AuthenticationPrincipal UsersDetails usersDetails) {
         return ResponseEntity.ok(usersService.usersGet(usersDetails.getUsername()));
     }
 
-    @GetMapping("/point")
+    @GetMapping("/users/point")
     public ResponseEntity<UsersGetPointRes> usersGetPoint(@AuthenticationPrincipal UsersDetails usersDetails) {
         return ResponseEntity.ok(usersService.usersGetPoint(usersDetails.getUsername()));
     }
 
-    @PutMapping("/point")
+    @PutMapping("/users/point")
     public ResponseEntity<UsersSavePointRes> usersSavePoint(@AuthenticationPrincipal UsersDetails usersDetails,
                                                            @RequestBody UsersSavePointReq req) {
         return ResponseEntity.ok(usersService.usersSavePoint(usersDetails.getUsername(), req));
     }
 
-    @PutMapping("/start")
+    @PutMapping("/users/start")
     public ResponseEntity<UsersMissionRes> usersMissionStart(@AuthenticationPrincipal UsersDetails usersDetails) {
         return ResponseEntity.ok(usersService.usersMissionStart(usersDetails.getUsername()));
     }
 
-    @PutMapping("/move")
+    @PutMapping("/users/move")
     public ResponseEntity<UsersMissionRes> usersMove(@AuthenticationPrincipal UsersDetails usersDetails) {
         return ResponseEntity.ok(usersService.usersMove(usersDetails.getUsername()));
     }
 
-    @PutMapping("/check")
+    @PutMapping("/users/check")
     public ResponseEntity<UsersMissionRes> usersMissionCheck(@AuthenticationPrincipal UsersDetails usersDetails) {
         return ResponseEntity.ok(usersService.usersMissionCheck(usersDetails.getUsername()));
     }
 
-    @PutMapping("/news")
+    @PutMapping("/users/news")
     public ResponseEntity<UsersReadNewsRes> usersReadNews(@AuthenticationPrincipal UsersDetails usersDetails) {
         return ResponseEntity.ok(usersService.usersReadNews(usersDetails.getUsername()));
     }
-
-
 }
