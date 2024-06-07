@@ -178,8 +178,6 @@ public class TransactionService {
                 Moneybox moneybox = moneyboxRepository.findByAccount(account)
                         .orElseThrow(() -> new MoneyboxNotFound());
                 moneybox.updateExpenseBalance(-amount);
-                // 소비합계 업데이트
-                moneybox.updateExpenseTotal(amount);
                 break;
             default:
                 throw new AccountSpendDenied();
