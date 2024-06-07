@@ -89,10 +89,10 @@ public class AccountService {
             throw new ProductsTypeInvalid();
         }
 
-        // 출금계좌 : 머니박스(저축)만 가능
+        // 출금계좌 : 입출금계좌만 가능
         Account withdrawalAccount = accountRepository.findById(accountSaving100SaveReq.withdrawalAccountId())
                 .orElseThrow(() -> new AccountNotFound());
-        if (withdrawalAccount.getProducts().getType() != ProductsType.MONEYBOX) {
+        if (withdrawalAccount.getProducts().getType() != ProductsType.DEPOSITWITHDRAWAL) {
             throw new AccountWithdrawalDenied();
         }
         // 비밀번호 동일하게 설정
@@ -105,6 +105,7 @@ public class AccountService {
         Moneybox moneybox = moneyboxRepository.findByAccountUsers(users)
                 .orElseThrow(() -> new MoneyboxNotFound());
         Integer initialAmount = moneybox.getSavingBalance().intValue();
+
         // 머니박스 간 송금 [머니박스(저축) -> 머니박스(파킹)]
         String title = MoneyboxType.SAVING + "->" + MoneyboxType.PARKING;
         transactionService.transactionMoneyboxSave(
@@ -112,10 +113,13 @@ public class AccountService {
                         initialAmount, title, title, MoneyboxType.SAVING, MoneyboxType.PARKING
                 ), phoneNumber
         );
+
         // 계좌 간 송금 [머니박스 -> 100일적금]
+        Account moneyboxAccount = accountRepository.findByUsersAndProductsType(users, ProductsType.MONEYBOX)
+                .orElseThrow(() -> new AccountNotFound());
         transactionService.transactionSave(
                 new TransactionSaveReq(
-                        initialAmount, "100일적금가입", "100일적금가입", withdrawalAccount.getAccountNumber(), account.getAccountNumber()
+                        initialAmount, "100일적금가입", "100일적금가입", moneyboxAccount.getAccountNumber(), account.getAccountNumber()
                 )
         );
 
