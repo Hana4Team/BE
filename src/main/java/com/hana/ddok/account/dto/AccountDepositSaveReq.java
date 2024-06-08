@@ -8,12 +8,10 @@ import com.hana.ddok.users.domain.Users;
 import java.time.LocalDate;
 
 public record AccountDepositSaveReq(
-        Integer payment,
-        Integer payDate,
+        Long initialAmount,
         LocalDate endDate,
         Long productsId,
-        Long withdrawalAccountId,
-        Long initialAmount
+        Long withdrawalAccountId
 ) {
     public Account toEntity(Users users, Products products, String accountNumber, String password) {
         return Account.builder()
@@ -29,8 +27,6 @@ public record AccountDepositSaveReq(
 
     public Depositsaving toDepositsaving(Account account, Account withdrawalAccount) {
         return Depositsaving.builder()
-                .payment(payment)
-                .payDate(payDate)
                 .endDate(endDate)
                 .withdrawalAccount(withdrawalAccount)
                 .account(account)
