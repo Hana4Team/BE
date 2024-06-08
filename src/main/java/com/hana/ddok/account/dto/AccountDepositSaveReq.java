@@ -7,7 +7,7 @@ import com.hana.ddok.users.domain.Users;
 
 import java.time.LocalDate;
 
-public record AccountDepositsavingSaveReq(
+public record AccountDepositSaveReq(
         Integer payment,
         Integer payDate,
         LocalDate endDate,

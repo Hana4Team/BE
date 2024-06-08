@@ -7,8 +7,8 @@ import com.hana.ddok.account.exception.AccountNotFound;
 import com.hana.ddok.account.exception.AccountWithdrawalDenied;
 import com.hana.ddok.account.repository.AccountRepository;
 import com.hana.ddok.depositsaving.domain.Depositsaving;
-import com.hana.ddok.account.dto.AccountDepositsavingSaveReq;
-import com.hana.ddok.account.dto.AccountDepositsavingSaveRes;
+import com.hana.ddok.account.dto.AccountDepositSaveReq;
+import com.hana.ddok.account.dto.AccountDepositSaveRes;
 import com.hana.ddok.depositsaving.exception.DepositsavingNotFound;
 import com.hana.ddok.depositsaving.repository.DepositsavingRepository;
 import com.hana.ddok.moneybox.domain.Moneybox;
@@ -27,8 +27,6 @@ import com.hana.ddok.transaction.dto.TransactionMoneyboxSaveReq;
 import com.hana.ddok.transaction.dto.TransactionSaveReq;
 import com.hana.ddok.transaction.service.TransactionService;
 import com.hana.ddok.users.domain.Users;
-import com.hana.ddok.users.dto.UsersMsgCheckReq;
-import com.hana.ddok.users.dto.UsersMsgCheckRes;
 import com.hana.ddok.users.exception.UsersNotFound;
 import com.hana.ddok.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
@@ -161,17 +159,17 @@ public class AccountService {
     }
 
     @Transactional
-    public AccountDepositsavingSaveRes accountDepositsavingSave(AccountDepositsavingSaveReq accountDepositsavingSaveReq, String phoneNumber) {
+    public AccountDepositSaveRes accountDepositSave(AccountDepositSaveReq accountDepositSaveReq, String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
-        Products products = productsRepository.findById(accountDepositsavingSaveReq.productsId())
+        Products products = productsRepository.findById(accountDepositSaveReq.productsId())
                 .orElseThrow(() -> new ProductsNotFound());
-        if (products.getType() != ProductsType.DEPOSIT && products.getType() != ProductsType.SAVING) {
+        if (products.getType() != ProductsType.DEPOSIT) {
             throw new ProductsTypeInvalid();
         }
 
         // 출금계좌 : 입출금계좌만 가능
-        Account withdrawalAccount = accountRepository.findById(accountDepositsavingSaveReq.withdrawalAccountId())
+        Account withdrawalAccount = accountRepository.findById(accountDepositSaveReq.withdrawalAccountId())
                 .orElseThrow(() -> new AccountNotFound());
         if (withdrawalAccount.getProducts().getType() != ProductsType.DEPOSITWITHDRAWAL) {
             throw new AccountWithdrawalDenied();
@@ -179,17 +177,17 @@ public class AccountService {
         // 비밀번호 동일하게 설정
         String password = withdrawalAccount.getPassword();
 
-        Account account = accountRepository.save(accountDepositsavingSaveReq.toEntity(users, products, generateAccountNumber(), password));
-        Depositsaving depositsaving = depositsavingRepository.save(accountDepositsavingSaveReq.toDepositsaving(account, withdrawalAccount));
+        Account account = accountRepository.save(accountDepositSaveReq.toEntity(users, products, generateAccountNumber(), password));
+        Depositsaving depositsaving = depositsavingRepository.save(accountDepositSaveReq.toDepositsaving(account, withdrawalAccount));
 
         // 계좌 간 송금 [입출금계좌 -> 예적금]
         transactionService.transactionSave(
                 new TransactionSaveReq(
-                        accountDepositsavingSaveReq.initialAmount().intValue(), "예적금가입", "예적금가입", withdrawalAccount.getAccountNumber(), account.getAccountNumber()
+                        accountDepositSaveReq.initialAmount().intValue(), "예금가입", "예금가입", withdrawalAccount.getAccountNumber(), account.getAccountNumber()
                 )
         );
 
-        return new AccountDepositsavingSaveRes(depositsaving, account);
+        return new AccountDepositSaveRes(depositsaving, account);
     }
 
     @Transactional

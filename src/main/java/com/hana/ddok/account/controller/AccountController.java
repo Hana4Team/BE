@@ -4,8 +4,8 @@ import com.hana.ddok.account.dto.*;
 import com.hana.ddok.account.service.AccountService;
 import com.hana.ddok.account.dto.AccountMoneyboxSaveReq;
 import com.hana.ddok.account.dto.AccountMoneyboxSaveRes;
-import com.hana.ddok.account.dto.AccountDepositsavingSaveReq;
-import com.hana.ddok.account.dto.AccountDepositsavingSaveRes;
+import com.hana.ddok.account.dto.AccountDepositSaveReq;
+import com.hana.ddok.account.dto.AccountDepositSaveRes;
 import com.hana.ddok.users.domain.UsersDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -44,11 +44,10 @@ public class AccountController {
         return ResponseEntity.ok(accountSavingSaveRes);
     }
 
-    // TODO : 예금
-    @PostMapping("/account/depositsaving")
-    public ResponseEntity<AccountDepositsavingSaveRes> accountDepositsavingSave(@RequestBody AccountDepositsavingSaveReq accountDepositsavingSaveReq, @AuthenticationPrincipal UsersDetails usersDetails) {
-        AccountDepositsavingSaveRes accountDepositsavingSaveRes = accountService.accountDepositsavingSave(accountDepositsavingSaveReq, usersDetails.getUsername());
-        return ResponseEntity.ok(accountDepositsavingSaveRes);
+    @PostMapping("/account/deposit")
+    public ResponseEntity<AccountDepositSaveRes> accountDepositSave(@RequestBody AccountDepositSaveReq accountDepositSaveReq, @AuthenticationPrincipal UsersDetails usersDetails) {
+        AccountDepositSaveRes accountDepositSaveRes = accountService.accountDepositSave(accountDepositSaveReq, usersDetails.getUsername());
+        return ResponseEntity.ok(accountDepositSaveRes);
     }
 
     @DeleteMapping("/account/depositsaving")
