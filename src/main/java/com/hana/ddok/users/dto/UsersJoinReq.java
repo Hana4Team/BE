@@ -4,6 +4,7 @@ import com.hana.ddok.account.domain.Account;
 import com.hana.ddok.home.domain.Home;
 import com.hana.ddok.products.domain.Products;
 import com.hana.ddok.users.domain.Users;
+import com.hana.ddok.users.domain.UsersStepStatus;
 
 
 import java.time.LocalDate;
@@ -17,7 +18,7 @@ public record UsersJoinReq(String name, LocalDate birthDate, String phoneNumber,
                 .phoneNumber(req.phoneNumber)
                 .password(encodedPwd)
                 .step(1)
-                .stepStatus(null)
+                .stepStatus(UsersStepStatus.NOTSTARTED)
                 .points(0)
                 .readNews(false)
                 .home(home)
