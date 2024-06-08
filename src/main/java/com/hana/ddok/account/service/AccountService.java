@@ -4,6 +4,7 @@ import com.hana.ddok.account.domain.Account;
 import com.hana.ddok.account.dto.*;
 import com.hana.ddok.account.exception.AccountDeleteDenied;
 import com.hana.ddok.account.exception.AccountNotFound;
+import com.hana.ddok.account.exception.AccountSaveDenied;
 import com.hana.ddok.account.exception.AccountWithdrawalDenied;
 import com.hana.ddok.account.repository.AccountRepository;
 import com.hana.ddok.depositsaving.domain.Depositsaving;
@@ -73,6 +74,11 @@ public class AccountService {
         if (products.getType() != ProductsType.MONEYBOX) {
             throw new ProductsTypeInvalid();
         }
+        // 머니박스 : 유저 당 1개 가능
+        Optional<Account> accountOptional = accountRepository.findByUsersAndProductsType(users, ProductsType.MONEYBOX);
+        if (accountOptional.isPresent()) {
+            throw new AccountSaveDenied();
+        }
 
         Account account = accountRepository.save(accountMoneyboxSaveReq.toEntity(users, products, generateAccountNumber()));
         Moneybox moneybox = moneyboxRepository.save(accountMoneyboxSaveReq.toMoneybox(account));
@@ -87,6 +93,11 @@ public class AccountService {
                 .orElseThrow(() -> new ProductsNotFound());
         if (products.getType() != ProductsType.SAVING100) {
             throw new ProductsTypeInvalid();
+        }
+        // 100일적금 : 유저 당 1개 가능
+        Optional<Account> accountOptional = accountRepository.findByUsersAndProductsType(users, ProductsType.SAVING100);
+        if (accountOptional.isPresent()) {
+            throw new AccountSaveDenied();
         }
 
         // 출금계좌 : 입출금계좌만 가능
@@ -135,6 +146,11 @@ public class AccountService {
         if (products.getType() != ProductsType.SAVING) {
             throw new ProductsTypeInvalid();
         }
+        // 같은 상품에 여러 번 가입 불가
+        Optional<Account> accountOptional = accountRepository.findByUsersAndProducts(users, products);
+        if (accountOptional.isPresent()) {
+            throw new AccountSaveDenied();
+        }
 
         // 출금계좌 : 입출금계좌만 가능
         Account withdrawalAccount = accountRepository.findById(accountSavingSaveReq.withdrawalAccountId())
@@ -173,6 +189,11 @@ public class AccountService {
                 .orElseThrow(() -> new ProductsNotFound());
         if (products.getType() != ProductsType.DEPOSIT) {
             throw new ProductsTypeInvalid();
+        }
+        // 같은 상품에 여러 번 가입 불가
+        Optional<Account> accountOptional = accountRepository.findByUsersAndProducts(users, products);
+        if (accountOptional.isPresent()) {
+            throw new AccountSaveDenied();
         }
 
         // 출금계좌 : 입출금계좌만 가능
@@ -218,7 +239,7 @@ public class AccountService {
         Float interest = 0f;
         if (currentDate.isBefore(endDate)) {    // 만기일 이전 : 중도해지 최저금리
             interest = products.getInterest1();
-        } else if (currentDate.isEqual(endDate) || currentDate.isAfter(endDate)) {  // 만기일 이전 : 만기해지 최고금리
+        } else if (currentDate.isEqual(endDate) || currentDate.isAfter(endDate)) {  // 만기일 이후 : 만기해지 최고금리
             interest = (products.getInterest2());
         }
         withdrawalAccount.updateInterest(interest);
