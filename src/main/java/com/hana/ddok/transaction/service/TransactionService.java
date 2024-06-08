@@ -62,6 +62,12 @@ public class TransactionService {
             Moneybox moneybox = moneyboxRepository.findByAccount(recipentAccount)
                     .orElseThrow(() -> new MoneyboxNotFound());
             moneybox.updateParkingBalance(amount);
+
+            // 머니박스가 첫 충전일 경우, 2단계 스케줄링 시작
+            Boolean isCharged = transactionRepository.existsByRecipientAccount(recipentAccount);
+            if (isCharged == false) {
+                // TODO : 2단계 스케줄링
+            }
         }
 
         Transaction transaction = transactionRepository.save(transactionSaveReq.toEntity(senderAccount, recipentAccount));
