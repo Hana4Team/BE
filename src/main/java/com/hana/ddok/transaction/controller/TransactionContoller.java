@@ -46,4 +46,10 @@ public class TransactionContoller {
         TransactionSpendSaveRes transactionSpendSaveRes = transactionService.transactionSpendSave(transactionSpendSaveReq);
         return ResponseEntity.ok(transactionSpendSaveRes);
     }
+
+    @GetMapping("/transaction/saving100Check")
+    public ResponseEntity<TransactionSaving100CheckRes> transactionSaving100Check(@AuthenticationPrincipal UsersDetails usersDetails) {
+        TransactionSaving100CheckRes transactionSaving100Check = transactionService.transactionSaving100Check(usersDetails.getUsername());
+        return ResponseEntity.ok(transactionSaving100Check);
+    }
 }

@@ -4,6 +4,9 @@ import com.hana.ddok.account.domain.Account;
 import com.hana.ddok.account.exception.AccountNotFound;
 import com.hana.ddok.account.exception.AccountSpendDenied;
 import com.hana.ddok.account.repository.AccountRepository;
+import com.hana.ddok.depositsaving.domain.Depositsaving;
+import com.hana.ddok.depositsaving.exception.DepositsavingNotFound;
+import com.hana.ddok.depositsaving.repository.DepositsavingRepository;
 import com.hana.ddok.moneybox.domain.Moneybox;
 import com.hana.ddok.moneybox.domain.MoneyboxType;
 import com.hana.ddok.moneybox.exception.MoneyboxNotFound;
@@ -35,6 +38,7 @@ public class TransactionService {
     private final MoneyboxRepository moneyboxRepository;
     private final UsersRepository usersRepository;
     private final SpendRepository spendRepository;
+    private final DepositsavingRepository depositsavingRepository;
 
     @Transactional
     public TransactionSaveRes transactionSave(TransactionSaveReq transactionSaveReq) {
@@ -196,5 +200,21 @@ public class TransactionService {
         recipentAccount.updateBalance(transactionInterestSaveReq.amount().longValue());
         Transaction transaction = transactionRepository.save(transactionInterestSaveReq.toEntity(recipentAccount));
         return new TransactionInterestSaveRes(transaction);
+    }
+
+    @Transactional(readOnly = true)
+    public TransactionSaving100CheckRes transactionSaving100Check(String phoneNumber) {
+        Users users = usersRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsersNotFound());
+        Account account = accountRepository.findByUsersAndProductsType(users, ProductsType.SAVING100)
+                .orElseThrow(() -> new AccountNotFound());
+        Depositsaving depositsaving = depositsavingRepository.findByAccount(account)
+                .orElseThrow(() -> new DepositsavingNotFound());
+
+        // 개설일자 ~ 만기일자자정직전 의 송금 개수 확인
+        LocalDateTime startDateTime = account.getCreatedAt();
+        LocalDateTime endDateTime = depositsaving.getEndDate().atTime(23, 59, 59).minusDays(1);
+        Integer successCount = transactionRepository.countByRecipientAccountAndCreatedAtBetween(account, startDateTime, endDateTime);
+        return new TransactionSaving100CheckRes(successCount);
     }
 }

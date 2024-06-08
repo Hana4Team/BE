@@ -14,5 +14,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     List<Transaction> findAllByTypeInAndRecipientAccountAndCreatedAtBetween(List<TransactionType> typeList, Account account, LocalDateTime startDateTime, LocalDateTime endDateTime);
     List<Transaction> findAllByTypeInAndSenderAccountAndCreatedAtBetweenAndSenderTitleContaining(List<TransactionType> typeList, Account account, LocalDateTime startDateTime, LocalDateTime endDateTime, String title);
     List<Transaction> findAllByTypeInAndRecipientAccountAndCreatedAtBetweenAndRecipientTitleContaining(List<TransactionType> typeList, Account account, LocalDateTime startDateTime, LocalDateTime endDateTime, String title);
+    Integer countByRecipientAccountAndCreatedAtBetween(Account account, LocalDateTime startDateTime, LocalDateTime endDateTime);
     Optional<Transaction> findFirstByRecipientAccountOrderByCreatedAt(Account account);
 }

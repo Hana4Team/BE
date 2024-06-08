@@ -1,10 +1,8 @@
 package com.hana.ddok.transaction.dto;
 
 import com.hana.ddok.account.domain.Account;
-import com.hana.ddok.transaction.domain.Transaction;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public record TransactionFindAllRes(
         String name,
