@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface AccountRepository extends JpaRepository<Account, Long> {
-    List<Account> findAllByUsers(Users users);
-    Optional<Account> findByUsersAndProductsType(Users users, ProductsType type);
-    Optional<Account> findByUsersAndProducts(Users users, Products products);
+    List<Account> findAllByUsersAndIsDeletedFalse(Users users);
     List<Account> findAllByUsersAndProductsTypeIn(Users users, List<ProductsType> typeList);
+    Optional<Account> findByUsersAndProductsTypeAndIsDeletedFalse(Users users, ProductsType type);
+    Optional<Account> findByUsersAndProductsAndIsDeletedFalse(Users users, Products products);
     Optional<Account> findByAccountNumber(String accountNumber);
 }

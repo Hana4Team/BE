@@ -42,6 +42,7 @@ public class SpendService {
                 .orElseThrow(() -> new UsersNotFound());
 
         // 입출금계좌, 머니박스만 소비 존재
+        // 만약 해지된 계좌여도, 소비는 확인해야함 : isDeleted=true/false 모두 포함
         List<Account> spendAccountList = accountRepository.findAllByUsersAndProductsTypeIn(users,
                 List.of(ProductsType.DEPOSITWITHDRAWAL, ProductsType.MONEYBOX)
         );

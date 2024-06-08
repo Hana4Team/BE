@@ -52,7 +52,7 @@ public class AccountService {
     public List<AccountFindAllRes> accountFindAll(AccountFindAllReq accountFindAllReq, String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
-        List<AccountFindAllRes> accountFindAllResList = accountRepository.findAllByUsers(users).stream()
+        List<AccountFindAllRes> accountFindAllResList = accountRepository.findAllByUsersAndIsDeletedFalse(users).stream()
                 .filter(account -> (accountFindAllReq.depositWithdrawalAccount() && account.getProducts().getType().equals(ProductsType.DEPOSITWITHDRAWAL)) ||
                         (accountFindAllReq.moneyboxAccount() && account.getProducts().getType().equals(ProductsType.MONEYBOX)) ||
                         (accountFindAllReq.saving100Account() && account.getProducts().getType().equals(ProductsType.SAVING100)) ||
@@ -75,7 +75,7 @@ public class AccountService {
             throw new ProductsTypeInvalid();
         }
         // 머니박스 : 유저 당 1개 가능
-        Optional<Account> accountOptional = accountRepository.findByUsersAndProductsType(users, ProductsType.MONEYBOX);
+        Optional<Account> accountOptional = accountRepository.findByUsersAndProductsTypeAndIsDeletedFalse(users, ProductsType.MONEYBOX);
         if (accountOptional.isPresent()) {
             throw new AccountSaveDenied();
         }
@@ -95,7 +95,7 @@ public class AccountService {
             throw new ProductsTypeInvalid();
         }
         // 100일적금 : 유저 당 1개 가능
-        Optional<Account> accountOptional = accountRepository.findByUsersAndProductsType(users, ProductsType.SAVING100);
+        Optional<Account> accountOptional = accountRepository.findByUsersAndProductsTypeAndIsDeletedFalse(users, ProductsType.SAVING100);
         if (accountOptional.isPresent()) {
             throw new AccountSaveDenied();
         }
@@ -126,7 +126,7 @@ public class AccountService {
         );
 
         // 계좌 간 송금 [머니박스 -> 100일적금]
-        Account moneyboxAccount = accountRepository.findByUsersAndProductsType(users, ProductsType.MONEYBOX)
+        Account moneyboxAccount = accountRepository.findByUsersAndProductsTypeAndIsDeletedFalse(users, ProductsType.MONEYBOX)
                 .orElseThrow(() -> new AccountNotFound());
         transactionService.transactionSave(
                 new TransactionSaveReq(
@@ -147,7 +147,7 @@ public class AccountService {
             throw new ProductsTypeInvalid();
         }
         // 같은 상품에 여러 번 가입 불가
-        Optional<Account> accountOptional = accountRepository.findByUsersAndProducts(users, products);
+        Optional<Account> accountOptional = accountRepository.findByUsersAndProductsAndIsDeletedFalse(users, products);
         if (accountOptional.isPresent()) {
             throw new AccountSaveDenied();
         }
@@ -184,7 +184,7 @@ public class AccountService {
             throw new ProductsTypeInvalid();
         }
         // 같은 상품에 여러 번 가입 불가
-        Optional<Account> accountOptional = accountRepository.findByUsersAndProducts(users, products);
+        Optional<Account> accountOptional = accountRepository.findByUsersAndProductsAndIsDeletedFalse(users, products);
         if (accountOptional.isPresent()) {
             throw new AccountSaveDenied();
         }

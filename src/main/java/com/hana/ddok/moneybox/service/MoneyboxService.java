@@ -29,7 +29,7 @@ public class MoneyboxService {
     public MoneyboxFindAllRes moneyboxFindAll(String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
-        Account account = accountRepository.findByUsersAndProductsType(users, ProductsType.MONEYBOX)
+        Account account = accountRepository.findByUsersAndProductsTypeAndIsDeletedFalse(users, ProductsType.MONEYBOX)
                 .orElseThrow(() -> new AccountNotFound());
         Moneybox moneybox = moneyboxRepository.findByAccount(account)
                 .orElseThrow(() -> new MoneyboxNotFound());
@@ -40,7 +40,7 @@ public class MoneyboxService {
     public MoneyboxFindBySavingRes moneyboxFindBySavingRes(String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
-        Account account = accountRepository.findByUsersAndProductsType(users, ProductsType.MONEYBOX)
+        Account account = accountRepository.findByUsersAndProductsTypeAndIsDeletedFalse(users, ProductsType.MONEYBOX)
                 .orElseThrow(() -> new AccountNotFound());
         Moneybox moneybox = moneyboxRepository.findByAccount(account)
                 .orElseThrow(() -> new MoneyboxNotFound());

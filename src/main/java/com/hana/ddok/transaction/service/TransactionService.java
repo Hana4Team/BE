@@ -94,7 +94,7 @@ public class TransactionService {
     public TransactionMoneyboxSaveRes transactionMoneyboxSave(TransactionMoneyboxSaveReq transactionMoneyboxSaveReq, String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
-        Account account = accountRepository.findByUsersAndProductsType(users, ProductsType.MONEYBOX)
+        Account account = accountRepository.findByUsersAndProductsTypeAndIsDeletedFalse(users, ProductsType.MONEYBOX)
                 .orElseThrow(() -> new AccountNotFound());
 
         Moneybox moneybox = moneyboxRepository.findByAccount(account)
@@ -134,7 +134,7 @@ public class TransactionService {
     public TransactionMoneyboxFindAllRes transactionMoneyboxFindAll(MoneyboxType type, Integer year, Integer month, String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
-        Account account = accountRepository.findByUsersAndProductsType(users, ProductsType.MONEYBOX)
+        Account account = accountRepository.findByUsersAndProductsTypeAndIsDeletedFalse(users, ProductsType.MONEYBOX)
                 .orElseThrow(() -> new AccountNotFound());
 
         List<TransactionType> typeList = Collections.singletonList(TransactionType.MONEYBOX);
@@ -206,7 +206,7 @@ public class TransactionService {
     public TransactionSaving100CheckRes transactionSaving100Check(String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
-        Account account = accountRepository.findByUsersAndProductsType(users, ProductsType.SAVING100)
+        Account account = accountRepository.findByUsersAndProductsTypeAndIsDeletedFalse(users, ProductsType.SAVING100)
                 .orElseThrow(() -> new AccountNotFound());
         Depositsaving depositsaving = depositsavingRepository.findByAccount(account)
                 .orElseThrow(() -> new DepositsavingNotFound());
