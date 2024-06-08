@@ -51,7 +51,7 @@ public class DepositsavingService {
             case SAVING:
                 Period period = Period.between(account.getCreatedAt().toLocalDate(), depositsaving.getEndDate());
                 Integer monthPeriod = period.getYears() * 12 + period.getMonths();
-                targetAmount = payment.longValue() * monthPeriod;
+                targetAmount = payment.longValue() * (monthPeriod - 1) + initialAmount;
                 break;
             case DEPOSIT:
                 targetAmount = initialAmount;
