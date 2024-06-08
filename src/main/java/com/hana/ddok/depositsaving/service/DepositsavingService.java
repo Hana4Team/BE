@@ -34,7 +34,7 @@ public class DepositsavingService {
     public DepositsavingFindbyTypeRes depositsavingFindByType(ProductsType type, String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
-        Account account = accountRepository.findByUsersAndProductsType(users, type)
+        Account account = accountRepository.findByUsersAndProductsTypeAndIsDeletedFalse(users, type)
                         .orElseThrow(() -> new AccountNotFound());
         Depositsaving depositsaving = depositsavingRepository.findByAccount(account)
                 .orElseThrow(() -> new DepositsavingNotFound());
