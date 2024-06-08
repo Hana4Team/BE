@@ -8,6 +8,7 @@ import com.hana.ddok.users.domain.Users;
 import java.time.LocalDate;
 
 public record AccountSavingSaveReq(
+        Long initialAmount,
         Integer payment,
         Integer payDate,
         LocalDate endDate,
