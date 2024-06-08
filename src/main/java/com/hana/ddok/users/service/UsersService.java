@@ -116,9 +116,9 @@ public class UsersService {
     }
 
     public UsersGetRes usersGet(String phoneNumber) {
-        Users user = usersRepository.findByPhoneNumber(phoneNumber)
+        Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
-        return new UsersGetRes(user.getName(), user.getPhoneNumber(), user.getStep(), user.getStepStatus());
+        return new UsersGetRes(users);
     }
 
     public UsersGetPointRes usersGetPoint(String phoneNumber) {

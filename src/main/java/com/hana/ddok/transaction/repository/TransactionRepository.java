@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
+    Boolean existsByRecipientAccount(Account account);
     List<Transaction> findAllByTypeInAndSenderAccountAndCreatedAtBetween(List<TransactionType> typeList, Account account, LocalDateTime startDateTime, LocalDateTime endDateTime);
     List<Transaction> findAllByTypeInAndRecipientAccountAndCreatedAtBetween(List<TransactionType> typeList, Account account, LocalDateTime startDateTime, LocalDateTime endDateTime);
     List<Transaction> findAllByTypeInAndSenderAccountAndCreatedAtBetweenAndSenderTitleContaining(List<TransactionType> typeList, Account account, LocalDateTime startDateTime, LocalDateTime endDateTime, String title);
