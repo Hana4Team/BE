@@ -25,7 +25,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -214,13 +216,14 @@ public class TransactionService {
                 .orElseThrow(() -> new UsersNotFound());
         Account account = accountRepository.findByUsersAndProductsTypeAndIsDeletedFalse(users, ProductsType.SAVING100)
                 .orElseThrow(() -> new AccountNotFound());
-        Depositsaving depositsaving = depositsavingRepository.findByAccount(account)
-                .orElseThrow(() -> new DepositsavingNotFound());
 
-        // 개설일자 ~ 만기일자자정직전 의 송금 개수 확인
         LocalDateTime startDateTime = account.getCreatedAt();
-        LocalDateTime endDateTime = depositsaving.getEndDate().atTime(23, 59, 59).minusDays(1);
-        Integer successCount = transactionRepository.countByRecipientAccountAndCreatedAtBetween(account, startDateTime, endDateTime);
-        return new TransactionSaving100CheckRes(successCount);
+        // 성공일수 : 개설일자 ~ 현재 의 송금 개수 확인
+        Integer successCount = transactionRepository.countByRecipientAccountAndCreatedAtBetween(account, startDateTime, LocalDateTime.now());
+        // 실패일수 : 개설일자 ~ 현재 의 송금 없는 개수 확인
+        Period period = Period.between(startDateTime.toLocalDate(), LocalDate.now());
+        Integer failCount = period.getDays() + 1 - successCount;    // 시작일이 1일차
+
+        return new TransactionSaving100CheckRes(successCount, failCount);
     }
 }

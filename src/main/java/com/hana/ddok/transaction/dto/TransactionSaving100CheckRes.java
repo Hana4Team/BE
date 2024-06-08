@@ -8,10 +8,4 @@ public record TransactionSaving100CheckRes(
         Integer successCount,
         Integer failCount
 ) {
-    public TransactionSaving100CheckRes(Integer successCount) {
-        this(
-                successCount,
-                100 - successCount
-        );
-    }
 }
