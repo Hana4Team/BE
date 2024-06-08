@@ -191,10 +191,10 @@ public class AccountService {
     }
 
     @Transactional
-    public AccountDepositDeleteRes accountDepositDelete(AccountDepositsavingDeleteReq accountDepositsavingDeleteReq) {
-        Account withdrawalAccount = accountRepository.findById(accountDepositsavingDeleteReq.withdrawalAccountId())
+    public AccountDeleteRes accountDelete(AccountDeleteReq accountDeleteReq) {
+        Account withdrawalAccount = accountRepository.findById(accountDeleteReq.deleteAccountId())
                 .orElseThrow(() -> new AccountNotFound());
-        Account depositAccount = accountRepository.findById(accountDepositsavingDeleteReq.depositAccountId())
+        Account depositAccount = accountRepository.findById(accountDeleteReq.depositAccountId())
                 .orElseThrow(() -> new AccountNotFound());
 
         // 100일적금, 적금, 예금만 해지 가능
@@ -232,8 +232,7 @@ public class AccountService {
 
         // 해지
         withdrawalAccount.deleteAccount();
-
-        return new AccountDepositDeleteRes(withdrawalAccount);
+        return new AccountDeleteRes("success");
     }
 
     public AccountPasswordCheckRes accountPasswordCheck(AccountPasswordCheckReq accountPasswordCheckReq) {
