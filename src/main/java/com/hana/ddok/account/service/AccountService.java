@@ -192,7 +192,7 @@ public class AccountService {
 
     @Transactional
     public AccountDeleteRes accountDelete(AccountDeleteReq accountDeleteReq) {
-        Account withdrawalAccount = accountRepository.findById(accountDeleteReq.withdrawalAccountId())
+        Account withdrawalAccount = accountRepository.findById(accountDeleteReq.deleteAccountId())
                 .orElseThrow(() -> new AccountNotFound());
         Account depositAccount = accountRepository.findById(accountDeleteReq.depositAccountId())
                 .orElseThrow(() -> new AccountNotFound());
@@ -232,8 +232,7 @@ public class AccountService {
 
         // 해지
         withdrawalAccount.deleteAccount();
-
-        return new AccountDeleteRes(withdrawalAccount);
+        return new AccountDeleteRes("success");
     }
 
     public AccountPasswordCheckRes accountPasswordCheck(AccountPasswordCheckReq accountPasswordCheckReq) {

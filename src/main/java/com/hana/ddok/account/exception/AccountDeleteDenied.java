@@ -4,6 +4,6 @@ import com.hana.ddok.common.exception.AccessDeniedException;
 
 public class AccountDeleteDenied extends AccessDeniedException {
     public AccountDeleteDenied() {
-        super("계좌를 해지할 수 없습니다.");
+        super("해당 상품의 계좌는 해지할 수 없습니다.");
     }
 }
