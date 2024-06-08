@@ -171,13 +171,6 @@ public class AccountService {
                 )
         );
 
-        // 계좌 간 송금 [출금계좌 -> 적금]
-        transactionService.transactionSave(
-                new TransactionSaveReq(
-                        accountSavingSaveReq.payment(), "적금1회차납입", "적금1회차납입", withdrawalAccount.getAccountNumber(), account.getAccountNumber()
-                )
-        );
-
         return new AccountSavingSaveRes(depositsaving, account);
     }
 
