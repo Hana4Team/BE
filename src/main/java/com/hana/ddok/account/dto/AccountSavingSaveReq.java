@@ -12,8 +12,7 @@ public record AccountSavingSaveReq(
         Integer payDate,
         LocalDate endDate,
         Long productsId,
-        Long withdrawalAccountId,
-        Long initialAmount
+        Long withdrawalAccountId
 ) {
     public Account toEntity(Users users, Products products, String accountNumber, String password) {
         return Account.builder()
