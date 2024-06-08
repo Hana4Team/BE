@@ -50,10 +50,10 @@ public class AccountController {
         return ResponseEntity.ok(accountDepositSaveRes);
     }
 
-    @DeleteMapping("/account/depositsaving")
-    public ResponseEntity<AccountDepositDeleteRes> accountDepositDelete(@RequestBody AccountDepositsavingDeleteReq accountDepositsavingDeleteReq) {
-        AccountDepositDeleteRes accountDepositDeleteRes = accountService.accountDepositDelete(accountDepositsavingDeleteReq);
-        return ResponseEntity.ok(accountDepositDeleteRes);
+    @DeleteMapping("/account")
+    public ResponseEntity<AccountDeleteRes> accountDelete(@RequestBody AccountDeleteReq accountDeleteReq) {
+        AccountDeleteRes accountDeleteRes = accountService.accountDelete(accountDeleteReq);
+        return ResponseEntity.ok(accountDeleteRes);
     }
 
     @PostMapping("/account/password")
