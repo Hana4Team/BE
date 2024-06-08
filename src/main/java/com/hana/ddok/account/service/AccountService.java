@@ -148,7 +148,14 @@ public class AccountService {
         Account account = accountRepository.save(accountSavingSaveReq.toEntity(users, products, generateAccountNumber(), password));
         Depositsaving depositsaving = depositsavingRepository.save(accountSavingSaveReq.toDepositsaving(account, withdrawalAccount));
 
-        // 계좌 간 송금 [출금계좌 -> 예적금]
+        // 계좌 간 송금 [출금계좌 -> 적금]
+        transactionService.transactionSave(
+                new TransactionSaveReq(
+                        accountSavingSaveReq.initialAmount().intValue(), "적금가입", "적금가입", withdrawalAccount.getAccountNumber(), account.getAccountNumber()
+                )
+        );
+
+        // 계좌 간 송금 [출금계좌 -> 적금]
         transactionService.transactionSave(
                 new TransactionSaveReq(
                         accountSavingSaveReq.payment(), "적금1회차납입", "적금1회차납입", withdrawalAccount.getAccountNumber(), account.getAccountNumber()
@@ -180,7 +187,7 @@ public class AccountService {
         Account account = accountRepository.save(accountDepositSaveReq.toEntity(users, products, generateAccountNumber(), password));
         Depositsaving depositsaving = depositsavingRepository.save(accountDepositSaveReq.toDepositsaving(account, withdrawalAccount));
 
-        // 계좌 간 송금 [입출금계좌 -> 예적금]
+        // 계좌 간 송금 [입출금계좌 -> 예금]
         transactionService.transactionSave(
                 new TransactionSaveReq(
                         accountDepositSaveReq.initialAmount().intValue(), "예금가입", "예금가입", withdrawalAccount.getAccountNumber(), account.getAccountNumber()
