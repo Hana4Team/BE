@@ -38,6 +38,13 @@ public class AccountController {
         return ResponseEntity.ok(accountSaving100SaveRes);
     }
 
+    @PostMapping("/account/saving")
+    public ResponseEntity<AccountSavingSaveRes> accountSavingSave(@RequestBody AccountSavingSaveReq accountSavingSaveReq, @AuthenticationPrincipal UsersDetails usersDetails) {
+        AccountSavingSaveRes accountSavingSaveRes = accountService.accountSavingSave(accountSavingSaveReq, usersDetails.getUsername());
+        return ResponseEntity.ok(accountSavingSaveRes);
+    }
+
+    // TODO : 예금
     @PostMapping("/account/depositsaving")
     public ResponseEntity<AccountDepositsavingSaveRes> accountDepositsavingSave(@RequestBody AccountDepositsavingSaveReq accountDepositsavingSaveReq, @AuthenticationPrincipal UsersDetails usersDetails) {
         AccountDepositsavingSaveRes accountDepositsavingSaveRes = accountService.accountDepositsavingSave(accountDepositsavingSaveReq, usersDetails.getUsername());

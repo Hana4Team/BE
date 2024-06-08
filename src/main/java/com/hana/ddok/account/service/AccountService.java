@@ -129,6 +129,31 @@ public class AccountService {
     }
 
     @Transactional
+    public AccountSavingSaveRes accountSavingSave(AccountSavingSaveReq accountSavingSaveReq, String phoneNumber) {
+        Users users = usersRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsersNotFound());
+        Products products = productsRepository.findById(accountSavingSaveReq.productsId())
+                .orElseThrow(() -> new ProductsNotFound());
+        if (products.getType() != ProductsType.SAVING) {
+            throw new ProductsTypeInvalid();
+        }
+
+        // 출금계좌 : 입출금계좌만 가능
+        Account withdrawalAccount = accountRepository.findById(accountSavingSaveReq.withdrawalAccountId())
+                .orElseThrow(() -> new AccountNotFound());
+        if (withdrawalAccount.getProducts().getType() != ProductsType.DEPOSITWITHDRAWAL) {
+            throw new AccountWithdrawalDenied();
+        }
+        // 비밀번호 동일하게 설정
+        String password = withdrawalAccount.getPassword();
+
+        Account account = accountRepository.save(accountSavingSaveReq.toEntity(users, products, generateAccountNumber(), password));
+        Depositsaving depositsaving = depositsavingRepository.save(accountSavingSaveReq.toDepositsaving(account, withdrawalAccount));
+
+        return new AccountSavingSaveRes(depositsaving, account);
+    }
+
+    @Transactional
     public AccountDepositsavingSaveRes accountDepositsavingSave(AccountDepositsavingSaveReq accountDepositsavingSaveReq, String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
