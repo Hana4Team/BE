@@ -54,17 +54,17 @@ public class UsersService {
     private String from;
 
     public UsersLoginRes usersLogin(UsersLoginReq req) {
-        Users user = usersRepository.findByPhoneNumber(req.phoneNumber())
+        Users users = usersRepository.findByPhoneNumber(req.phoneNumber())
                 .orElseThrow(() -> new UsersNotFound());
         String targetPwd = req.password();
-        String originPwd = user.getPassword();
+        String originPwd = users.getPassword();
 
         if (!bCryptPasswordEncoder.matches(targetPwd, originPwd)) {
             throw new UsersInvalidPwd();
         }
 
-        String token = jwtUtil.createJwt(user.getPhoneNumber(), expiredTime);
-        return new UsersLoginRes(true, user.getName(), user.getPhoneNumber(), user.getStep(), user.getStepStatus(), token);
+        String token = jwtUtil.createJwt(users.getPhoneNumber(), expiredTime);
+        return new UsersLoginRes(true, users, token);
     }
 
     @Transactional
