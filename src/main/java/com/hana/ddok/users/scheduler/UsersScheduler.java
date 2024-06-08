@@ -10,9 +10,10 @@ import org.springframework.stereotype.Component;
 public class UsersScheduler {
     private final UsersRepository usersRepository;
 
+//    @Scheduled(cron = "0 * * * * ?") // test용 1분
+
     // 매일 자정에 실행
-    // @Scheduled(cron = "0 0 0 * * ?")
-    @Scheduled(cron = "0 * * * * ?") // test용 1분
+    @Scheduled(cron = "0 0 0 * * ?")
     public void updateReadNews() {
         usersRepository.updateReadNews();
     }
