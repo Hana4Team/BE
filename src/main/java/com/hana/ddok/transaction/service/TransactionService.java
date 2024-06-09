@@ -40,7 +40,6 @@ public class TransactionService {
     private final MoneyboxRepository moneyboxRepository;
     private final UsersRepository usersRepository;
     private final SpendRepository spendRepository;
-    private final DepositsavingRepository depositsavingRepository;
 
     @Transactional
     public TransactionSaveRes transactionSave(TransactionSaveReq transactionSaveReq) {
@@ -222,7 +221,8 @@ public class TransactionService {
         Integer successCount = transactionRepository.countByRecipientAccountAndCreatedAtBetween(account, startDateTime, LocalDateTime.now());
         // 실패일수 : 개설일자 ~ 현재 의 송금 없는 개수 확인
         Period period = Period.between(startDateTime.toLocalDate(), LocalDate.now());
-        Integer failCount = period.getDays() + 1 - successCount;    // 시작일이 1일차
+        Integer days = period.getYears() * 365 + period.getMonths() * 30 + period.getDays();
+        Integer failCount = days + 1 - successCount;    // 시작일이 1일차
 
         return new TransactionSaving100CheckRes(successCount, failCount);
     }

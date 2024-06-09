@@ -46,7 +46,7 @@ public class DepositsavingService {
         Long targetAmount = 0L;
         switch (type) {
             case SAVING100:
-                targetAmount = initialAmount + payment * 100;
+                targetAmount = initialAmount + payment * 99;
                 break;
             case SAVING:
                 Period period = Period.between(account.getCreatedAt().toLocalDate(), depositsaving.getEndDate());
