@@ -173,12 +173,14 @@ public class TransactionService {
     }
 
     @Transactional
-    public TransactionSpendSaveRes transactionSpendSave(TransactionSpendSaveReq transactionSpendSaveReq) {
-        Account account = accountRepository.findByAccountNumber(transactionSpendSaveReq.senderAccount())
+    public TransactionSpendSaveRes transactionSpendSave(TransactionSpendSaveReq transactionSpendSaveReq, String phoneNumber) {
+        Users users = usersRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsersNotFound());
+        ProductsType type = transactionSpendSaveReq.senderAccountType();
+        Account account = accountRepository.findByUsersAndProductsTypeAndIsDeletedFalse(users, transactionSpendSaveReq.senderAccountType())
                 .orElseThrow(() -> new AccountNotFound());
 
         Long amount = transactionSpendSaveReq.amount().longValue();
-        ProductsType type = account.getProducts().getType();
         switch (type) {
             case DEPOSITWITHDRAWAL:
                 account.updateBalance(-amount);
