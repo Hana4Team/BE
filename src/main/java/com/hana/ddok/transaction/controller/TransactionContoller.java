@@ -3,6 +3,7 @@ package com.hana.ddok.transaction.controller;
 import com.hana.ddok.moneybox.domain.MoneyboxType;
 import com.hana.ddok.transaction.dto.*;
 import com.hana.ddok.transaction.service.TransactionService;
+import com.hana.ddok.users.domain.Users;
 import com.hana.ddok.users.domain.UsersDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -42,8 +43,8 @@ public class TransactionContoller {
     }
 
     @PostMapping("/transaction/spend")
-    public ResponseEntity<TransactionSpendSaveRes> transactionSpendSave(@RequestBody TransactionSpendSaveReq transactionSpendSaveReq) {
-        TransactionSpendSaveRes transactionSpendSaveRes = transactionService.transactionSpendSave(transactionSpendSaveReq);
+    public ResponseEntity<TransactionSpendSaveRes> transactionSpendSave(@RequestBody TransactionSpendSaveReq transactionSpendSaveReq, @AuthenticationPrincipal UsersDetails usersDetails) {
+        TransactionSpendSaveRes transactionSpendSaveRes = transactionService.transactionSpendSave(transactionSpendSaveReq, usersDetails.getUsername());
         return ResponseEntity.ok(transactionSpendSaveRes);
     }
 
