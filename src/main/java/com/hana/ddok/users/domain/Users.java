@@ -1,5 +1,6 @@
 package com.hana.ddok.users.domain;
 import com.hana.ddok.budget.domain.Budget;
+import com.hana.ddok.budget.exception.BudgetNotFound;
 import com.hana.ddok.common.exception.EntityNotFoundException;
 import com.hana.ddok.common.exception.ValueInvalidException;
 import com.hana.ddok.home.domain.Home;
@@ -79,5 +80,12 @@ public class Users {
             throw new HomeNotFound();
         }
         this.home = home;
+    }
+
+    public void updateBudget(Budget budget) {
+        if (budget == null) {
+            throw new BudgetNotFound();
+        }
+        this.budget = budget;
     }
 }

@@ -58,6 +58,7 @@ public class BudgetService {
                     .overseas(0L)
                     .build();
             budgetRepository.save(budget);
+            users.updateBudget(budget);
             usersService.usersMove(users.getPhoneNumber());
         } else {
             budget.updateSum(budgetSumUpdateReq.sum());
@@ -89,7 +90,6 @@ public class BudgetService {
 
         budget = Budget.builder()
                 .budgetId(budget.getBudgetId())
-                .sum(budget.getSum())
                 .shopping(budgetByCategoryUpdateReq.shopping())
                 .food(budgetByCategoryUpdateReq.food())
                 .traffic(budgetByCategoryUpdateReq.traffic())
@@ -102,6 +102,7 @@ public class BudgetService {
                 .overseas(budgetByCategoryUpdateReq.overseas())
                 .build();
         budgetRepository.save(budget);
+        users.updateBudget(budget);
 
         return new BudgetByCategoryUpdateRes(budget);
     }
