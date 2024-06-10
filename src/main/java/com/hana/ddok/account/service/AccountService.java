@@ -122,7 +122,7 @@ public class AccountService {
         // 초기자본 : 머니박스(저축)
         Moneybox moneybox = moneyboxRepository.findByAccountUsers(users)
                 .orElseThrow(() -> new MoneyboxNotFound());
-        Integer initialAmount = moneybox.getSavingBalance().intValue();
+        Long initialAmount = moneybox.getSavingBalance();
 
         // 머니박스 간 송금 [머니박스(저축) -> 머니박스(파킹)]
         String title = MoneyboxType.SAVING + "->" + MoneyboxType.PARKING;
@@ -140,6 +140,8 @@ public class AccountService {
                         initialAmount, "100일적금가입", "100일적금가입", moneyboxAccount.getAccountNumber(), account.getAccountNumber()
                 )
         );
+
+        // TODO : 3단계 스케줄러 시작
 
         return new AccountSaving100SaveRes(depositsaving, account);
     }
@@ -174,9 +176,13 @@ public class AccountService {
         // 계좌 간 송금 [출금계좌 -> 적금]
         transactionService.transactionSave(
                 new TransactionSaveReq(
-                        accountSavingSaveReq.initialAmount().intValue(), "적금가입", "적금가입", withdrawalAccount.getAccountNumber(), account.getAccountNumber()
+                        accountSavingSaveReq.initialAmount(), "적금가입", "적금가입", withdrawalAccount.getAccountNumber(), account.getAccountNumber()
                 )
         );
+
+        if (users.getStep() == 4 && users.getStepStatus() == UsersStepStatus.NOTSTARTED) {
+            // TODO : 4단계 스케줄링 시작
+        }
 
         return new AccountSavingSaveRes(depositsaving, account);
     }
@@ -211,9 +217,13 @@ public class AccountService {
         // 계좌 간 송금 [입출금계좌 -> 예금]
         transactionService.transactionSave(
                 new TransactionSaveReq(
-                        accountDepositSaveReq.initialAmount().intValue(), "예금가입", "예금가입", withdrawalAccount.getAccountNumber(), account.getAccountNumber()
+                        accountDepositSaveReq.initialAmount(), "예금가입", "예금가입", withdrawalAccount.getAccountNumber(), account.getAccountNumber()
                 )
         );
+
+        if (users.getStep() == 5 && users.getStepStatus() == UsersStepStatus.NOTSTARTED) {
+            // TODO : 5단계 스케줄링 시작
+        }
 
         return new AccountDepositSaveRes(depositsaving, account);
     }
@@ -247,14 +257,14 @@ public class AccountService {
         // 계좌 간 송금 [출금계좌 -> 입금계좌]
         transactionService.transactionSave(
                 new TransactionSaveReq(
-                        withdrawalAccount.getBalance().intValue(), "예적금해지", "예적금해지", withdrawalAccount.getAccountNumber(), depositAccount.getAccountNumber()
+                        withdrawalAccount.getBalance(), "예적금해지", "예적금해지", withdrawalAccount.getAccountNumber(), depositAccount.getAccountNumber()
                 )
         );
 
         // 이자입금 [ -> 입금계좌]
         transactionService.transactionInterestSave(
                 new TransactionInterestSaveReq(
-                        (int)(withdrawalAccount.getBalance() * interest)/100, "예적금이자", depositAccount.getAccountNumber()
+                        (long)(withdrawalAccount.getBalance() * interest)/100, "예적금이자", depositAccount.getAccountNumber()
                 )
         );
 

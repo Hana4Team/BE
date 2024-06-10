@@ -46,16 +46,16 @@ public class BudgetService {
             isInitialUpdate = true;
             budget = Budget.builder()
                     .sum(budgetSumUpdateReq.sum())
-                    .shopping(0)
-                    .food(0)
-                    .traffic(0)
-                    .hospital(0)
-                    .fee(0)
-                    .education(0)
-                    .leisure(0)
-                    .society(0)
-                    .daily(0)
-                    .overseas(0)
+                    .shopping(0L)
+                    .food(0L)
+                    .traffic(0L)
+                    .hospital(0L)
+                    .fee(0L)
+                    .education(0L)
+                    .leisure(0L)
+                    .society(0L)
+                    .daily(0L)
+                    .overseas(0L)
                     .build();
             budgetRepository.save(budget);
             usersService.usersMove(users.getPhoneNumber());

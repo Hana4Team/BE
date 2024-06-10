@@ -3,6 +3,6 @@ package com.hana.ddok.spend.dto;
 import java.util.List;
 
 public record SpendFindAllRes(
-        Integer sum,
+        Long sum,
         List<SpendFindByTypeRes> spendFindByTypeResList
 ) { }

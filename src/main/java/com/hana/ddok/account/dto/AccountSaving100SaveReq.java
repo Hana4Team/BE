@@ -9,7 +9,7 @@ import com.hana.ddok.users.domain.Users;
 import java.time.LocalDate;
 
 public record AccountSaving100SaveReq(
-        Integer payment,
+        Long payment,
         LocalDate endDate,
         Long productsId,
         Long withdrawalAccountId

@@ -26,7 +26,6 @@ public record AccountMoneyboxSaveReq(
                 .parkingBalance(0L)
                 .expenseBalance(0L)
                 .savingBalance(0L)
-                .isCharged(false)
                 .account(account)
                 .build();
     }

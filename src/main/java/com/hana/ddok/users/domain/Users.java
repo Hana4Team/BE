@@ -39,7 +39,7 @@ public class Users {
     private Integer step;
 
     @Enumerated(EnumType.ORDINAL)
-    @Column(name = "step_status")
+    @Column(name = "step_status", nullable = false)
     private UsersStepStatus stepStatus;
 
     @Column(name = "points", nullable = false)

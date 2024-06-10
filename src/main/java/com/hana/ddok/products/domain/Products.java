@@ -42,10 +42,10 @@ public class Products extends BaseEntity {
     private String period;
 
     @Column(name = "payment1")
-    private Integer payment1;
+    private Long payment1;
 
     @Column(name = "payment2")
-    private Integer payment2;
+    private Long payment2;
 
     @Column(name = "desc1")
     private String desc1;

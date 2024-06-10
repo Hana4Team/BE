@@ -9,7 +9,7 @@ import java.time.LocalDate;
 
 public record AccountSavingSaveReq(
         Long initialAmount,
-        Integer payment,
+        Long payment,
         Integer payDate,
         LocalDate endDate,
         Long productsId,
