@@ -15,58 +15,69 @@ public class UsersController {
     private final UsersService usersService;
 
     @PostMapping("/users/login")
-    public ResponseEntity<UsersLoginRes> usersLogin(@RequestBody UsersLoginReq req) {
-        return ResponseEntity.ok(usersService.usersLogin(req));
+    public ResponseEntity<UsersLoginRes> usersLogin(@RequestBody UsersLoginReq usersLoginReq) {
+        UsersLoginRes usersLoginRes = usersService.usersLogin(usersLoginReq);
+        return ResponseEntity.ok(usersLoginRes);
     }
 
     @PostMapping("/users/join")
-    public ResponseEntity<UsersJoinRes> usersJoin(@RequestBody UsersJoinReq req) {
-        return ResponseEntity.ok(usersService.usersJoin(req));
+    public ResponseEntity<UsersJoinRes> usersJoin(@RequestBody UsersJoinReq usersJoinReq) {
+        UsersJoinRes usersJoinRes = usersService.usersJoin(usersJoinReq);
+        return ResponseEntity.ok(usersJoinRes);
     }
 
     @PostMapping("/users/message")
-    public ResponseEntity<UsersMessageRes> usersMessage(@RequestBody UsersMessageReq req) {
-        return ResponseEntity.ok(usersService.usersMessage(req));
+    public ResponseEntity<UsersMessageRes> usersMessage(@RequestBody UsersMessageReq usersMessageReq) {
+        UsersMessageRes usersMessageRes = usersService.usersMessage(usersMessageReq);
+        return ResponseEntity.ok(usersMessageRes);
     }
 
     @PostMapping("/users/msgCheck")
-    public ResponseEntity<UsersMsgCheckRes> usersMsgCheck(@RequestBody UsersMsgCheckReq req) {
-        return ResponseEntity.ok(usersService.usersMsgCheck(req));
+    public ResponseEntity<UsersMsgCheckRes> usersMsgCheck(@RequestBody UsersMsgCheckReq usersMsgCheckReq) {
+        UsersMsgCheckRes usersMsgCheckRes = usersService.usersMsgCheck(usersMsgCheckReq);
+        return ResponseEntity.ok(usersMsgCheckRes);
     }
 
     @GetMapping("/users")
     public ResponseEntity<UsersGetRes> usersGet(@AuthenticationPrincipal UsersDetails usersDetails) {
-        return ResponseEntity.ok(usersService.usersGet(usersDetails.getUsername()));
+        UsersGetRes usersGetRes = usersService.usersGet(usersDetails.getUsername());
+        return ResponseEntity.ok(usersGetRes);
     }
 
     @GetMapping("/users/point")
     public ResponseEntity<UsersGetPointRes> usersGetPoint(@AuthenticationPrincipal UsersDetails usersDetails) {
-        return ResponseEntity.ok(usersService.usersGetPoint(usersDetails.getUsername()));
+        UsersGetPointRes usersGetPointRes = usersService.usersGetPoint(usersDetails.getUsername());
+        return ResponseEntity.ok(usersGetPointRes);
     }
 
     @PutMapping("/users/point")
     public ResponseEntity<UsersSavePointRes> usersSavePoint(@AuthenticationPrincipal UsersDetails usersDetails,
-                                                           @RequestBody UsersSavePointReq req) {
-        return ResponseEntity.ok(usersService.usersSavePoint(usersDetails.getUsername(), req));
+                                                           @RequestBody UsersSavePointReq usersSavePointReq) {
+        UsersSavePointRes usersSavePointRes = usersService.usersSavePoint(usersDetails.getUsername(), usersSavePointReq);
+        return ResponseEntity.ok(usersSavePointRes);
     }
 
     @PutMapping("/users/start")
     public ResponseEntity<UsersMissionRes> usersMissionStart(@AuthenticationPrincipal UsersDetails usersDetails) {
-        return ResponseEntity.ok(usersService.usersMissionStart(usersDetails.getUsername()));
-    }
-
-    @PutMapping("/users/move")
-    public ResponseEntity<UsersMissionRes> usersMove(@AuthenticationPrincipal UsersDetails usersDetails) {
-        return ResponseEntity.ok(usersService.usersMove(usersDetails.getUsername()));
+        UsersMissionRes usersMissionRes = usersService.usersMissionStart(usersDetails.getUsername());
+        return ResponseEntity.ok(usersMissionRes);
     }
 
     @PutMapping("/users/check")
     public ResponseEntity<UsersMissionRes> usersMissionCheck(@AuthenticationPrincipal UsersDetails usersDetails) {
-        return ResponseEntity.ok(usersService.usersMissionCheck(usersDetails.getUsername()));
+        UsersMissionRes usersMissionRes = usersService.usersMissionCheck(usersDetails.getUsername());
+        return ResponseEntity.ok(usersMissionRes);
     }
 
     @PutMapping("/users/news")
     public ResponseEntity<UsersReadNewsRes> usersReadNews(@AuthenticationPrincipal UsersDetails usersDetails) {
-        return ResponseEntity.ok(usersService.usersReadNews(usersDetails.getUsername()));
+        UsersReadNewsRes usersReadNewsRes = usersService.usersReadNews(usersDetails.getUsername());
+        return ResponseEntity.ok(usersReadNewsRes);
+    }
+
+    // TODO : 컨트롤러 제외
+    @PutMapping("/users/move")
+    public ResponseEntity<UsersMissionRes> usersMove(@AuthenticationPrincipal UsersDetails usersDetails) {
+        return ResponseEntity.ok(usersService.usersMove(usersDetails.getUsername()));
     }
 }

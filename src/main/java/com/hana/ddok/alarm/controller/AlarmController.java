@@ -20,13 +20,14 @@ public class AlarmController {
 
     @PostMapping("/alarm")
     public ResponseEntity<AlarmSaveRes> alarmSave(@AuthenticationPrincipal UsersDetails usersDetails,
-                                                  @RequestBody AlarmSaveReq req) {
-        return ResponseEntity.ok(alarmService.alarmSave(usersDetails.getUsername(), req));
+                                                  @RequestBody AlarmSaveReq alarmSaveReq) {
+        AlarmSaveRes alarmSaveRes = alarmService.alarmSave(usersDetails.getUsername(), alarmSaveReq);
+        return ResponseEntity.ok(alarmSaveRes);
     }
 
     @GetMapping("/alarm")
     public ResponseEntity<List<AlarmGetRes>> alarmGet(@AuthenticationPrincipal UsersDetails usersDetails) {
-        List<AlarmGetRes> response = alarmService.alarmGet(usersDetails.getUsername());
-        return ResponseEntity.ok(response);
+        List<AlarmGetRes> alarmGetResList = alarmService.alarmGet(usersDetails.getUsername());
+        return ResponseEntity.ok(alarmGetResList);
     }
 }
