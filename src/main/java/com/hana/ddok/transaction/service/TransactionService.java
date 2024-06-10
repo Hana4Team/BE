@@ -152,9 +152,6 @@ public class TransactionService {
         return new TransactionWasteGetRes(wasteIndex, wasteType);
     }
 
-
-
-
     private void updateMoneyboxParkingBalance(Account account, Long amount) {
         if (account.getProducts().getType() == ProductsType.MONEYBOX) {
             Moneybox moneybox = moneyboxRepository.findByAccount(account)
