@@ -240,7 +240,7 @@ public class AccountService {
         if (currentDate.isBefore(endDate)) {    // 만기일 이전 : 중도해지 최저금리
             interest = products.getInterest1();
         } else if (currentDate.isEqual(endDate) || currentDate.isAfter(endDate)) {  // 만기일 이후 : 만기해지 최고금리
-            interest = (products.getInterest2());
+            interest = (products.getInterest1());
         }
         withdrawalAccount.updateInterest(interest);
 
@@ -304,7 +304,7 @@ public class AccountService {
         Account account = Account.builder()
                 .accountNumber(generateAccountNumber())
                 .balance(10000000L)
-                .interest(products.getInterest2())
+                .interest(products.getInterest1())
                 .password(password)
                 .isDeleted(false)
                 .users(users)

@@ -19,7 +19,7 @@ public record AccountSavingSaveReq(
         return Account.builder()
                 .accountNumber(accountNumber)
                 .balance(0L)
-                .interest(products.getInterest2())
+                .interest(products.getInterest1())
                 .password(password)
                 .isDeleted(false)
                 .users(users)
