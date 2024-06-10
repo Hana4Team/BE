@@ -1,17 +1,11 @@
 package com.hana.ddok.users.service;
 
-import com.hana.ddok.account.domain.Account;
 import com.hana.ddok.account.repository.AccountRepository;
 import com.hana.ddok.account.service.AccountService;
-import com.hana.ddok.common.exception.EntityNotFoundException;
-import com.hana.ddok.common.exception.ValueInvalidException;
 import com.hana.ddok.common.jwt.JWTUtil;
 import com.hana.ddok.home.domain.Home;
 import com.hana.ddok.home.exception.HomeNotFound;
 import com.hana.ddok.home.repository.HomeRepository;
-import com.hana.ddok.products.domain.Products;
-import com.hana.ddok.products.domain.ProductsType;
-import com.hana.ddok.products.exception.ProductsNotFound;
 import com.hana.ddok.products.repository.ProductsRepository;
 import com.hana.ddok.transaction.service.TransactionService;
 import com.hana.ddok.users.domain.Users;
@@ -24,16 +18,12 @@ import com.hana.ddok.users.exception.UsersReadNewsUpdateDenied;
 import com.hana.ddok.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import net.nurigo.sdk.message.model.Message;
-import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
-import net.nurigo.sdk.message.response.SingleMessageSentResponse;
 import net.nurigo.sdk.message.service.DefaultMessageService;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
@@ -43,11 +33,8 @@ import java.util.Random;
 public class UsersService {
     private final UsersRepository usersRepository;
     private final HomeRepository homeRepository;
-    private final AccountRepository accountRepository;
-    private final ProductsRepository productsRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JWTUtil jwtUtil;
-    private final DefaultMessageService messageService;
     private final AccountService accountService;
     private final TransactionService transactionService;
 
@@ -167,10 +154,10 @@ public class UsersService {
         if (users.getStepStatus() == UsersStepStatus.FAIL) {
             if (users.getStep() == 2) {
                 users.updateStepStatus(UsersStepStatus.PROCEEDING);
-            } else users.updateStepStatus(null);
+            } else users.updateStepStatus(UsersStepStatus.NOTSTARTED);
         } else {
             users.updateStep(users.getStep() + 1);
-            users.updateStepStatus(null);
+            users.updateStepStatus(UsersStepStatus.NOTSTARTED);
         }
         usersRepository.save(users);
         return new UsersMissionRes(users);
