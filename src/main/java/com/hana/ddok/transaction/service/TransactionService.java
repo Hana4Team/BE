@@ -83,33 +83,77 @@ public class TransactionService {
                             double wasteIndex = (salary - savingBalance) / (double) salary;
                             if (wasteIndex >= 1.0) {
                                 // 심각한 과소비
-                                System.out.println(wasteIndex);
                             } else if (wasteIndex >= 0.7) {
                                 // 과소비
-                                System.out.println(wasteIndex);
                             } else if (wasteIndex > 0.5) {
                                 // 적정 소비
-                                System.out.println(wasteIndex);
                                 recipientAccount.updateInterest(recipientAccount.getProducts().getInterest2());
                             } else if (wasteIndex <= 0.5) {
                                 // 알뜰 소비
-                                System.out.println(wasteIndex);
                                 recipientAccount.updateInterest(recipientAccount.getProducts().getInterest2());
                             }
-
                             users.updateStepStatus(UsersStepStatus.SUCCESS);
-
 //                        }, 30L * 24 * 60 * 60 * 1000
                         },  60L * 3000
                 );
-
             }
-
         }
+        // Account 객체 저장
+        accountRepository.save(senderAccount);
+        accountRepository.save(recipientAccount);
+
+        // Users 객체 저장
+        usersRepository.save(users);
 
         Transaction transaction = transactionRepository.save(transactionSaveReq.toEntity(senderAccount, recipientAccount));
         return new TransactionSaveRes(transaction);
     }
+
+
+    public TransactionWasteGetRes getWaste(String phoneNumber) {
+        Optional<Users> usersOptional = usersRepository.findByPhoneNumber(phoneNumber);
+        if (!usersOptional.isPresent()) {
+            throw new UsersNotFound();
+        }
+        Users users = usersOptional.get();
+
+        Optional<Account> accountOptional = accountRepository.findByUsersAndProductsTypeAndIsDeletedFalse(users, ProductsType.MONEYBOX);
+        if (!accountOptional.isPresent()) {
+            throw new AccountNotFound();
+        }
+        Account account = accountOptional.get();
+
+        Optional<Transaction> firstTransactionOptional = transactionRepository.findFirstByRecipientAccountOrderByCreatedAt(account);
+        if (!firstTransactionOptional.isPresent()) {
+            throw new TransactionNotFound();
+        }
+        Transaction firstTransaction = firstTransactionOptional.get();
+        Long salary = firstTransaction.getAmount();
+
+        Optional<Moneybox> moneyboxOptional = moneyboxRepository.findByAccount(account);
+        if (!moneyboxOptional.isPresent()) {
+            throw new MoneyboxNotFound();
+        }
+        Moneybox moneybox = moneyboxOptional.get();
+        Long savingBalance = moneybox.getSavingBalance();
+
+        double wasteIndex = (salary - savingBalance) / (double) salary;
+
+        String wasteType;
+        if (wasteIndex >= 1.0) {
+            wasteType = "심각한 과소비";
+        } else if (wasteIndex >= 0.7) {
+            wasteType = "과소비";
+        } else if (wasteIndex > 0.5) {
+            wasteType = "적정 소비";
+        } else {
+            wasteType = "알뜰 소비";
+        }
+
+        return new TransactionWasteGetRes(wasteIndex, wasteType);
+    }
+
+
 
 
     private void updateMoneyboxParkingBalance(Account account, Long amount) {

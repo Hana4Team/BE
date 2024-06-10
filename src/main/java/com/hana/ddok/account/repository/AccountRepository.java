@@ -6,6 +6,7 @@ import com.hana.ddok.products.domain.ProductsType;
 import com.hana.ddok.users.domain.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,4 +16,5 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     Optional<Account> findByUsersAndProductsTypeAndIsDeletedFalse(Users users, ProductsType type);
     Optional<Account> findByUsersAndProductsAndIsDeletedFalse(Users users, Products products);
     Optional<Account> findByAccountNumber(String accountNumber);
+
 }

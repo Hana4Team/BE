@@ -50,4 +50,10 @@ public class TransactionContoller {
         TransactionSaving100CheckRes transactionSaving100Check = transactionService.transactionSaving100Check(usersDetails.getUsername());
         return ResponseEntity.ok(transactionSaving100Check);
     }
+
+    @GetMapping("/transaction/waste")
+    public ResponseEntity<TransactionWasteGetRes> transactionWasteGet(@AuthenticationPrincipal UsersDetails usersDetails) {
+        TransactionWasteGetRes transactionWasteGetRes = transactionService.getWaste(usersDetails.getUsername());
+        return ResponseEntity.ok(transactionWasteGetRes);
+    }
 }
