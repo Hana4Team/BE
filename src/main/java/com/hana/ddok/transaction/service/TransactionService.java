@@ -20,6 +20,7 @@ import com.hana.ddok.transaction.domain.Transaction;
 import com.hana.ddok.transaction.domain.TransactionType;
 import com.hana.ddok.transaction.dto.*;
 import com.hana.ddok.transaction.exception.TransactionAccessDenied;
+import com.hana.ddok.transaction.exception.TransactionAmountInvalid;
 import com.hana.ddok.transaction.repository.TransactionRepository;
 import com.hana.ddok.users.domain.Users;
 import com.hana.ddok.users.exception.UsersNotFound;
@@ -52,6 +53,9 @@ public class TransactionService {
                 .orElseThrow(() -> new AccountNotFound());
 
         Long amount = transactionSaveReq.amount();
+        if (amount <= 0) {
+            throw new TransactionAmountInvalid();
+        }
 
         senderAccount.updateBalance(-amount);
         recipentAccount.updateBalance(amount);
@@ -115,6 +119,10 @@ public class TransactionService {
                 .orElseThrow(() -> new MoneyboxNotFound());
 
         Long amount = transactionMoneyboxSaveReq.amount();
+        if (amount <= 0) {
+            throw new TransactionAmountInvalid();
+        }
+
         MoneyboxType senderMoneyboxType = transactionMoneyboxSaveReq.senderMoneybox();
         switch (senderMoneyboxType) {
             case PARKING:
@@ -196,6 +204,10 @@ public class TransactionService {
                 .orElseThrow(() -> new AccountNotFound());
 
         Long amount = transactionSpendSaveReq.amount();
+        if (amount <= 0) {
+            throw new TransactionAmountInvalid();
+        }
+
         switch (type) {
             case DEPOSITWITHDRAWAL:
                 account.updateBalance(-amount);
@@ -221,7 +233,12 @@ public class TransactionService {
         Account recipentAccount = accountRepository.findByAccountNumber(transactionInterestSaveReq.recipientAccount())
                 .orElseThrow(() -> new AccountNotFound());
 
-        recipentAccount.updateBalance(transactionInterestSaveReq.amount());
+        Long amount = transactionInterestSaveReq.amount();
+        if (amount <= 0) {
+            throw new TransactionAmountInvalid();
+        }
+
+        recipentAccount.updateBalance(amount);
         Transaction transaction = transactionRepository.save(transactionInterestSaveReq.toEntity(recipentAccount));
         return new TransactionInterestSaveRes(transaction);
     }
