@@ -4,15 +4,11 @@ import com.hana.ddok.account.domain.Account;
 import com.hana.ddok.account.exception.AccountNotFound;
 import com.hana.ddok.account.exception.AccountSpendDenied;
 import com.hana.ddok.account.repository.AccountRepository;
-import com.hana.ddok.budget.domain.Budget;
-import com.hana.ddok.budget.repository.BudgetRepository;
 import com.hana.ddok.moneybox.domain.Moneybox;
 import com.hana.ddok.moneybox.domain.MoneyboxType;
 import com.hana.ddok.moneybox.exception.MoneyboxNotFound;
 import com.hana.ddok.moneybox.repository.MoneyboxRepository;
-import com.hana.ddok.products.domain.Products;
 import com.hana.ddok.products.domain.ProductsType;
-import com.hana.ddok.products.exception.ProductsNotFound;
 import com.hana.ddok.spend.domain.Spend;
 import com.hana.ddok.spend.domain.SpendType;
 import com.hana.ddok.spend.repository.SpendRepository;
@@ -20,6 +16,7 @@ import com.hana.ddok.transaction.domain.Transaction;
 import com.hana.ddok.transaction.domain.TransactionType;
 import com.hana.ddok.transaction.dto.*;
 import com.hana.ddok.transaction.exception.TransactionAccessDenied;
+import com.hana.ddok.transaction.exception.TransactionAmountInvalid;
 import com.hana.ddok.transaction.exception.TransactionNotFound;
 import com.hana.ddok.transaction.repository.TransactionRepository;
 import com.hana.ddok.users.domain.Users;
@@ -53,6 +50,9 @@ public class TransactionService {
                 .orElseThrow(() -> new AccountNotFound());
 
         Long amount = transactionSaveReq.amount();
+        if (amount <= 0) {
+            throw new TransactionAmountInvalid();
+        }
 
         senderAccount.updateBalance(-amount);
         recipientAccount.updateBalance(amount);
@@ -67,7 +67,7 @@ public class TransactionService {
             if (isFirstCharge) {
                 Transaction firstTransaction = transactionRepository.findFirstByRecipientAccountOrderByCreatedAt(recipientAccount)
                         .orElseThrow(() -> new TransactionNotFound());
-                int salary = firstTransaction.getAmount();
+                Long salary = firstTransaction.getAmount();
                 Moneybox moneybox = moneyboxRepository.findByAccount(recipientAccount)
                         .orElseThrow(() -> new MoneyboxNotFound());
                 Long savingBalance = moneybox.getSavingBalance();
@@ -140,6 +140,10 @@ public class TransactionService {
                 .orElseThrow(() -> new MoneyboxNotFound());
 
         Long amount = transactionMoneyboxSaveReq.amount();
+        if (amount <= 0) {
+            throw new TransactionAmountInvalid();
+        }
+
         MoneyboxType senderMoneyboxType = transactionMoneyboxSaveReq.senderMoneybox();
         switch (senderMoneyboxType) {
             case PARKING:
@@ -221,6 +225,10 @@ public class TransactionService {
                 .orElseThrow(() -> new AccountNotFound());
 
         Long amount = transactionSpendSaveReq.amount();
+        if (amount <= 0) {
+            throw new TransactionAmountInvalid();
+        }
+
         switch (type) {
             case DEPOSITWITHDRAWAL:
                 account.updateBalance(-amount);
@@ -246,7 +254,12 @@ public class TransactionService {
         Account recipentAccount = accountRepository.findByAccountNumber(transactionInterestSaveReq.recipientAccount())
                 .orElseThrow(() -> new AccountNotFound());
 
-        recipentAccount.updateBalance(transactionInterestSaveReq.amount());
+        Long amount = transactionInterestSaveReq.amount();
+        if (amount <= 0) {
+            throw new TransactionAmountInvalid();
+        }
+
+        recipentAccount.updateBalance(amount);
         Transaction transaction = transactionRepository.save(transactionInterestSaveReq.toEntity(recipentAccount));
         return new TransactionInterestSaveRes(transaction);
     }
