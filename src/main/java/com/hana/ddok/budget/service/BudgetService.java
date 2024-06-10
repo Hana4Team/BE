@@ -104,6 +104,7 @@ public class BudgetService {
         }
 
         budget = Budget.builder()
+                .sum(budget.getSum())
                 .budgetId(budget.getBudgetId())
                 .shopping(budgetByCategoryUpdateReq.shopping())
                 .food(budgetByCategoryUpdateReq.food())
