@@ -22,6 +22,7 @@ import com.hana.ddok.transaction.dto.*;
 import com.hana.ddok.transaction.exception.TransactionAccessDenied;
 import com.hana.ddok.transaction.exception.TransactionNotFound;
 import com.hana.ddok.transaction.repository.TransactionRepository;
+import com.hana.ddok.transaction.scheduler.TransactionStep2SchedulerService;
 import com.hana.ddok.users.domain.Users;
 import com.hana.ddok.users.exception.UsersNotFound;
 import com.hana.ddok.users.repository.UsersRepository;
@@ -44,7 +45,7 @@ public class TransactionService {
     private final MoneyboxRepository moneyboxRepository;
     private final UsersRepository usersRepository;
     private final SpendRepository spendRepository;
-
+    private final TransactionStep2SchedulerService step2SchedulerService;
     @Transactional
     public TransactionSaveRes transactionSave(TransactionSaveReq transactionSaveReq) {
         Account senderAccount = accountRepository.findByAccountNumber(transactionSaveReq.senderAccount())
@@ -61,34 +62,43 @@ public class TransactionService {
         updateMoneyboxParkingBalance(senderAccount, -amount);
         updateMoneyboxParkingBalance(recipientAccount, amount);
 
-        // 머니박스가 첫 충전일 경우, 과소비 지수 계산 및 2단계 스케줄링 시작
-        if (recipientAccount.getProducts().getType() == ProductsType.MONEYBOX) {
-            boolean isFirstCharge = !transactionRepository.existsByRecipientAccount(recipientAccount);
-            if (isFirstCharge) {
-                Transaction firstTransaction = transactionRepository.findFirstByRecipientAccountOrderByCreatedAt(recipientAccount)
-                        .orElseThrow(() -> new TransactionNotFound());
-                int salary = firstTransaction.getAmount();
-                Moneybox moneybox = moneyboxRepository.findByAccount(recipientAccount)
-                        .orElseThrow(() -> new MoneyboxNotFound());
-                Long savingBalance = moneybox.getSavingBalance();
-                double wasteIndex = (salary - savingBalance) / (double) salary;
-                if (wasteIndex >= 1.0) {
-                    // 심각한 과소비
-                    // 2단계 스케줄링 시작
-                } else if (wasteIndex >= 0.7 && wasteIndex < 1.0) {
-                    // 과소비
-                    // 2단계 스케줄링 시작
-                } else if (wasteIndex >= 0.6 && wasteIndex < 0.7) {
-                    // 적정 소비
-                    // 2단계 스케줄링 시작
-                    recipientAccount.updateInterest(recipientAccount.getProducts().getInterest2());
-                } else if (wasteIndex < 0.5) {
-                    // 알뜰 소비
-                    // 2단계 스케줄링 시작
-                    recipientAccount.updateInterest(recipientAccount.getProducts().getInterest2());
-                }
-            }
-        }
+       Users users = recipientAccount.getUsers();
+
+//        // 머니박스가 첫 충전일 경우, 과소비 지수 계산 및 2단계 스케줄링 시작
+//        if (recipientAccount.getProducts().getType() == ProductsType.MONEYBOX) {
+//            boolean isFirstCharge = !transactionRepository.existsByRecipientAccount(recipientAccount);
+//            if (isFirstCharge) {
+//
+//                step2SchedulerService.scheduleTaskForUser(users.getUsersId(),
+//                        () -> {
+//                            Transaction firstTransaction = transactionRepository.findFirstByRecipientAccountOrderByCreatedAt(recipientAccount)
+//                                    .orElseThrow(() -> new TransactionNotFound());
+//                            Long salary = firstTransaction.getAmount();
+//                            Moneybox moneybox = moneyboxRepository.findByAccount(recipientAccount)
+//                                    .orElseThrow(() -> new MoneyboxNotFound());
+//                            Long savingBalance = moneybox.getSavingBalance();
+//                            double wasteIndex = (salary - savingBalance) / (double) salary;
+//                            if (wasteIndex >= 1.0) {
+//                                // 심각한 과소비
+//                                // 2단계 스케줄링 시작
+//                            } else if (wasteIndex >= 0.7 && wasteIndex < 1.0) {
+//                                // 과소비
+//                                // 2단계 스케줄링 시작
+//                            } else if (wasteIndex >= 0.6 && wasteIndex < 0.7) {
+//                                // 적정 소비
+//                                // 2단계 스케줄링 시작
+//                                recipientAccount.updateInterest(recipientAccount.getProducts().getInterest2());
+//                            } else if (wasteIndex < 0.5) {
+//                                // 알뜰 소비
+//                                // 2단계 스케줄링 시작
+//                                recipientAccount.updateInterest(recipientAccount.getProducts().getInterest2());
+//                            }
+//                        }, 30 * 24 * 60 * 60 * 1000
+//                );
+//
+//            }
+
+//        }
 
         Transaction transaction = transactionRepository.save(transactionSaveReq.toEntity(senderAccount, recipientAccount));
         return new TransactionSaveRes(transaction);
