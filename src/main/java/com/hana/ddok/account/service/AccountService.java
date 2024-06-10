@@ -151,6 +151,8 @@ public class AccountService {
                 ), phoneNumber
         );
 
+        System.out.println("머박백일");
+
         // 계좌 간 송금 [머니박스 -> 100일적금]
         Account moneyboxAccount = accountRepository.findByUsersAndProductsTypeAndIsDeletedFalse(users, ProductsType.MONEYBOX)
                 .orElseThrow(() -> new AccountNotFound());
@@ -319,17 +321,17 @@ public class AccountService {
 
     @Transactional
     public AccountDeleteRes accountDelete(AccountDeleteReq accountDeleteReq) {
-        Account withdrawalAccount = accountRepository.findById(accountDeleteReq.deleteAccountId())
+        Account deleteAccount = accountRepository.findById(accountDeleteReq.deleteAccountId())
                 .orElseThrow(() -> new AccountNotFound());
         Account depositAccount = accountRepository.findById(accountDeleteReq.depositAccountId())
                 .orElseThrow(() -> new AccountNotFound());
 
         // 100일적금, 적금, 예금만 해지 가능
-        Products products = withdrawalAccount.getProducts();
+        Products products = deleteAccount.getProducts();
         if (products.getType() == ProductsType.DEPOSITWITHDRAWAL || products.getType() == ProductsType.MONEYBOX) {
             throw new AccountDeleteDenied();
         }
-        Depositsaving depositsaving = depositsavingRepository.findByAccount(withdrawalAccount)
+        Depositsaving depositsaving = depositsavingRepository.findByAccount(deleteAccount)
                 .orElseThrow(() -> new DepositsavingNotFound());
 
         // 이율 수정
@@ -341,24 +343,24 @@ public class AccountService {
         } else if (currentDate.isEqual(endDate) || currentDate.isAfter(endDate)) {  // 만기일 이후 : 만기해지 최고금리
             interest = (products.getInterest1());
         }
-        withdrawalAccount.updateInterest(interest);
-
-        // 계좌 간 송금 [출금계좌 -> 입금계좌]
-        transactionService.transactionSave(
-                new TransactionSaveReq(
-                        withdrawalAccount.getBalance(), "예적금해지", "예적금해지", withdrawalAccount.getAccountNumber(), depositAccount.getAccountNumber()
-                )
-        );
+        deleteAccount.updateInterest(interest);
 
         // 이자입금 [ -> 입금계좌]
         transactionService.transactionInterestSave(
                 new TransactionInterestSaveReq(
-                        (long)(withdrawalAccount.getBalance() * interest)/100, "예적금이자", depositAccount.getAccountNumber()
+                        (long) (deleteAccount.getBalance() * interest / 100), "예적금이자", depositAccount.getAccountNumber()
+                )
+        );
+
+        // 계좌 간 송금 [출금계좌 -> 입금계좌]
+        transactionService.transactionSave(
+                new TransactionSaveReq(
+                        deleteAccount.getBalance(), "예적금해지", "예적금해지", deleteAccount.getAccountNumber(), depositAccount.getAccountNumber()
                 )
         );
 
         // 해지
-        withdrawalAccount.deleteAccount();
+        deleteAccount.deleteAccount();
         return new AccountDeleteRes("success");
     }
 
