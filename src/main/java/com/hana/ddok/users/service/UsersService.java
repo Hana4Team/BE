@@ -18,6 +18,8 @@ import com.hana.ddok.users.exception.UsersReadNewsUpdateDenied;
 import com.hana.ddok.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import net.nurigo.sdk.message.model.Message;
+import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
+import net.nurigo.sdk.message.response.SingleMessageSentResponse;
 import net.nurigo.sdk.message.service.DefaultMessageService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -37,6 +39,7 @@ public class UsersService {
     private final JWTUtil jwtUtil;
     private final AccountService accountService;
     private final TransactionService transactionService;
+    private final DefaultMessageService messageService;
 
     @Value("${jwt.expired.time}")
     private Long expiredTime;
@@ -88,6 +91,7 @@ public class UsersService {
         message.setFrom(from);
         message.setTo(req.phoneNumber());
         message.setText("인증번호: " + code);
+        SingleMessageSentResponse response = this.messageService.sendOne(new SingleMessageSendingRequest(message));
 
         return new UsersMessageRes(code);
     }
