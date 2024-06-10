@@ -17,7 +17,6 @@ import com.hana.ddok.transaction.domain.TransactionType;
 import com.hana.ddok.transaction.dto.*;
 import com.hana.ddok.transaction.exception.TransactionAccessDenied;
 import com.hana.ddok.transaction.exception.TransactionAmountInvalid;
-import com.hana.ddok.transaction.exception.TransactionNotFound;
 import com.hana.ddok.transaction.repository.TransactionRepository;
 import com.hana.ddok.transaction.scheduler.TransactionStep2SchedulerService;
 import com.hana.ddok.users.domain.Users;
@@ -42,7 +41,6 @@ public class TransactionService {
     private final MoneyboxRepository moneyboxRepository;
     private final UsersRepository usersRepository;
     private final SpendRepository spendRepository;
-    private final TransactionStep2SchedulerService step2SchedulerService;
     @Transactional
     public TransactionSaveRes transactionSave(TransactionSaveReq transactionSaveReq) {
         Account senderAccount = accountRepository.findByAccountNumber(transactionSaveReq.senderAccount())

@@ -4,8 +4,13 @@ import com.hana.ddok.budget.domain.Budget;
 import com.hana.ddok.budget.dto.*;
 import com.hana.ddok.budget.exception.BudgetNotFound;
 import com.hana.ddok.budget.repository.BudgetRepository;
+import com.hana.ddok.home.domain.Home;
+import com.hana.ddok.home.exception.HomeNotFound;
+import com.hana.ddok.home.repository.HomeRepository;
 import com.hana.ddok.users.domain.Users;
+import com.hana.ddok.users.domain.UsersStepStatus;
 import com.hana.ddok.users.exception.UsersNotFound;
+import com.hana.ddok.users.exception.UsersStepDenied;
 import com.hana.ddok.users.repository.UsersRepository;
 import com.hana.ddok.users.service.UsersService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +23,7 @@ public class BudgetService {
     private final BudgetRepository budgetRepository;
     private final UsersRepository usersRepository;
     private final UsersService usersService;
+    private final HomeRepository homeRepository;
 
     @Transactional(readOnly = true)
     public BudgetSumFindRes budgetSumFind(String phoneNumber) {
@@ -42,6 +48,12 @@ public class BudgetService {
 
         if (budget == null) {
             isInitialUpdate = true;
+
+            // 1단계 시작 확인
+            if (users.getStep() == 1 && users.getStepStatus() != UsersStepStatus.PROCEEDING) {
+                throw new UsersStepDenied();
+            }
+
             budget = Budget.builder()
                     .sum(budgetSumUpdateReq.sum())
                     .shopping(0L)
@@ -57,7 +69,12 @@ public class BudgetService {
                     .build();
             budgetRepository.save(budget);
             users.updateBudget(budget);
-            usersService.usersMove(users.getPhoneNumber());
+
+            // 1단계 성공 처리
+            Home home = homeRepository.findById(users.getHome().getHomeId() + 1)
+                    .orElseThrow(() -> new HomeNotFound());
+            users.updateHome(home);
+            users.updateStepStatus(UsersStepStatus.SUCCESS);
         } else {
             budget.updateSum(budgetSumUpdateReq.sum());
         }
