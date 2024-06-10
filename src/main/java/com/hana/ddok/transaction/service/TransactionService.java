@@ -20,6 +20,7 @@ import com.hana.ddok.spend.repository.SpendRepository;
 import com.hana.ddok.transaction.domain.Transaction;
 import com.hana.ddok.transaction.domain.TransactionType;
 import com.hana.ddok.transaction.dto.*;
+import com.hana.ddok.transaction.exception.TransactionAccessDenied;
 import com.hana.ddok.transaction.repository.TransactionRepository;
 import com.hana.ddok.users.domain.Users;
 import com.hana.ddok.users.exception.UsersNotFound;
@@ -79,9 +80,14 @@ public class TransactionService {
     }
 
     @Transactional(readOnly = true)
-    public TransactionFindAllRes transactionFindAll(Long accountId, Integer year, Integer month) {
+    public TransactionFindAllRes transactionFindAll(Long accountId, Integer year, Integer month, String phoneNumber) {
+        Users users = usersRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsersNotFound());
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new AccountNotFound());
+        if (!Objects.equals(users, account.getUsers())) {
+            throw new TransactionAccessDenied();
+        }
 
         List<TransactionType> typeList = Arrays.asList(TransactionType.REMITTANCE, TransactionType.SPEND, TransactionType.INTEREST);
         LocalDateTime startDateTime = LocalDateTime.of(year, month, 1, 0, 0);
