@@ -153,7 +153,7 @@ public class AccountService {
         AtomicInteger executionCount = new AtomicInteger(1);
         accountSaving100SchedulerService.scheduleTaskForUser(users.getUsersId(),
                 () -> executeSaving100Task(executionCount, users, accountSaving100SaveReq.payment(), account, withdrawalAccount)
-                , 1000 // TODO : 24 * 60 * 60 * 1000
+                , 24 * 60 * 60 * 1000
         );
 
         return new AccountSaving100SaveRes(depositsaving, account);
@@ -166,7 +166,7 @@ public class AccountService {
                     new TransactionSaveReq(payment, executionCount.get() + "일차납입", executionCount.get() + "일차납입", withdrawalAccount.getAccountNumber(), account.getAccountNumber())
             );
             accountSaving100SchedulerService.scheduleTaskForUser(users.getUsersId(), () -> executeSaving100Task(executionCount, users, payment, account, withdrawalAccount)
-                    , 1000 // TODO : 24 * 60 * 60 * 1000
+                    , 24 * 60 * 60 * 1000
             );
         }
         else {  // 만기 시 : 101일차
