@@ -35,6 +35,7 @@ import com.hana.ddok.transaction.service.TransactionService;
 import com.hana.ddok.users.domain.Users;
 import com.hana.ddok.users.domain.UsersStepStatus;
 import com.hana.ddok.users.exception.UsersNotFound;
+import com.hana.ddok.users.exception.UsersStepDenied;
 import com.hana.ddok.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -85,6 +86,13 @@ public class AccountService {
         if (products.getType() != ProductsType.MONEYBOX) {
             throw new ProductsTypeInvalid();
         }
+
+        // 2단계 시작
+        if (users.getStep() != 2 || users.getStepStatus() != UsersStepStatus.NOTSTARTED) {
+            throw new UsersStepDenied();
+        }
+        users.updateStepStatus(UsersStepStatus.PROCEEDING);
+
         // 머니박스 : 유저 당 1개 가능
         Optional<Account> accountOptional = accountRepository.findByUsersAndProductsTypeAndIsDeletedFalse(users, ProductsType.MONEYBOX);
         if (accountOptional.isPresent()) {
@@ -93,9 +101,6 @@ public class AccountService {
 
         Account account = accountRepository.save(accountMoneyboxSaveReq.toEntity(users, products, generateAccountNumber()));
         Moneybox moneybox = moneyboxRepository.save(accountMoneyboxSaveReq.toMoneybox(account));
-
-        users.updateStepStatus(UsersStepStatus.PROCEEDING);
-        usersRepository.save(users);
 
         return new AccountMoneyboxSaveRes(account, moneybox);
     }
@@ -114,6 +119,12 @@ public class AccountService {
         if (accountOptional.isPresent()) {
             throw new AccountSaveDenied();
         }
+
+        // 3단계 시작
+        if (users.getStep() != 3 || users.getStepStatus() != UsersStepStatus.NOTSTARTED) {
+            throw new UsersStepDenied();
+        }
+        users.updateStepStatus(UsersStepStatus.PROCEEDING);
 
         // 출금계좌 : 입출금계좌만 가능
         Account withdrawalAccount = accountRepository.findById(accountSaving100SaveReq.withdrawalAccountId())
@@ -199,6 +210,12 @@ public class AccountService {
             throw new AccountSaveDenied();
         }
 
+        // 4단계 시작
+        if (users.getStep() != 4 || users.getStepStatus() != UsersStepStatus.NOTSTARTED) {
+            throw new UsersStepDenied();
+        }
+        users.updateStepStatus(UsersStepStatus.PROCEEDING);
+
         // 출금계좌 : 입출금계좌만 가능
         Account withdrawalAccount = accountRepository.findById(accountSavingSaveReq.withdrawalAccountId())
                 .orElseThrow(() -> new AccountNotFound());
@@ -267,6 +284,12 @@ public class AccountService {
         if (accountOptional.isPresent()) {
             throw new AccountSaveDenied();
         }
+
+        // 3단계 시작
+        if (users.getStep() != 5 || users.getStepStatus() != UsersStepStatus.NOTSTARTED) {
+            throw new UsersStepDenied();
+        }
+        users.updateStepStatus(UsersStepStatus.PROCEEDING);
 
         // 출금계좌 : 입출금계좌만 가능
         Account withdrawalAccount = accountRepository.findById(accountDepositSaveReq.withdrawalAccountId())

@@ -45,7 +45,6 @@ public class TransactionService {
     private final SpendRepository spendRepository;
     private final TransactionStep2SchedulerService step2SchedulerService;
 
-
     @Transactional
     public TransactionSaveRes transactionSave(TransactionSaveReq transactionSaveReq) {
         Account senderAccount = accountRepository.findByAccountNumber(transactionSaveReq.senderAccount())
@@ -65,13 +64,12 @@ public class TransactionService {
         updateMoneyboxParkingBalance(senderAccount, -amount);
         updateMoneyboxParkingBalance(recipientAccount, amount);
 
-       Users users = recipientAccount.getUsers();
+        Users users = recipientAccount.getUsers();
 
         // 머니박스가 첫 충전일 경우, 과소비 지수 계산 및 2단계 스케줄링 시작
         if (recipientAccount.getProducts().getType() == ProductsType.MONEYBOX) {
             boolean isFirstCharge = !transactionRepository.existsByRecipientAccount(recipientAccount);
             if (isFirstCharge) {
-
                 step2SchedulerService.scheduleTaskForUser(users.getUsersId(),
                         () -> {
                             Transaction firstTransaction = transactionRepository.findFirstByRecipientAccountOrderByCreatedAt(recipientAccount)
@@ -93,17 +91,18 @@ public class TransactionService {
                                 recipientAccount.updateInterest(recipientAccount.getProducts().getInterest2());
                             }
                             users.updateStepStatus(UsersStepStatus.SUCCESS);
+                            // Account 객체 저장
+                            accountRepository.save(senderAccount);
+                            accountRepository.save(recipientAccount);
+
+                            // Users 객체 저장
+                            usersRepository.save(users);
 //                        }, 30L * 24 * 60 * 60 * 1000
                         },  60L * 3000
                 );
             }
         }
-        // Account 객체 저장
-        accountRepository.save(senderAccount);
-        accountRepository.save(recipientAccount);
 
-        // Users 객체 저장
-        usersRepository.save(users);
 
         Transaction transaction = transactionRepository.save(transactionSaveReq.toEntity(senderAccount, recipientAccount));
         return new TransactionSaveRes(transaction);
