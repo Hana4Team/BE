@@ -13,7 +13,7 @@ public record AccountMoneyboxSaveReq(
         return Account.builder()
                 .accountNumber(accountNumber)
                 .balance(0L)
-                .interest(products.getInterest2())
+                .interest(products.getInterest1())
                 .password(password)
                 .isDeleted(false)
                 .users(users)
@@ -26,7 +26,6 @@ public record AccountMoneyboxSaveReq(
                 .parkingBalance(0L)
                 .expenseBalance(0L)
                 .savingBalance(0L)
-                .isCharged(false)
                 .account(account)
                 .build();
     }

@@ -14,7 +14,7 @@ public record TransactionFindByIdRes(
         this(
                 isSender,
                 isSender ? transaction.getSenderTitle() : transaction.getRecipientTitle(),
-                transaction.getAmount().longValue(),
+                transaction.getAmount(),
                 transaction.getCreatedAt()
         );
     }

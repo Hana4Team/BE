@@ -5,7 +5,7 @@ import com.hana.ddok.transaction.domain.Transaction;
 import com.hana.ddok.transaction.domain.TransactionType;
 
 public record TransactionSaveReq(
-        Integer amount,
+        Long amount,
         String senderTitle,
         String recipientTitle,
         String senderAccount,

@@ -2,10 +2,10 @@ package com.hana.ddok.budget.dto;
 
 import com.hana.ddok.budget.domain.Budget;
 
-public record BudgetFindRes(
-        Integer sum
+public record BudgetSumFindRes(
+        Long sum
 ) {
-    public BudgetFindRes(Budget budget) {
+    public BudgetSumFindRes(Budget budget) {
         this(
                 budget.getSum()
         );

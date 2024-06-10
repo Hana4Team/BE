@@ -22,43 +22,39 @@ public class Budget {
     private Long budgetId;
 
     @Column(name = "sum", nullable = false)
-    private Integer sum;
+    private Long sum;
 
     @Column(name = "shopping", nullable = false)
-    private Integer shopping;
+    private Long shopping;
 
     @Column(name = "food", nullable = false)
-    private Integer food;
+    private Long food;
 
     @Column(name = "traffic", nullable = false)
-    private Integer traffic;
+    private Long traffic;
 
     @Column(name = "hospital", nullable = false)
-    private Integer hospital;
+    private Long hospital;
 
     @Column(name = "fee", nullable = false)
-    private Integer fee;
+    private Long fee;
 
     @Column(name = "education", nullable = false)
-    private Integer education;
+    private Long education;
 
     @Column(name = "leisure", nullable = false)
-    private Integer leisure;
+    private Long leisure;
 
     @Column(name = "society", nullable = false)
-    private Integer society;
+    private Long society;
 
     @Column(name = "daily", nullable = false)
-    private Integer daily;
+    private Long daily;
 
     @Column(name = "overseas", nullable = false)
-    private Integer overseas;
+    private Long overseas;
 
-//    @OneToOne
-//    @JoinColumn(name = "users_id")
-//    private Users users;
-
-    public void updateSum(Integer sum) {
+    public void updateSum(Long sum) {
         this.sum = sum;
     }
 }

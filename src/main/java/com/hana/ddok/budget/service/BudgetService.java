@@ -22,7 +22,7 @@ public class BudgetService {
     private final UsersService usersService;
 
     @Transactional(readOnly = true)
-    public BudgetFindRes budgetFind(String phoneNumber) {
+    public BudgetSumFindRes budgetSumFind(String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
 
@@ -31,11 +31,11 @@ public class BudgetService {
             throw new BudgetNotFound();
         }
 
-        return new BudgetFindRes(budget);
+        return new BudgetSumFindRes(budget);
     }
 
     @Transactional
-    public BudgetUpdateRes budgetUpdate(BudgetUpdateReq budgetUpdateReq, String phoneNumber) {
+    public BudgetSumUpdateRes budgetSumUpdate(BudgetSumUpdateReq budgetSumUpdateReq, String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
 
@@ -45,25 +45,26 @@ public class BudgetService {
         if (budget == null) {
             isInitialUpdate = true;
             budget = Budget.builder()
-                    .sum(budgetUpdateReq.sum())
-                    .shopping(0)
-                    .food(0)
-                    .traffic(0)
-                    .hospital(0)
-                    .fee(0)
-                    .education(0)
-                    .leisure(0)
-                    .society(0)
-                    .daily(0)
-                    .overseas(0)
+                    .sum(budgetSumUpdateReq.sum())
+                    .shopping(0L)
+                    .food(0L)
+                    .traffic(0L)
+                    .hospital(0L)
+                    .fee(0L)
+                    .education(0L)
+                    .leisure(0L)
+                    .society(0L)
+                    .daily(0L)
+                    .overseas(0L)
                     .build();
             budgetRepository.save(budget);
+            users.updateBudget(budget);
             usersService.usersMove(users.getPhoneNumber());
         } else {
-            budget.updateSum(budgetUpdateReq.sum());
+            budget.updateSum(budgetSumUpdateReq.sum());
         }
 
-        return new BudgetUpdateRes(isInitialUpdate);
+        return new BudgetSumUpdateRes(isInitialUpdate);
     }
 
     @Transactional(readOnly = true)
@@ -89,7 +90,6 @@ public class BudgetService {
 
         budget = Budget.builder()
                 .budgetId(budget.getBudgetId())
-                .sum(budget.getSum())
                 .shopping(budgetByCategoryUpdateReq.shopping())
                 .food(budgetByCategoryUpdateReq.food())
                 .traffic(budgetByCategoryUpdateReq.traffic())
@@ -102,6 +102,7 @@ public class BudgetService {
                 .overseas(budgetByCategoryUpdateReq.overseas())
                 .build();
         budgetRepository.save(budget);
+        users.updateBudget(budget);
 
         return new BudgetByCategoryUpdateRes(budget);
     }
