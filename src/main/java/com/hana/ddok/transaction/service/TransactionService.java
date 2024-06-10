@@ -152,21 +152,29 @@ public class TransactionService {
         Account account = accountRepository.findByUsersAndProductsTypeAndIsDeletedFalse(users, ProductsType.MONEYBOX)
                 .orElseThrow(() -> new AccountNotFound());
 
-        List<TransactionType> typeList = Collections.singletonList(TransactionType.MONEYBOX);
         LocalDateTime startDateTime = LocalDateTime.of(year, month, 1, 0, 0);
         LocalDateTime endDateTime = startDateTime.plusMonths(1).minusDays(1).plusHours(23).plusMinutes(59).plusSeconds(59);
 
+        // 머니박스 간 송금 : title로 확인
+        List<TransactionType> typeList = Collections.singletonList(TransactionType.MONEYBOX);
         List<Transaction> senderTransactionList =  transactionRepository.findAllByTypeInAndSenderAccountAndCreatedAtBetweenAndSenderTitleContaining(typeList, account, startDateTime, endDateTime, type.getKorean()+"->");
         List<Transaction> recipientTransactionList =  transactionRepository.findAllByTypeInAndRecipientAccountAndCreatedAtBetweenAndRecipientTitleContaining(typeList, account, startDateTime, endDateTime, "->"+type.getKorean());
 
-        // 파킹 :  계좌 간 송금 내역 포함
-        if (type == MoneyboxType.PARKING) {
-            List<TransactionType> parkingTypeList = Arrays.asList(TransactionType.REMITTANCE, TransactionType.SPEND, TransactionType.INTEREST);
+        // 소비 : 지출 포함
+        if (type == MoneyboxType.EXPENSE) {
+            typeList = Collections.singletonList(TransactionType.SPEND);
             senderTransactionList.addAll(
-                    transactionRepository.findAllByTypeInAndSenderAccountAndCreatedAtBetween(parkingTypeList, account, startDateTime, endDateTime)
+                    transactionRepository.findAllByTypeInAndSenderAccountAndCreatedAtBetween(typeList, account, startDateTime, endDateTime)
+            );
+        }
+        // 파킹 :  계좌 간 송금 내역 포함
+        else if (type == MoneyboxType.PARKING) {
+            typeList = Arrays.asList(TransactionType.REMITTANCE, TransactionType.INTEREST);
+            senderTransactionList.addAll(
+                    transactionRepository.findAllByTypeInAndSenderAccountAndCreatedAtBetween(typeList, account, startDateTime, endDateTime)
             );
             recipientTransactionList.addAll(
-                    transactionRepository.findAllByTypeInAndRecipientAccountAndCreatedAtBetween(parkingTypeList, account, startDateTime, endDateTime)
+                    transactionRepository.findAllByTypeInAndRecipientAccountAndCreatedAtBetween(typeList, account, startDateTime, endDateTime)
             );
         }
 
