@@ -1,12 +1,10 @@
 package com.hana.ddok.users.service;
 
-import com.hana.ddok.account.repository.AccountRepository;
 import com.hana.ddok.account.service.AccountService;
 import com.hana.ddok.common.jwt.JWTUtil;
 import com.hana.ddok.home.domain.Home;
 import com.hana.ddok.home.exception.HomeNotFound;
 import com.hana.ddok.home.repository.HomeRepository;
-import com.hana.ddok.products.repository.ProductsRepository;
 import com.hana.ddok.transaction.service.TransactionService;
 import com.hana.ddok.users.domain.Users;
 import com.hana.ddok.users.domain.UsersStepStatus;
