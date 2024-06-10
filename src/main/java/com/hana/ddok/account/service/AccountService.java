@@ -88,7 +88,7 @@ public class AccountService {
         }
 
         // 2단계 시작
-        if (users.getStep() != 2) {
+        if (users.getStep() != 2 || users.getStepStatus() != UsersStepStatus.NOTSTARTED) {
             throw new UsersStepDenied();
         }
         users.updateStepStatus(UsersStepStatus.PROCEEDING);
@@ -119,6 +119,12 @@ public class AccountService {
         if (accountOptional.isPresent()) {
             throw new AccountSaveDenied();
         }
+
+        // 3단계 시작
+        if (users.getStep() != 3 || users.getStepStatus() != UsersStepStatus.NOTSTARTED) {
+            throw new UsersStepDenied();
+        }
+        users.updateStepStatus(UsersStepStatus.PROCEEDING);
 
         // 출금계좌 : 입출금계좌만 가능
         Account withdrawalAccount = accountRepository.findById(accountSaving100SaveReq.withdrawalAccountId())
@@ -204,6 +210,12 @@ public class AccountService {
             throw new AccountSaveDenied();
         }
 
+        // 4단계 시작
+        if (users.getStep() != 4 || users.getStepStatus() != UsersStepStatus.NOTSTARTED) {
+            throw new UsersStepDenied();
+        }
+        users.updateStepStatus(UsersStepStatus.PROCEEDING);
+
         // 출금계좌 : 입출금계좌만 가능
         Account withdrawalAccount = accountRepository.findById(accountSavingSaveReq.withdrawalAccountId())
                 .orElseThrow(() -> new AccountNotFound());
@@ -272,6 +284,12 @@ public class AccountService {
         if (accountOptional.isPresent()) {
             throw new AccountSaveDenied();
         }
+
+        // 3단계 시작
+        if (users.getStep() != 5 || users.getStepStatus() != UsersStepStatus.NOTSTARTED) {
+            throw new UsersStepDenied();
+        }
+        users.updateStepStatus(UsersStepStatus.PROCEEDING);
 
         // 출금계좌 : 입출금계좌만 가능
         Account withdrawalAccount = accountRepository.findById(accountDepositSaveReq.withdrawalAccountId())

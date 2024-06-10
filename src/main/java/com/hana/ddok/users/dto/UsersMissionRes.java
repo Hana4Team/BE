@@ -6,13 +6,13 @@ import com.hana.ddok.users.domain.UsersStepStatus;
 public record UsersMissionRes(
         String phoneNumber,
         Integer step,
-        UsersStepStatus stepStatus
+        Integer stepStatus
 ) {
     public UsersMissionRes(Users users) {
         this(
                 users.getPhoneNumber(),
                 users.getStep(),
-                users.getStepStatus()
+                users.getStepStatus().ordinal()
         );
     }
 }
