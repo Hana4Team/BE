@@ -19,6 +19,7 @@ import com.hana.ddok.users.dto.*;
 import com.hana.ddok.users.exception.UsersExistPhoneNumber;
 import com.hana.ddok.users.exception.UsersInvalidPwd;
 import com.hana.ddok.users.exception.UsersNotFound;
+import com.hana.ddok.users.exception.UsersReadNewsUpdateDenied;
 import com.hana.ddok.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import net.nurigo.sdk.message.model.Message;
@@ -78,7 +79,7 @@ public class UsersService {
             throw new UsersInvalidPwd();
 
         String encodedPwd = bCryptPasswordEncoder.encode(req.password());
-        Home home = homeRepository.findById(1L).orElseThrow(() -> new EntityNotFoundException("집을 찾을 수 없습니다"));
+        Home home = homeRepository.findById(1L).orElseThrow(() -> new HomeNotFound());
         Users users = usersRepository.save(UsersJoinReq.toEntity(req, encodedPwd, home));
 
         // 입출금계좌 더미로 자동 개설
@@ -193,12 +194,12 @@ public class UsersService {
     }
 
     public UsersReadNewsRes usersReadNews(String phoneNumber) {
-        Users user = usersRepository.findByPhoneNumber(phoneNumber)
+        Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
-        if (user.getReadNews())
-            throw new ValueInvalidException("이미 읽은 회원입니다.");
-        user.updateReadNews(true);
-        usersRepository.save(user);
+        if (users.getReadNews())
+            throw new UsersReadNewsUpdateDenied();
+        users.updateReadNews(true);
+        usersRepository.save(users);
         return new UsersReadNewsRes(true);
     }
 }
