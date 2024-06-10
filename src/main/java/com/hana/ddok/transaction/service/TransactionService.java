@@ -11,8 +11,11 @@ import com.hana.ddok.moneybox.domain.Moneybox;
 import com.hana.ddok.moneybox.domain.MoneyboxType;
 import com.hana.ddok.moneybox.exception.MoneyboxNotFound;
 import com.hana.ddok.moneybox.repository.MoneyboxRepository;
+import com.hana.ddok.products.domain.Products;
 import com.hana.ddok.products.domain.ProductsType;
+import com.hana.ddok.products.exception.ProductsNotFound;
 import com.hana.ddok.spend.domain.Spend;
+import com.hana.ddok.spend.domain.SpendType;
 import com.hana.ddok.spend.repository.SpendRepository;
 import com.hana.ddok.transaction.domain.Transaction;
 import com.hana.ddok.transaction.domain.TransactionType;
@@ -227,5 +230,27 @@ public class TransactionService {
         Integer failCount = days + 1 - successCount;    // 시작일이 1일차
 
         return new TransactionSaving100CheckRes(successCount, failCount);
+    }
+
+    @Transactional
+    public void generateDummyTransaction(Users users) {
+        String phoneNumber = users.getPhoneNumber();
+        transactionSpendSave(new TransactionSpendSaveReq(50000, "무신사", ProductsType.DEPOSITWITHDRAWAL, SpendType.SHOPPING), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(300000, "신세계백화점", ProductsType.DEPOSITWITHDRAWAL, SpendType.SHOPPING), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(4500, "스타벅스", ProductsType.DEPOSITWITHDRAWAL, SpendType.FOOD), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(8000, "맥도날드", ProductsType.DEPOSITWITHDRAWAL, SpendType.FOOD), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(1200, "시내버스", ProductsType.DEPOSITWITHDRAWAL, SpendType.TRAFFIC), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(1300, "지하철", ProductsType.DEPOSITWITHDRAWAL, SpendType.TRAFFIC), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(23000, "김안과의원", ProductsType.DEPOSITWITHDRAWAL, SpendType.HOSPITAL), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(23000, "가스비", ProductsType.DEPOSITWITHDRAWAL, SpendType.FEE), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(300000, "파고다어학원", ProductsType.DEPOSITWITHDRAWAL, SpendType.EDUCATION), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(20000, "CGV", ProductsType.DEPOSITWITHDRAWAL, SpendType.LEISURE), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(190000, "뮤지컬레미제라블", ProductsType.DEPOSITWITHDRAWAL, SpendType.LEISURE), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(4000, "인생네컷", ProductsType.DEPOSITWITHDRAWAL, SpendType.LEISURE), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(10000, "유니세프", ProductsType.DEPOSITWITHDRAWAL, SpendType.SOCIETY), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(20000, "다이소", ProductsType.DEPOSITWITHDRAWAL, SpendType.DAILY), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(2000, "GS25", ProductsType.DEPOSITWITHDRAWAL, SpendType.DAILY), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(70000, "올리브영", ProductsType.DEPOSITWITHDRAWAL, SpendType.DAILY), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(80000, "돈키호테시부야점", ProductsType.DEPOSITWITHDRAWAL, SpendType.OVERSEAS), phoneNumber);
     }
 }

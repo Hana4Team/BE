@@ -1,8 +1,6 @@
 package com.hana.ddok.users.dto;
 
-import com.hana.ddok.account.domain.Account;
 import com.hana.ddok.home.domain.Home;
-import com.hana.ddok.products.domain.Products;
 import com.hana.ddok.users.domain.Users;
 import com.hana.ddok.users.domain.UsersStepStatus;
 
@@ -22,18 +20,6 @@ public record UsersJoinReq(String name, LocalDate birthDate, String phoneNumber,
                 .points(0)
                 .readNews(false)
                 .home(home)
-                .build();
-    }
-
-    public Account toAccount(Users users, Products products, String accountNumber, String password, Long balance) {
-        return Account.builder()
-                .accountNumber(accountNumber)
-                .balance(balance)
-                .interest(products.getInterest2())
-                .password(password)
-                .isDeleted(false)
-                .users(users)
-                .products(products)
                 .build();
     }
 }
