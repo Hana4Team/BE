@@ -22,8 +22,8 @@ public class TransactionContoller {
     }
 
     @GetMapping("/transaction/{accountId}")
-    public ResponseEntity<TransactionFindAllRes> transactionFindAll(@PathVariable Long accountId, @RequestParam Integer year, @RequestParam Integer month) {
-        TransactionFindAllRes transactionFindAllRes = transactionService.transactionFindAll(accountId, year, month);
+    public ResponseEntity<TransactionFindAllRes> transactionFindAll(@PathVariable Long accountId, @RequestParam Integer year, @RequestParam Integer month, @AuthenticationPrincipal UsersDetails usersDetails) {
+        TransactionFindAllRes transactionFindAllRes = transactionService.transactionFindAll(accountId, year, month, usersDetails.getUsername());
         return ResponseEntity.ok(transactionFindAllRes);
     }
 

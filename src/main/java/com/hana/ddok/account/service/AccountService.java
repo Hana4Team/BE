@@ -7,6 +7,7 @@ import com.hana.ddok.account.exception.AccountNotFound;
 import com.hana.ddok.account.exception.AccountSaveDenied;
 import com.hana.ddok.account.exception.AccountWithdrawalDenied;
 import com.hana.ddok.account.repository.AccountRepository;
+import com.hana.ddok.budget.domain.Budget;
 import com.hana.ddok.depositsaving.domain.Depositsaving;
 import com.hana.ddok.account.dto.AccountDepositSaveReq;
 import com.hana.ddok.account.dto.AccountDepositSaveRes;
@@ -53,6 +54,7 @@ public class AccountService {
     public List<AccountFindAllRes> accountFindAll(AccountFindAllReq accountFindAllReq, String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
+        // TODO
         List<AccountFindAllRes> accountFindAllResList = accountRepository.findAllByUsersAndIsDeletedFalse(users).stream()
                 .filter(account -> (accountFindAllReq.depositWithdrawalAccount() && account.getProducts().getType().equals(ProductsType.DEPOSITWITHDRAWAL)) ||
                         (accountFindAllReq.moneyboxAccount() && account.getProducts().getType().equals(ProductsType.MONEYBOX)) ||
@@ -261,6 +263,7 @@ public class AccountService {
         return new AccountDeleteRes("success");
     }
 
+    @Transactional(readOnly = true)
     public AccountPasswordCheckRes accountPasswordCheck(AccountPasswordCheckReq accountPasswordCheckReq) {
         Account account = accountRepository.findByAccountNumber(accountPasswordCheckReq.accountNumber())
                 .orElseThrow(() -> new AccountNotFound());
@@ -268,8 +271,7 @@ public class AccountService {
         return new AccountPasswordCheckRes(message);
     }
 
-    @Transactional(readOnly = true)
-    public String generateAccountNumber() {
+    private String generateAccountNumber() {
         String accountNumber;
         Optional<Account> existingAccount;
         do {
@@ -285,5 +287,29 @@ public class AccountService {
             existingAccount = accountRepository.findByAccountNumber(accountNumber);
         } while (existingAccount.isPresent());
         return accountNumber;
+    }
+
+    @Transactional
+    public void generateDummyDepositWithdrawalAccount(Users users) {
+        // 해당 종류의 상품 중 랜덤으로 생성
+        List<Products> productsList = productsRepository.findAllByType(ProductsType.DEPOSITWITHDRAWAL);
+        if (productsList.isEmpty()) {
+            throw new ProductsNotFound();
+        }
+        Random random = new Random();
+        Integer randomIndex = random.nextInt(productsList.size());
+        Products products = productsList.get(randomIndex);
+        String password = String.format("%04d", random.nextInt(10000));   // 0000~9999
+
+        Account account = Account.builder()
+                .accountNumber(generateAccountNumber())
+                .balance(10000000L)
+                .interest(products.getInterest2())
+                .password(password)
+                .isDeleted(false)
+                .users(users)
+                .products(products)
+                .build();
+        accountRepository.save(account);
     }
 }

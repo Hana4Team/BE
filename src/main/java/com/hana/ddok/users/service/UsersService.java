@@ -13,6 +13,7 @@ import com.hana.ddok.products.domain.Products;
 import com.hana.ddok.products.domain.ProductsType;
 import com.hana.ddok.products.exception.ProductsNotFound;
 import com.hana.ddok.products.repository.ProductsRepository;
+import com.hana.ddok.transaction.service.TransactionService;
 import com.hana.ddok.users.domain.Users;
 import com.hana.ddok.users.domain.UsersStepStatus;
 import com.hana.ddok.users.dto.*;
@@ -48,6 +49,7 @@ public class UsersService {
     private final JWTUtil jwtUtil;
     private final DefaultMessageService messageService;
     private final AccountService accountService;
+    private final TransactionService transactionService;
 
     @Value("${jwt.expired.time}")
     private Long expiredTime;
@@ -82,16 +84,9 @@ public class UsersService {
         Home home = homeRepository.findById(1L).orElseThrow(() -> new HomeNotFound());
         Users users = usersRepository.save(UsersJoinReq.toEntity(req, encodedPwd, home));
 
-        // 입출금계좌 더미로 자동 개설
-        List<Products> productsList = productsRepository.findAllByType(ProductsType.DEPOSITWITHDRAWAL);
-        if (productsList.isEmpty()) {
-            throw new ProductsNotFound();
-        }
-        Random random = new Random();
-        Integer randomIndex = random.nextInt(productsList.size());
-        Products products = productsList.get(randomIndex);
-        String password = String.format("%04d", random.nextInt(10000));   // 0000~9999
-        accountRepository.save(req.toAccount(users, products, accountService.generateAccountNumber(), password, 10000000L));
+        // 더미데이터 : 입출금계좌 개설 + 소비하기
+        accountService.generateDummyDepositWithdrawalAccount(users);
+        transactionService.generateDummyTransaction(users);
 
         return new UsersJoinRes(true, users.getUsersId(), users.getPhoneNumber());
     }
@@ -114,18 +109,21 @@ public class UsersService {
         return new UsersMsgCheckRes(Objects.equals(req.code(), req.input()) ? "match" : "mismatch");
     }
 
+    @Transactional(readOnly = true)
     public UsersGetRes usersGet(String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
         return new UsersGetRes(users);
     }
 
+    @Transactional(readOnly = true)
     public UsersGetPointRes usersGetPoint(String phoneNumber) {
         Users user = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
         return new UsersGetPointRes(user.getPoints());
     }
 
+    @Transactional
     public UsersSavePointRes usersSavePoint(String phoneNumber, UsersSavePointReq req) {
         Users user = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
@@ -163,19 +161,6 @@ public class UsersService {
     }
 
     @Transactional
-    public UsersMissionRes usersMove(String phoneNumber) {
-        Users users = usersRepository.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new UsersNotFound());
-        Home home = homeRepository.findById(users.getHome().getHomeId() + 1)
-                .orElseThrow(() -> new HomeNotFound());
-
-        users.updateHome(home);
-        users.updateStepStatus(UsersStepStatus.SUCCESS);
-        usersRepository.save(users);
-        return new UsersMissionRes(users);
-    }
-
-    @Transactional
     public UsersMissionRes usersMissionCheck(String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
@@ -191,6 +176,7 @@ public class UsersService {
         return new UsersMissionRes(users);
     }
 
+    @Transactional
     public UsersReadNewsRes usersReadNews(String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
@@ -200,4 +186,18 @@ public class UsersService {
         usersRepository.save(users);
         return new UsersReadNewsRes(true);
     }
+
+    @Transactional
+    public UsersMissionRes usersMove(String phoneNumber) {
+        Users users = usersRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsersNotFound());
+        Home home = homeRepository.findById(users.getHome().getHomeId() + 1)
+                .orElseThrow(() -> new HomeNotFound());
+
+        users.updateHome(home);
+        users.updateStepStatus(UsersStepStatus.SUCCESS);
+        usersRepository.save(users);
+        return new UsersMissionRes(users);
+    }
+
 }
