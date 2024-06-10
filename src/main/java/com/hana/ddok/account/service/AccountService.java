@@ -151,8 +151,6 @@ public class AccountService {
                 ), phoneNumber
         );
 
-        System.out.println("머박백일");
-
         // 계좌 간 송금 [머니박스 -> 100일적금]
         Account moneyboxAccount = accountRepository.findByUsersAndProductsTypeAndIsDeletedFalse(users, ProductsType.MONEYBOX)
                 .orElseThrow(() -> new AccountNotFound());
