@@ -7,7 +7,8 @@ import com.hana.ddok.account.exception.AccountNotFound;
 import com.hana.ddok.account.exception.AccountSaveDenied;
 import com.hana.ddok.account.exception.AccountWithdrawalDenied;
 import com.hana.ddok.account.repository.AccountRepository;
-import com.hana.ddok.budget.domain.Budget;
+import com.hana.ddok.account.scheduler.AccountSaving100SchedulerService;
+import com.hana.ddok.account.scheduler.AccountStep3SchedulerService;
 import com.hana.ddok.depositsaving.domain.Depositsaving;
 import com.hana.ddok.account.dto.AccountDepositSaveReq;
 import com.hana.ddok.account.dto.AccountDepositSaveRes;
@@ -38,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,6 +51,8 @@ public class AccountService {
     private final ProductsRepository productsRepository;
     private final MoneyboxRepository moneyboxRepository;
     private final TransactionService transactionService;
+    private final AccountStep3SchedulerService accountStep3SchedulerService;
+    private final AccountSaving100SchedulerService accountSaving100SchedulerService;
 
     @Transactional(readOnly = true)
     public List<AccountFindAllRes> accountFindAll(AccountFindAllReq accountFindAllReq, String phoneNumber) {
@@ -137,13 +141,41 @@ public class AccountService {
                 .orElseThrow(() -> new AccountNotFound());
         transactionService.transactionSave(
                 new TransactionSaveReq(
-                        initialAmount, "100일적금가입", "100일적금가입", moneyboxAccount.getAccountNumber(), account.getAccountNumber()
+                        initialAmount, "백일적금가입", "백일적금가입", moneyboxAccount.getAccountNumber(), account.getAccountNumber()
                 )
         );
 
-        // TODO : 3단계 스케줄러 시작
+        // 1일1회 적금 납입
+        AtomicInteger executionCount = new AtomicInteger(1);
+        accountSaving100SchedulerService.scheduleTaskForUser(users.getUsersId(),
+                () -> executeTask(executionCount, users.getUsersId(), accountSaving100SaveReq.payment(), account, withdrawalAccount)
+                , 24 * 60 * 60 * 1000
+        );
+
+        // 3단계 스케줄러 시작 -> 100일 뒤 종료
+        accountStep3SchedulerService.scheduleTaskForUser(users.getUsersId(),
+                () -> {
+                    // 50일 이상 성공 시 : 최고금리
+                    if (transactionService.transactionSaving100Check(users.getPhoneNumber()).successCount() >= 50) {
+                        account.updateInterest(products.getInterest2());
+                    }
+                    accountStep3SchedulerService.cancelScheduledTaskForUser(users.getUsersId());
+                }, 100 * 24 * 60 * 60 * 1000
+        );
 
         return new AccountSaving100SaveRes(depositsaving, account);
+    }
+
+    private void executeTask(AtomicInteger executionCount, Long userId, Long payment, Account account, Account withdrawalAccount) {
+        if (executionCount.getAndIncrement() < 100) {    // 2~100일차
+            // 작업 수행 내용
+            transactionService.transactionSave(
+                    new TransactionSaveReq(payment, executionCount.get() + "일차납입", executionCount.get() + "일차", withdrawalAccount.getAccountNumber(), account.getAccountNumber())
+            );
+            accountSaving100SchedulerService.scheduleTaskForUser(userId, () -> executeTask(executionCount, userId, payment, account, withdrawalAccount)
+                    , 24 * 60 * 60 * 1000
+            );
+        }
     }
 
     @Transactional
