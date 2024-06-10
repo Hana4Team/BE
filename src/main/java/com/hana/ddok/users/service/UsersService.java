@@ -116,18 +116,21 @@ public class UsersService {
         return new UsersMsgCheckRes(Objects.equals(req.code(), req.input()) ? "match" : "mismatch");
     }
 
+    @Transactional(readOnly = true)
     public UsersGetRes usersGet(String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
         return new UsersGetRes(users);
     }
 
+    @Transactional(readOnly = true)
     public UsersGetPointRes usersGetPoint(String phoneNumber) {
         Users user = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
         return new UsersGetPointRes(user.getPoints());
     }
 
+    @Transactional
     public UsersSavePointRes usersSavePoint(String phoneNumber, UsersSavePointReq req) {
         Users user = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
@@ -165,19 +168,6 @@ public class UsersService {
     }
 
     @Transactional
-    public UsersMissionRes usersMove(String phoneNumber) {
-        Users users = usersRepository.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new UsersNotFound());
-        Home home = homeRepository.findById(users.getHome().getHomeId() + 1)
-                .orElseThrow(() -> new HomeNotFound());
-
-        users.updateHome(home);
-        users.updateStepStatus(UsersStepStatus.SUCCESS);
-        usersRepository.save(users);
-        return new UsersMissionRes(users);
-    }
-
-    @Transactional
     public UsersMissionRes usersMissionCheck(String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
@@ -193,6 +183,7 @@ public class UsersService {
         return new UsersMissionRes(users);
     }
 
+    @Transactional
     public UsersReadNewsRes usersReadNews(String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
@@ -202,4 +193,18 @@ public class UsersService {
         usersRepository.save(users);
         return new UsersReadNewsRes(true);
     }
+
+    @Transactional
+    public UsersMissionRes usersMove(String phoneNumber) {
+        Users users = usersRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsersNotFound());
+        Home home = homeRepository.findById(users.getHome().getHomeId() + 1)
+                .orElseThrow(() -> new HomeNotFound());
+
+        users.updateHome(home);
+        users.updateStepStatus(UsersStepStatus.SUCCESS);
+        usersRepository.save(users);
+        return new UsersMissionRes(users);
+    }
+
 }
