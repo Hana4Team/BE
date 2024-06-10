@@ -54,11 +54,11 @@ public class Budget {
     @Column(name = "overseas", nullable = false)
     private Integer overseas;
 
-    @OneToOne
-    @JoinColumn(name = "users_id")
-    private Users users;
+//    @OneToOne
+//    @JoinColumn(name = "users_id")
+//    private Users users;
 
-    public void setSum(Integer sum) {
+    public void updateSum(Integer sum) {
         this.sum = sum;
     }
 }

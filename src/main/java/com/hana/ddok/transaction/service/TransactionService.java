@@ -4,9 +4,8 @@ import com.hana.ddok.account.domain.Account;
 import com.hana.ddok.account.exception.AccountNotFound;
 import com.hana.ddok.account.exception.AccountSpendDenied;
 import com.hana.ddok.account.repository.AccountRepository;
-import com.hana.ddok.depositsaving.domain.Depositsaving;
-import com.hana.ddok.depositsaving.exception.DepositsavingNotFound;
-import com.hana.ddok.depositsaving.repository.DepositsavingRepository;
+import com.hana.ddok.budget.domain.Budget;
+import com.hana.ddok.budget.repository.BudgetRepository;
 import com.hana.ddok.moneybox.domain.Moneybox;
 import com.hana.ddok.moneybox.domain.MoneyboxType;
 import com.hana.ddok.moneybox.exception.MoneyboxNotFound;
@@ -40,6 +39,7 @@ public class TransactionService {
     private final MoneyboxRepository moneyboxRepository;
     private final UsersRepository usersRepository;
     private final SpendRepository spendRepository;
+    private final BudgetRepository budgetRepository;
 
     @Transactional
     public TransactionSaveRes transactionSave(TransactionSaveReq transactionSaveReq) {
@@ -54,27 +54,26 @@ public class TransactionService {
         recipentAccount.updateBalance(amount);
 
         // 계좌가 머니박스일 경우, 파킹 잔액 변경
-        if (senderAccount.getProducts().getType() == ProductsType.MONEYBOX) {
-            Moneybox moneybox = moneyboxRepository.findByAccount(senderAccount)
-                    .orElseThrow(() -> new MoneyboxNotFound());
-            moneybox.updateParkingBalance(-amount);
-        }
-        else if (recipentAccount.getProducts().getType() == ProductsType.MONEYBOX) {
-            Moneybox moneybox = moneyboxRepository.findByAccount(recipentAccount)
-                    .orElseThrow(() -> new MoneyboxNotFound());
-            moneybox.updateParkingBalance(amount);
+        updateMoneyboxParkingBalance(senderAccount, -amount);
+        updateMoneyboxParkingBalance(recipentAccount, amount);
 
-            // 머니박스가 첫 충전일 경우, 2단계 스케줄링 시작
-            Boolean isCharged = transactionRepository.existsByRecipientAccount(recipentAccount);
-            if (isCharged == false) {
-                // TODO : 2단계 스케줄링
-            }
+        // 머니박스가 첫 충전일 경우, 2단계 스케줄링 시작
+        Boolean isCharged = transactionRepository.existsByRecipientAccount(recipentAccount);
+        if (!isCharged) {
+            // TODO : 2단계 스케줄링
         }
 
         Transaction transaction = transactionRepository.save(transactionSaveReq.toEntity(senderAccount, recipentAccount));
         return new TransactionSaveRes(transaction);
     }
 
+    private void updateMoneyboxParkingBalance(Account account, Long amount) {
+        if (account.getProducts().getType() == ProductsType.MONEYBOX) {
+            Moneybox moneybox = moneyboxRepository.findByAccount(account)
+                    .orElseThrow(() -> new MoneyboxNotFound());
+            moneybox.updateParkingBalance(amount);
+        }
+    }
     @Transactional(readOnly = true)
     public TransactionFindAllRes transactionFindAll(Long accountId, Integer year, Integer month) {
         Account account = accountRepository.findById(accountId)

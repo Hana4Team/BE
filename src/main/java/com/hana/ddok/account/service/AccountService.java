@@ -28,6 +28,7 @@ import com.hana.ddok.transaction.dto.TransactionMoneyboxSaveReq;
 import com.hana.ddok.transaction.dto.TransactionSaveReq;
 import com.hana.ddok.transaction.service.TransactionService;
 import com.hana.ddok.users.domain.Users;
+import com.hana.ddok.users.domain.UsersStepStatus;
 import com.hana.ddok.users.exception.UsersNotFound;
 import com.hana.ddok.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
@@ -82,6 +83,10 @@ public class AccountService {
 
         Account account = accountRepository.save(accountMoneyboxSaveReq.toEntity(users, products, generateAccountNumber()));
         Moneybox moneybox = moneyboxRepository.save(accountMoneyboxSaveReq.toMoneybox(account));
+
+        users.updateStepStatus(UsersStepStatus.PROCEEDING);
+        usersRepository.save(users);
+
         return new AccountMoneyboxSaveRes(account, moneybox);
     }
 

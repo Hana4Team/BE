@@ -107,8 +107,6 @@ public class UsersService {
         message.setTo(req.phoneNumber());
         message.setText("인증번호: " + code);
 
-        SingleMessageSentResponse response = this.messageService.sendOne(new SingleMessageSendingRequest(message));
-
         return new UsersMessageRes(code);
     }
 

@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
 
 
 @Service
@@ -26,8 +25,11 @@ public class BudgetService {
     public BudgetFindRes budgetFind(String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
-        Budget budget = budgetRepository.findByUsers(users)
-                .orElseThrow(() -> new BudgetNotFound());
+
+        Budget budget = users.getBudget();
+        if (budget == null) {
+            throw new BudgetNotFound();
+        }
 
         return new BudgetFindRes(budget);
     }
@@ -37,15 +39,12 @@ public class BudgetService {
         Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
 
-        Optional<Budget> optionalBudget = budgetRepository.findByUsers(users);
-        Budget budget = null;
-        Boolean isInitialUpdate = false;
-        if (optionalBudget.isPresent()) {   // 1단계 성공 이후
-            budget = optionalBudget.get();
-            budget.setSum(budgetUpdateReq.sum());
-        } else {    // 1단계 성공 이전 => 1단계 성공
+        Budget budget = users.getBudget();
+        boolean isInitialUpdate = false;
+
+        if (budget == null) {
             isInitialUpdate = true;
-            budget = budgetRepository.save(Budget.builder()
+            budget = Budget.builder()
                     .sum(budgetUpdateReq.sum())
                     .shopping(0)
                     .food(0)
@@ -57,10 +56,11 @@ public class BudgetService {
                     .society(0)
                     .daily(0)
                     .overseas(0)
-                    .users(users)
-                    .build()
-            );
+                    .build();
+            budgetRepository.save(budget);
             usersService.usersMove(users.getPhoneNumber());
+        } else {
+            budget.updateSum(budgetUpdateReq.sum());
         }
 
         return new BudgetUpdateRes(isInitialUpdate);
@@ -70,8 +70,10 @@ public class BudgetService {
     public BudgetFindByCategoryRes budgetFindByCategory(String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
-        Budget budget = budgetRepository.findByUsers(users)
-                .orElseThrow(() -> new BudgetNotFound());
+        Budget budget = users.getBudget();
+        if (budget == null) {
+            throw new BudgetNotFound();
+        }
 
         return new BudgetFindByCategoryRes(budget);
     }
@@ -80,8 +82,10 @@ public class BudgetService {
     public BudgetByCategoryUpdateRes budgetByCategoryUpdate(BudgetByCategoryUpdateReq budgetByCategoryUpdateReq, String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
-        Budget budget = budgetRepository.findByUsers(users)
-                .orElseThrow(() -> new BudgetNotFound());
+        Budget budget = users.getBudget();
+        if (budget == null) {
+            throw new BudgetNotFound();
+        }
 
         budget = Budget.builder()
                 .budgetId(budget.getBudgetId())
@@ -96,7 +100,6 @@ public class BudgetService {
                 .society(budgetByCategoryUpdateReq.society())
                 .daily(budgetByCategoryUpdateReq.daily())
                 .overseas(budgetByCategoryUpdateReq.overseas())
-                .users(users)
                 .build();
         budgetRepository.save(budget);
 

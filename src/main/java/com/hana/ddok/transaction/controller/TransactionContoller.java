@@ -3,14 +3,11 @@ package com.hana.ddok.transaction.controller;
 import com.hana.ddok.moneybox.domain.MoneyboxType;
 import com.hana.ddok.transaction.dto.*;
 import com.hana.ddok.transaction.service.TransactionService;
-import com.hana.ddok.users.domain.Users;
 import com.hana.ddok.users.domain.UsersDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RequestMapping("/api/v1")
 @RestController
