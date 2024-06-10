@@ -23,7 +23,7 @@ public class Alarm extends BaseEntity {
     @Column(name = "contents")
     private String contents;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "users_id")
     private Users users;
 }

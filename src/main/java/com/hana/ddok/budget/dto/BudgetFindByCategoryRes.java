@@ -3,17 +3,17 @@ package com.hana.ddok.budget.dto;
 import com.hana.ddok.budget.domain.Budget;
 
 public record BudgetFindByCategoryRes(
-        Integer sum,
-        Integer shopping,
-        Integer food,
-        Integer traffic,
-        Integer hospital,
-        Integer fee,
-        Integer education,
-        Integer leisure,
-        Integer society,
-        Integer daily,
-        Integer overseas
+        Long sum,
+        Long shopping,
+        Long food,
+        Long traffic,
+        Long hospital,
+        Long fee,
+        Long education,
+        Long leisure,
+        Long society,
+        Long daily,
+        Long overseas
 
 ) {
     public BudgetFindByCategoryRes(Budget budget) {

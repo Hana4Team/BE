@@ -39,7 +39,7 @@ public class Users {
     private Integer step;
 
     @Enumerated(EnumType.ORDINAL)
-    @Column(name = "step_status")
+    @Column(name = "step_status", nullable = false)
     private UsersStepStatus stepStatus;
 
     @Column(name = "points", nullable = false)
@@ -48,7 +48,7 @@ public class Users {
     @Column(name = "read_news", nullable = false)
     private Boolean readNews;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "home_id", nullable = false)
     private Home home;
 

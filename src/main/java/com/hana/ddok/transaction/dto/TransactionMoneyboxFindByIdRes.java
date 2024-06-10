@@ -14,7 +14,7 @@ public record TransactionMoneyboxFindByIdRes(
         this(
                 isSender,
                 isSender ? transaction.getSenderTitle() : transaction.getRecipientTitle(),
-                transaction.getAmount().longValue(),
+                transaction.getAmount(),
                 transaction.getCreatedAt()
         );
     }

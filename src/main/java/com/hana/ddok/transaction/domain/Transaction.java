@@ -21,7 +21,7 @@ public class Transaction extends BaseEntity {
     private Long transactionId;
 
     @Column(name = "amount", nullable = false)
-    private Integer amount;
+    private Long amount;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)

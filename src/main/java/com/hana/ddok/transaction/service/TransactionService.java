@@ -43,7 +43,6 @@ public class TransactionService {
     private final MoneyboxRepository moneyboxRepository;
     private final UsersRepository usersRepository;
     private final SpendRepository spendRepository;
-    private final BudgetRepository budgetRepository;
 
     @Transactional
     public TransactionSaveRes transactionSave(TransactionSaveReq transactionSaveReq) {
@@ -52,7 +51,7 @@ public class TransactionService {
         Account recipentAccount = accountRepository.findByAccountNumber(transactionSaveReq.recipientAccount())
                 .orElseThrow(() -> new AccountNotFound());
 
-        Long amount = transactionSaveReq.amount().longValue();
+        Long amount = transactionSaveReq.amount();
 
         senderAccount.updateBalance(-amount);
         recipentAccount.updateBalance(amount);
@@ -115,7 +114,7 @@ public class TransactionService {
         Moneybox moneybox = moneyboxRepository.findByAccount(account)
                 .orElseThrow(() -> new MoneyboxNotFound());
 
-        Long amount = transactionMoneyboxSaveReq.amount().longValue();
+        Long amount = transactionMoneyboxSaveReq.amount();
         MoneyboxType senderMoneyboxType = transactionMoneyboxSaveReq.senderMoneybox();
         switch (senderMoneyboxType) {
             case PARKING:
@@ -196,7 +195,7 @@ public class TransactionService {
         Account account = accountRepository.findByUsersAndProductsTypeAndIsDeletedFalse(users, transactionSpendSaveReq.senderAccountType())
                 .orElseThrow(() -> new AccountNotFound());
 
-        Long amount = transactionSpendSaveReq.amount().longValue();
+        Long amount = transactionSpendSaveReq.amount();
         switch (type) {
             case DEPOSITWITHDRAWAL:
                 account.updateBalance(-amount);
@@ -222,7 +221,7 @@ public class TransactionService {
         Account recipentAccount = accountRepository.findByAccountNumber(transactionInterestSaveReq.recipientAccount())
                 .orElseThrow(() -> new AccountNotFound());
 
-        recipentAccount.updateBalance(transactionInterestSaveReq.amount().longValue());
+        recipentAccount.updateBalance(transactionInterestSaveReq.amount());
         Transaction transaction = transactionRepository.save(transactionInterestSaveReq.toEntity(recipentAccount));
         return new TransactionInterestSaveRes(transaction);
     }
@@ -248,22 +247,22 @@ public class TransactionService {
     @Transactional
     public void generateDummyTransaction(Users users) {
         String phoneNumber = users.getPhoneNumber();
-        transactionSpendSave(new TransactionSpendSaveReq(50000, "무신사", ProductsType.DEPOSITWITHDRAWAL, SpendType.SHOPPING), phoneNumber);
-        transactionSpendSave(new TransactionSpendSaveReq(300000, "신세계백화점", ProductsType.DEPOSITWITHDRAWAL, SpendType.SHOPPING), phoneNumber);
-        transactionSpendSave(new TransactionSpendSaveReq(4500, "스타벅스", ProductsType.DEPOSITWITHDRAWAL, SpendType.FOOD), phoneNumber);
-        transactionSpendSave(new TransactionSpendSaveReq(8000, "맥도날드", ProductsType.DEPOSITWITHDRAWAL, SpendType.FOOD), phoneNumber);
-        transactionSpendSave(new TransactionSpendSaveReq(1200, "시내버스", ProductsType.DEPOSITWITHDRAWAL, SpendType.TRAFFIC), phoneNumber);
-        transactionSpendSave(new TransactionSpendSaveReq(1300, "지하철", ProductsType.DEPOSITWITHDRAWAL, SpendType.TRAFFIC), phoneNumber);
-        transactionSpendSave(new TransactionSpendSaveReq(23000, "김안과의원", ProductsType.DEPOSITWITHDRAWAL, SpendType.HOSPITAL), phoneNumber);
-        transactionSpendSave(new TransactionSpendSaveReq(23000, "가스비", ProductsType.DEPOSITWITHDRAWAL, SpendType.FEE), phoneNumber);
-        transactionSpendSave(new TransactionSpendSaveReq(300000, "파고다어학원", ProductsType.DEPOSITWITHDRAWAL, SpendType.EDUCATION), phoneNumber);
-        transactionSpendSave(new TransactionSpendSaveReq(20000, "CGV", ProductsType.DEPOSITWITHDRAWAL, SpendType.LEISURE), phoneNumber);
-        transactionSpendSave(new TransactionSpendSaveReq(190000, "뮤지컬레미제라블", ProductsType.DEPOSITWITHDRAWAL, SpendType.LEISURE), phoneNumber);
-        transactionSpendSave(new TransactionSpendSaveReq(4000, "인생네컷", ProductsType.DEPOSITWITHDRAWAL, SpendType.LEISURE), phoneNumber);
-        transactionSpendSave(new TransactionSpendSaveReq(10000, "유니세프", ProductsType.DEPOSITWITHDRAWAL, SpendType.SOCIETY), phoneNumber);
-        transactionSpendSave(new TransactionSpendSaveReq(20000, "다이소", ProductsType.DEPOSITWITHDRAWAL, SpendType.DAILY), phoneNumber);
-        transactionSpendSave(new TransactionSpendSaveReq(2000, "GS25", ProductsType.DEPOSITWITHDRAWAL, SpendType.DAILY), phoneNumber);
-        transactionSpendSave(new TransactionSpendSaveReq(70000, "올리브영", ProductsType.DEPOSITWITHDRAWAL, SpendType.DAILY), phoneNumber);
-        transactionSpendSave(new TransactionSpendSaveReq(80000, "돈키호테시부야점", ProductsType.DEPOSITWITHDRAWAL, SpendType.OVERSEAS), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(50000L, "무신사", ProductsType.DEPOSITWITHDRAWAL, SpendType.SHOPPING), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(300000L, "신세계백화점", ProductsType.DEPOSITWITHDRAWAL, SpendType.SHOPPING), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(4500L, "스타벅스", ProductsType.DEPOSITWITHDRAWAL, SpendType.FOOD), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(8000L, "맥도날드", ProductsType.DEPOSITWITHDRAWAL, SpendType.FOOD), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(1200L, "시내버스", ProductsType.DEPOSITWITHDRAWAL, SpendType.TRAFFIC), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(1300L, "지하철", ProductsType.DEPOSITWITHDRAWAL, SpendType.TRAFFIC), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(23000L, "김안과의원", ProductsType.DEPOSITWITHDRAWAL, SpendType.HOSPITAL), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(23000L, "가스비", ProductsType.DEPOSITWITHDRAWAL, SpendType.FEE), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(300000L, "파고다어학원", ProductsType.DEPOSITWITHDRAWAL, SpendType.EDUCATION), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(20000L, "CGV", ProductsType.DEPOSITWITHDRAWAL, SpendType.LEISURE), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(190000L, "뮤지컬레미제라블", ProductsType.DEPOSITWITHDRAWAL, SpendType.LEISURE), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(4000L, "인생네컷", ProductsType.DEPOSITWITHDRAWAL, SpendType.LEISURE), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(10000L, "유니세프", ProductsType.DEPOSITWITHDRAWAL, SpendType.SOCIETY), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(20000L, "다이소", ProductsType.DEPOSITWITHDRAWAL, SpendType.DAILY), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(2000L, "GS25", ProductsType.DEPOSITWITHDRAWAL, SpendType.DAILY), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(70000L, "올리브영", ProductsType.DEPOSITWITHDRAWAL, SpendType.DAILY), phoneNumber);
+        transactionSpendSave(new TransactionSpendSaveReq(80000L, "돈키호테시부야점", ProductsType.DEPOSITWITHDRAWAL, SpendType.OVERSEAS), phoneNumber);
     }
 }

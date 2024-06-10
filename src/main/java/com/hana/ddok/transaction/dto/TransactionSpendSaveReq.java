@@ -8,7 +8,7 @@ import com.hana.ddok.transaction.domain.Transaction;
 import com.hana.ddok.transaction.domain.TransactionType;
 
 public record TransactionSpendSaveReq(
-        Integer amount,
+        Long amount,
         String senderTitle,
         ProductsType senderAccountType,
         SpendType spendType

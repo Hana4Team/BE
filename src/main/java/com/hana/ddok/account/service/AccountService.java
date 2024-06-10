@@ -7,7 +7,8 @@ import com.hana.ddok.account.exception.AccountNotFound;
 import com.hana.ddok.account.exception.AccountSaveDenied;
 import com.hana.ddok.account.exception.AccountWithdrawalDenied;
 import com.hana.ddok.account.repository.AccountRepository;
-import com.hana.ddok.budget.domain.Budget;
+import com.hana.ddok.account.scheduler.AccountSaving100SchedulerService;
+import com.hana.ddok.account.scheduler.AccountStep3SchedulerService;
 import com.hana.ddok.depositsaving.domain.Depositsaving;
 import com.hana.ddok.account.dto.AccountDepositSaveReq;
 import com.hana.ddok.account.dto.AccountDepositSaveRes;
@@ -38,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,6 +51,8 @@ public class AccountService {
     private final ProductsRepository productsRepository;
     private final MoneyboxRepository moneyboxRepository;
     private final TransactionService transactionService;
+    private final AccountStep3SchedulerService accountStep3SchedulerService;
+    private final AccountSaving100SchedulerService accountSaving100SchedulerService;
 
     @Transactional(readOnly = true)
     public List<AccountFindAllRes> accountFindAll(AccountFindAllReq accountFindAllReq, String phoneNumber) {
@@ -122,7 +126,7 @@ public class AccountService {
         // 초기자본 : 머니박스(저축)
         Moneybox moneybox = moneyboxRepository.findByAccountUsers(users)
                 .orElseThrow(() -> new MoneyboxNotFound());
-        Integer initialAmount = moneybox.getSavingBalance().intValue();
+        Long initialAmount = moneybox.getSavingBalance();
 
         // 머니박스 간 송금 [머니박스(저축) -> 머니박스(파킹)]
         String title = MoneyboxType.SAVING + "->" + MoneyboxType.PARKING;
@@ -137,11 +141,41 @@ public class AccountService {
                 .orElseThrow(() -> new AccountNotFound());
         transactionService.transactionSave(
                 new TransactionSaveReq(
-                        initialAmount, "100일적금가입", "100일적금가입", moneyboxAccount.getAccountNumber(), account.getAccountNumber()
+                        initialAmount, "백일적금가입", "백일적금가입", moneyboxAccount.getAccountNumber(), account.getAccountNumber()
                 )
         );
 
+        // 1일1회 적금 납입
+        AtomicInteger executionCount = new AtomicInteger(1);
+        accountSaving100SchedulerService.scheduleTaskForUser(users.getUsersId(),
+                () -> executeTask(executionCount, users.getUsersId(), accountSaving100SaveReq.payment(), account, withdrawalAccount)
+                , 24 * 60 * 60 * 1000
+        );
+
+        // 3단계 스케줄러 시작 -> 100일 뒤 종료
+        accountStep3SchedulerService.scheduleTaskForUser(users.getUsersId(),
+                () -> {
+                    // 50일 이상 성공 시 : 최고금리
+                    if (transactionService.transactionSaving100Check(users.getPhoneNumber()).successCount() >= 50) {
+                        account.updateInterest(products.getInterest2());
+                    }
+                    accountStep3SchedulerService.cancelScheduledTaskForUser(users.getUsersId());
+                }, 100 * 24 * 60 * 60 * 1000
+        );
+
         return new AccountSaving100SaveRes(depositsaving, account);
+    }
+
+    private void executeTask(AtomicInteger executionCount, Long userId, Long payment, Account account, Account withdrawalAccount) {
+        if (executionCount.getAndIncrement() < 100) {    // 2~100일차
+            // 작업 수행 내용
+            transactionService.transactionSave(
+                    new TransactionSaveReq(payment, executionCount.get() + "일차납입", executionCount.get() + "일차", withdrawalAccount.getAccountNumber(), account.getAccountNumber())
+            );
+            accountSaving100SchedulerService.scheduleTaskForUser(userId, () -> executeTask(executionCount, userId, payment, account, withdrawalAccount)
+                    , 24 * 60 * 60 * 1000
+            );
+        }
     }
 
     @Transactional
@@ -174,9 +208,13 @@ public class AccountService {
         // 계좌 간 송금 [출금계좌 -> 적금]
         transactionService.transactionSave(
                 new TransactionSaveReq(
-                        accountSavingSaveReq.initialAmount().intValue(), "적금가입", "적금가입", withdrawalAccount.getAccountNumber(), account.getAccountNumber()
+                        accountSavingSaveReq.initialAmount(), "적금가입", "적금가입", withdrawalAccount.getAccountNumber(), account.getAccountNumber()
                 )
         );
+
+        if (users.getStep() == 4 && users.getStepStatus() == UsersStepStatus.NOTSTARTED) {
+            // TODO : 4단계 스케줄링 시작
+        }
 
         return new AccountSavingSaveRes(depositsaving, account);
     }
@@ -211,9 +249,13 @@ public class AccountService {
         // 계좌 간 송금 [입출금계좌 -> 예금]
         transactionService.transactionSave(
                 new TransactionSaveReq(
-                        accountDepositSaveReq.initialAmount().intValue(), "예금가입", "예금가입", withdrawalAccount.getAccountNumber(), account.getAccountNumber()
+                        accountDepositSaveReq.initialAmount(), "예금가입", "예금가입", withdrawalAccount.getAccountNumber(), account.getAccountNumber()
                 )
         );
+
+        if (users.getStep() == 5 && users.getStepStatus() == UsersStepStatus.NOTSTARTED) {
+            // TODO : 5단계 스케줄링 시작
+        }
 
         return new AccountDepositSaveRes(depositsaving, account);
     }
@@ -240,21 +282,21 @@ public class AccountService {
         if (currentDate.isBefore(endDate)) {    // 만기일 이전 : 중도해지 최저금리
             interest = products.getInterest1();
         } else if (currentDate.isEqual(endDate) || currentDate.isAfter(endDate)) {  // 만기일 이후 : 만기해지 최고금리
-            interest = (products.getInterest2());
+            interest = (products.getInterest1());
         }
         withdrawalAccount.updateInterest(interest);
 
         // 계좌 간 송금 [출금계좌 -> 입금계좌]
         transactionService.transactionSave(
                 new TransactionSaveReq(
-                        withdrawalAccount.getBalance().intValue(), "예적금해지", "예적금해지", withdrawalAccount.getAccountNumber(), depositAccount.getAccountNumber()
+                        withdrawalAccount.getBalance(), "예적금해지", "예적금해지", withdrawalAccount.getAccountNumber(), depositAccount.getAccountNumber()
                 )
         );
 
         // 이자입금 [ -> 입금계좌]
         transactionService.transactionInterestSave(
                 new TransactionInterestSaveReq(
-                        (int)(withdrawalAccount.getBalance() * interest)/100, "예적금이자", depositAccount.getAccountNumber()
+                        (long)(withdrawalAccount.getBalance() * interest)/100, "예적금이자", depositAccount.getAccountNumber()
                 )
         );
 
@@ -304,7 +346,7 @@ public class AccountService {
         Account account = Account.builder()
                 .accountNumber(generateAccountNumber())
                 .balance(10000000L)
-                .interest(products.getInterest2())
+                .interest(products.getInterest1())
                 .password(password)
                 .isDeleted(false)
                 .users(users)

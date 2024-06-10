@@ -31,9 +31,6 @@ public class Moneybox extends BaseEntity {
     @Column(name = "saving_balance", nullable = false)
     private Long savingBalance;
 
-    @Column(name = "is_charged", nullable = false)
-    private Boolean isCharged;
-
     @OneToOne
     @JoinColumn(name = "account_id")
     private Account account;

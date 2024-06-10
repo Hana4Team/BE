@@ -41,8 +41,8 @@ public class DepositsavingService {
         Transaction transaction = transactionRepository.findFirstByRecipientAccountOrderByCreatedAt(account)
                 .orElseThrow(() -> new TransactionNotFound());
 
-        Long initialAmount = transaction.getAmount().longValue();
-        Integer payment = depositsaving.getPayment();
+        Long initialAmount = transaction.getAmount();
+        Long payment = depositsaving.getPayment();
         Long targetAmount = 0L;
         switch (type) {
             case SAVING100:
@@ -51,7 +51,7 @@ public class DepositsavingService {
             case SAVING:
                 Period period = Period.between(account.getCreatedAt().toLocalDate(), depositsaving.getEndDate());
                 Integer monthPeriod = period.getYears() * 12 + period.getMonths();
-                targetAmount = payment.longValue() * (monthPeriod - 1) + initialAmount;
+                targetAmount = payment * (monthPeriod - 1) + initialAmount;
                 break;
             case DEPOSIT:
                 targetAmount = initialAmount;
@@ -60,6 +60,6 @@ public class DepositsavingService {
                 throw new ProductsTypeInvalid();
         }
 
-        return new DepositsavingFindbyTypeRes(account, depositsaving,  initialAmount, payment, targetAmount);
+        return new DepositsavingFindbyTypeRes(account, depositsaving, initialAmount, payment, targetAmount);
     }
 }
