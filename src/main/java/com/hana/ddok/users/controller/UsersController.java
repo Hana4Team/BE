@@ -74,10 +74,4 @@ public class UsersController {
         UsersReadNewsRes usersReadNewsRes = usersService.usersReadNews(usersDetails.getUsername());
         return ResponseEntity.ok(usersReadNewsRes);
     }
-
-    // TODO : 컨트롤러 제외
-    @PutMapping("/users/move")
-    public ResponseEntity<UsersMissionRes> usersMove(@AuthenticationPrincipal UsersDetails usersDetails) {
-        return ResponseEntity.ok(usersService.usersMove(usersDetails.getUsername()));
-    }
 }
