@@ -48,7 +48,7 @@ public class Users {
     @Column(name = "read_news", nullable = false)
     private Boolean readNews;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "home_id", nullable = false)
     private Home home;
 
