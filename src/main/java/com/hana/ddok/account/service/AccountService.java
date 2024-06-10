@@ -7,8 +7,8 @@ import com.hana.ddok.account.exception.AccountNotFound;
 import com.hana.ddok.account.exception.AccountSaveDenied;
 import com.hana.ddok.account.exception.AccountWithdrawalDenied;
 import com.hana.ddok.account.repository.AccountRepository;
-import com.hana.ddok.account.scheduler.AccountSaving100SchedulerService;
-import com.hana.ddok.account.scheduler.AccountSavingSchedulerService;
+import com.hana.ddok.common.scheduler.Step3SchedulerService;
+import com.hana.ddok.common.scheduler.Step4SchedulerService;
 import com.hana.ddok.depositsaving.domain.Depositsaving;
 import com.hana.ddok.account.dto.AccountDepositSaveReq;
 import com.hana.ddok.account.dto.AccountDepositSaveRes;
@@ -56,8 +56,8 @@ public class AccountService {
     private final MoneyboxRepository moneyboxRepository;
     private final TransactionService transactionService;
     private final HomeRepository homeRepository;
-    private final AccountSaving100SchedulerService accountSaving100SchedulerService;
-    private final AccountSavingSchedulerService accountSavingSchedulerService;
+    private final Step3SchedulerService step3SchedulerService;
+    private final Step4SchedulerService step4SchedulerService;
 
     @Transactional(readOnly = true)
     public List<AccountFindAllRes> accountFindAll(AccountFindAllReq accountFindAllReq, String phoneNumber) {
@@ -162,7 +162,7 @@ public class AccountService {
 
         // 스케줄링 : 1일1회 적금 납입
         AtomicInteger executionCount = new AtomicInteger(1);
-        accountSaving100SchedulerService.scheduleTaskForUser(users.getUsersId(),
+        step3SchedulerService.scheduleTaskForUser(users.getUsersId(),
                 () -> executeSaving100Task(executionCount, users, accountSaving100SaveReq.payment(), account, withdrawalAccount)
                 , 24 * 60 * 60 * 1000
         );
@@ -176,7 +176,7 @@ public class AccountService {
             transactionService.transactionSave(
                     new TransactionSaveReq(payment, executionCount.get() + "일차납입", executionCount.get() + "일차납입", withdrawalAccount.getAccountNumber(), account.getAccountNumber())
             );
-            accountSaving100SchedulerService.scheduleTaskForUser(users.getUsersId(), () -> executeSaving100Task(executionCount, users, payment, account, withdrawalAccount)
+            step3SchedulerService.scheduleTaskForUser(users.getUsersId(), () -> executeSaving100Task(executionCount, users, payment, account, withdrawalAccount)
                     , 24 * 60 * 60 * 1000
             );
         }
@@ -237,7 +237,7 @@ public class AccountService {
 
         // 스케줄링 : payday마다 적금 납입
         AtomicInteger executionCount = new AtomicInteger(1);
-        accountSavingSchedulerService.scheduleTaskForUser(users.getUsersId(),
+        step4SchedulerService.scheduleTaskForUser(users.getUsersId(),
                 () -> executeSavingTask(executionCount, users, accountSavingSaveReq.payment(), account, withdrawalAccount)
                 , 1000 // TODO : 24 * 60 * 60 * 1000
         );
@@ -251,7 +251,7 @@ public class AccountService {
             transactionService.transactionSave(
                     new TransactionSaveReq(payment, executionCount.get() + "일차납입", executionCount.get() + "일차납입", withdrawalAccount.getAccountNumber(), account.getAccountNumber())
             );
-            accountSavingSchedulerService.scheduleTaskForUser(users.getUsersId(), () -> executeSavingTask(executionCount, users, payment, account, withdrawalAccount)
+            step4SchedulerService.scheduleTaskForUser(users.getUsersId(), () -> executeSavingTask(executionCount, users, payment, account, withdrawalAccount)
                     , 1000 // TODO : 24 * 60 * 60 * 1000
             );
         }

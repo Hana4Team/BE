@@ -19,7 +19,7 @@ import com.hana.ddok.transaction.exception.TransactionAccessDenied;
 import com.hana.ddok.transaction.exception.TransactionAmountInvalid;
 import com.hana.ddok.transaction.exception.TransactionNotFound;
 import com.hana.ddok.transaction.repository.TransactionRepository;
-import com.hana.ddok.transaction.scheduler.TransactionStep2SchedulerService;
+import com.hana.ddok.common.scheduler.Step2SchedulerService;
 import com.hana.ddok.users.domain.Users;
 import com.hana.ddok.users.domain.UsersStepStatus;
 import com.hana.ddok.users.exception.UsersNotFound;
@@ -43,7 +43,7 @@ public class TransactionService {
     private final MoneyboxRepository moneyboxRepository;
     private final UsersRepository usersRepository;
     private final SpendRepository spendRepository;
-    private final TransactionStep2SchedulerService step2SchedulerService;
+    private final Step2SchedulerService step2SchedulerService;
 
     @Transactional
     public TransactionSaveRes transactionSave(TransactionSaveReq transactionSaveReq) {
@@ -103,12 +103,11 @@ public class TransactionService {
             }
         }
 
-
         Transaction transaction = transactionRepository.save(transactionSaveReq.toEntity(senderAccount, recipientAccount));
         return new TransactionSaveRes(transaction);
     }
 
-
+    @Transactional(readOnly = true)
     public TransactionWasteGetRes getWaste(String phoneNumber) {
         Optional<Users> usersOptional = usersRepository.findByPhoneNumber(phoneNumber);
         if (!usersOptional.isPresent()) {
