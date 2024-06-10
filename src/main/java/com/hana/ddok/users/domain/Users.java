@@ -4,6 +4,7 @@ import com.hana.ddok.common.exception.EntityNotFoundException;
 import com.hana.ddok.common.exception.ValueInvalidException;
 import com.hana.ddok.home.domain.Home;
 import com.hana.ddok.home.exception.HomeNotFound;
+import com.hana.ddok.users.exception.UsersPointsInvalid;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -68,7 +69,7 @@ public class Users {
 
     public void updatePoints(Integer points) {
         if (points < 0) {
-            throw new ValueInvalidException("하나머니는 마이너스가 될 수 없습니다.");
+            throw new UsersPointsInvalid();
         }
         this.points = points;
     }
