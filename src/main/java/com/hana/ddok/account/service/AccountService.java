@@ -9,6 +9,7 @@ import com.hana.ddok.account.exception.AccountWithdrawalDenied;
 import com.hana.ddok.account.repository.AccountRepository;
 import com.hana.ddok.common.scheduler.Step3SchedulerService;
 import com.hana.ddok.common.scheduler.Step4SchedulerService;
+import com.hana.ddok.common.scheduler.Step5SchedulerService;
 import com.hana.ddok.depositsaving.domain.Depositsaving;
 import com.hana.ddok.account.dto.AccountDepositSaveReq;
 import com.hana.ddok.account.dto.AccountDepositSaveRes;
@@ -28,9 +29,11 @@ import com.hana.ddok.products.domain.ProductsType;
 import com.hana.ddok.products.exception.ProductsNotFound;
 import com.hana.ddok.products.exception.ProductsTypeInvalid;
 import com.hana.ddok.products.repository.ProductsRepository;
+import com.hana.ddok.transaction.domain.Transaction;
 import com.hana.ddok.transaction.dto.TransactionInterestSaveReq;
 import com.hana.ddok.transaction.dto.TransactionMoneyboxSaveReq;
 import com.hana.ddok.transaction.dto.TransactionSaveReq;
+import com.hana.ddok.transaction.exception.TransactionNotFound;
 import com.hana.ddok.transaction.service.TransactionService;
 import com.hana.ddok.users.domain.Users;
 import com.hana.ddok.users.domain.UsersStepStatus;
@@ -42,6 +45,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -58,6 +62,7 @@ public class AccountService {
     private final HomeRepository homeRepository;
     private final Step3SchedulerService step3SchedulerService;
     private final Step4SchedulerService step4SchedulerService;
+    private final Step5SchedulerService step5SchedulerService;
 
     @Transactional(readOnly = true)
     public List<AccountFindAllRes> accountFindAll(AccountFindAllReq accountFindAllReq, String phoneNumber) {
@@ -236,39 +241,48 @@ public class AccountService {
         );
 
         // 스케줄링 : payday마다 적금 납입
-        AtomicInteger executionCount = new AtomicInteger(1);
-        step4SchedulerService.scheduleTaskForUser(users.getUsersId(),
-                () -> executeSavingTask(executionCount, users, accountSavingSaveReq.payment(), account, withdrawalAccount)
-                , 1000 // TODO : 24 * 60 * 60 * 1000
-        );
+//        AtomicInteger executionCount = new AtomicInteger(1);
+//        step4SchedulerService.scheduleTaskForUser(users.getUsersId(),
+//                () -> executeSavingTask(executionCount, users, accountSavingSaveReq.payment(), account, withdrawalAccount)
+//                , 1000 // TODO : 24 * 60 * 60 * 1000
+//        );
+
+        // 스케줄링 : 만기일에 만기해지
+//        Period period = Period.between(account.getCreatedAt().toLocalDate(), depositsaving.getEndDate());
+//        Integer dayPeriod = period.getYears() * 365 + period.getMonths() * 30 + period.getDays();
+//        System.out.println("날짜는요"+dayPeriod);
+//        step5SchedulerService.scheduleTaskForUser(users.getUsersId(),
+//                () -> {
+//                },  dayPeriod * 24 * 60 * 60 * 1000
+//        );
 
         return new AccountSavingSaveRes(depositsaving, account);
     }
 
-    @Transactional
-    public void executeSavingTask(AtomicInteger executionCount, Users users, Long payment, Account account, Account withdrawalAccount) {
-        if (executionCount.getAndIncrement() < 10) {    // 2~100일차
-            transactionService.transactionSave(
-                    new TransactionSaveReq(payment, executionCount.get() + "일차납입", executionCount.get() + "일차납입", withdrawalAccount.getAccountNumber(), account.getAccountNumber())
-            );
-            step4SchedulerService.scheduleTaskForUser(users.getUsersId(), () -> executeSavingTask(executionCount, users, payment, account, withdrawalAccount)
-                    , 1000 // TODO : 24 * 60 * 60 * 1000
-            );
-        }
-        else {  // 만기 시 : 101일차
-            // 성공일자 50일 이상부터 : 최고금리
-            if (transactionService.transactionSaving100Check(users.getPhoneNumber()).successCount() >= 50) {
-                account.updateInterest(account.getProducts().getInterest2());
-            }
-
-            // 이사가기
-            Home home = homeRepository.findById(users.getHome().getHomeId() + 1)
-                    .orElseThrow(() -> new HomeNotFound());
-            users.updateHome(home);
-            users.updateStepStatus(UsersStepStatus.SUCCESS);
-            usersRepository.save(users);
-        }
-    }
+//    @Transactional
+//    public void executeSavingTask(AtomicInteger executionCount, Users users, Long payment, Account account, Account withdrawalAccount) {
+//        if (executionCount.getAndIncrement() < 10) {    // 2~100일차
+//            transactionService.transactionSave(
+//                    new TransactionSaveReq(payment, executionCount.get() + "일차납입", executionCount.get() + "일차납입", withdrawalAccount.getAccountNumber(), account.getAccountNumber())
+//            );
+//            step4SchedulerService.scheduleTaskForUser(users.getUsersId(), () -> executeSavingTask(executionCount, users, payment, account, withdrawalAccount)
+//                    , 1000 // TODO : 24 * 60 * 60 * 1000
+//            );
+//        }
+//        else {  // 만기 시 : 101일차
+//            // 성공일자 50일 이상부터 : 최고금리
+//            if (transactionService.transactionSaving100Check(users.getPhoneNumber()).successCount() >= 50) {
+//                account.updateInterest(account.getProducts().getInterest2());
+//            }
+//
+//            // 이사가기
+//            Home home = homeRepository.findById(users.getHome().getHomeId() + 1)
+//                    .orElseThrow(() -> new HomeNotFound());
+//            users.updateHome(home);
+//            users.updateStepStatus(UsersStepStatus.SUCCESS);
+//            usersRepository.save(users);
+//        }
+//    }
 
     @Transactional
     public AccountDepositSaveRes accountDepositSave(AccountDepositSaveReq accountDepositSaveReq, String phoneNumber) {
@@ -285,11 +299,11 @@ public class AccountService {
             throw new AccountSaveDenied();
         }
 
-        // 3단계 시작
+        // 5단계 시작 => 성공
         if (users.getStep() != 5 || users.getStepStatus() != UsersStepStatus.NOTSTARTED) {
             throw new UsersStepDenied();
         }
-        users.updateStepStatus(UsersStepStatus.PROCEEDING);
+        users.updateStepStatus(UsersStepStatus.SUCCESS);
 
         // 출금계좌 : 입출금계좌만 가능
         Account withdrawalAccount = accountRepository.findById(accountDepositSaveReq.withdrawalAccountId())
@@ -309,10 +323,6 @@ public class AccountService {
                         accountDepositSaveReq.initialAmount(), "예금가입", "예금가입", withdrawalAccount.getAccountNumber(), account.getAccountNumber()
                 )
         );
-
-        if (users.getStep() == 5 && users.getStepStatus() == UsersStepStatus.NOTSTARTED) {
-            // TODO : 5단계 스케줄링 시작
-        }
 
         return new AccountDepositSaveRes(depositsaving, account);
     }

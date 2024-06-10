@@ -18,11 +18,4 @@ import java.util.concurrent.ScheduledFuture;
         ScheduledFuture<?> scheduledTask = taskScheduler.schedule(task, new Date(System.currentTimeMillis() + delayInMilliseconds));
         scheduledTasks.put(userId, scheduledTask);
     }
-
-    public void cancelScheduledTaskForUser(Long userId) {
-        ScheduledFuture<?> scheduledTask = scheduledTasks.get(userId);
-        if (scheduledTask != null) {
-            scheduledTask.cancel(true);
-        }
-    }
 }
