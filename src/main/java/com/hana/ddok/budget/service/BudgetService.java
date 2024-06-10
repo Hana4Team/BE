@@ -22,7 +22,7 @@ public class BudgetService {
     private final UsersService usersService;
 
     @Transactional(readOnly = true)
-    public BudgetFindRes budgetFind(String phoneNumber) {
+    public BudgetSumFindRes budgetSumFind(String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
 
@@ -31,11 +31,11 @@ public class BudgetService {
             throw new BudgetNotFound();
         }
 
-        return new BudgetFindRes(budget);
+        return new BudgetSumFindRes(budget);
     }
 
     @Transactional
-    public BudgetUpdateRes budgetUpdate(BudgetUpdateReq budgetUpdateReq, String phoneNumber) {
+    public BudgetSumUpdateRes budgetSumUpdate(BudgetSumUpdateReq budgetSumUpdateReq, String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
 
@@ -45,7 +45,7 @@ public class BudgetService {
         if (budget == null) {
             isInitialUpdate = true;
             budget = Budget.builder()
-                    .sum(budgetUpdateReq.sum())
+                    .sum(budgetSumUpdateReq.sum())
                     .shopping(0)
                     .food(0)
                     .traffic(0)
@@ -60,10 +60,10 @@ public class BudgetService {
             budgetRepository.save(budget);
             usersService.usersMove(users.getPhoneNumber());
         } else {
-            budget.updateSum(budgetUpdateReq.sum());
+            budget.updateSum(budgetSumUpdateReq.sum());
         }
 
-        return new BudgetUpdateRes(isInitialUpdate);
+        return new BudgetSumUpdateRes(isInitialUpdate);
     }
 
     @Transactional(readOnly = true)

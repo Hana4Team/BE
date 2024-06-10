@@ -1,6 +1,6 @@
 package com.hana.ddok.budget.dto;
 
-public record BudgetUpdateReq(
+public record BudgetSumUpdateReq(
         Integer sum
 ) {
 
