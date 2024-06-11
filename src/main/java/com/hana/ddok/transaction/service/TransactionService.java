@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Period;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -331,9 +331,8 @@ public class TransactionService {
         // 성공일수 : 개설일자 ~ 현재 의 송금 개수 확인
         Integer successCount = transactionRepository.countByRecipientAccountAndCreatedAtBetween(account, startDateTime, LocalDateTime.now());
         // 실패일수 : 개설일자 ~ 현재 의 송금 없는 개수 확인
-        Period period = Period.between(startDateTime.toLocalDate(), LocalDate.now());
-        Integer dayPeriod = period.getYears() * 365 + period.getMonths() * 30 + period.getDays();
-        Integer failCount = dayPeriod + 1 - successCount;    // 시작일이 1일차
+        Integer dayPeriod = (int) ChronoUnit.DAYS.between(startDateTime.toLocalDate(), LocalDate.now().plusDays(1));
+        Integer failCount = dayPeriod - successCount;
 
         return new TransactionSaving100CheckRes(successCount, failCount);
     }
