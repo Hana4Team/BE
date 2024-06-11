@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class BudgetService {
     private final BudgetRepository budgetRepository;
     private final UsersRepository usersRepository;
-    private final UsersService usersService;
     private final HomeRepository homeRepository;
 
     @Transactional(readOnly = true)
@@ -71,9 +70,6 @@ public class BudgetService {
             users.updateBudget(budget);
 
             // 1단계 성공 처리
-            Home home = homeRepository.findById(users.getHome().getHomeId() + 1)
-                    .orElseThrow(() -> new HomeNotFound());
-            users.updateHome(home);
             users.updateStepStatus(UsersStepStatus.SUCCESS);
         } else {
             budget.updateSum(budgetSumUpdateReq.sum());

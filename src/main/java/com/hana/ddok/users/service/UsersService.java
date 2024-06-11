@@ -162,6 +162,12 @@ public class UsersService {
             users.updateStepStatus(UsersStepStatus.NOTSTARTED);
         }
         usersRepository.save(users);
+
+        // 이사가기
+        Home home = homeRepository.findById(users.getHome().getHomeId() + 1)
+                .orElseThrow(() -> new HomeNotFound());
+        users.updateHome(home);
+
         return new UsersMissionRes(users);
     }
 
@@ -175,18 +181,4 @@ public class UsersService {
         usersRepository.save(users);
         return new UsersReadNewsRes(true);
     }
-
-//    @Transactional
-//    public UsersMissionRes usersMove(String phoneNumber) {
-//        Users users = usersRepository.findByPhoneNumber(phoneNumber)
-//                .orElseThrow(() -> new UsersNotFound());
-//        Home home = homeRepository.findById(users.getHome().getHomeId() + 1)
-//                .orElseThrow(() -> new HomeNotFound());
-//
-//        users.updateHome(home);
-//        users.updateStepStatus(UsersStepStatus.SUCCESS);
-//        usersRepository.save(users);
-//        return new UsersMissionRes(users);
-//    }
-
 }
