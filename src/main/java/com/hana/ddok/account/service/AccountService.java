@@ -241,6 +241,7 @@ public class AccountService {
         );
 
         // 스케줄링 : payday마다 적금 납입
+        // 납입횟수 파악
 //        AtomicInteger executionCount = new AtomicInteger(1);
 //        step4SchedulerService.scheduleTaskForUser(users.getUsersId(),
 //                () -> executeSavingTask(executionCount, users, accountSavingSaveReq.payment(), account, withdrawalAccount)
