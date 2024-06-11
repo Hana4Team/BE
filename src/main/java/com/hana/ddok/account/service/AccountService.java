@@ -93,7 +93,7 @@ public class AccountService {
         }
 
         // 2단계 시작
-        if (users.getStep() != 2 || users.getStepStatus() != UsersStepStatus.NOTSTARTED) {
+        if (users.getStep() != 2 || (users.getStepStatus() != UsersStepStatus.NOTSTARTED && users.getStepStatus() != UsersStepStatus.FAIL) ) {
             throw new UsersStepDenied();
         }
         users.updateStepStatus(UsersStepStatus.PROCEEDING);
@@ -126,7 +126,7 @@ public class AccountService {
         }
 
         // 3단계 시작
-        if (users.getStep() != 3 || users.getStepStatus() != UsersStepStatus.NOTSTARTED) {
+        if (users.getStep() != 3 || (users.getStepStatus() != UsersStepStatus.NOTSTARTED && users.getStepStatus() != UsersStepStatus.FAIL) ) {
             throw new UsersStepDenied();
         }
         users.updateStepStatus(UsersStepStatus.PROCEEDING);
@@ -216,7 +216,7 @@ public class AccountService {
         }
 
         // 4단계 시작
-        if (users.getStep() != 4 || users.getStepStatus() != UsersStepStatus.NOTSTARTED) {
+        if (users.getStep() != 4 || (users.getStepStatus() != UsersStepStatus.NOTSTARTED && users.getStepStatus() != UsersStepStatus.FAIL) ) {
             throw new UsersStepDenied();
         }
         users.updateStepStatus(UsersStepStatus.PROCEEDING);
@@ -328,7 +328,10 @@ public class AccountService {
     }
 
     @Transactional
-    public AccountDeleteRes accountDelete(AccountDeleteReq accountDeleteReq) {
+    public AccountDeleteRes accountDelete(AccountDeleteReq accountDeleteReq, String phoneNumber) {
+        Users users = usersRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsersNotFound());
+
         Account deleteAccount = accountRepository.findById(accountDeleteReq.deleteAccountId())
                 .orElseThrow(() -> new AccountNotFound());
         Account depositAccount = accountRepository.findById(accountDeleteReq.depositAccountId())
@@ -348,6 +351,10 @@ public class AccountService {
         Float interest = 0f;
         if (currentDate.isBefore(endDate)) {    // 만기일 이전 : 중도해지 최저금리
             interest = products.getInterest1();
+            // 단계 진행 중이면, status 변경
+            if (users.getStepStatus() == UsersStepStatus.PROCEEDING) {
+                users.updateStepStatus(UsersStepStatus.FAIL);
+            }
         } else if (currentDate.isEqual(endDate) || currentDate.isAfter(endDate)) {  // 만기일 이후 : 만기해지 최고금리
             interest = (products.getInterest1());
         }
