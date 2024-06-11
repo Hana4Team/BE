@@ -61,8 +61,6 @@ public class AccountService {
     private final TransactionService transactionService;
     private final HomeRepository homeRepository;
     private final Step3SchedulerService step3SchedulerService;
-    private final Step4SchedulerService step4SchedulerService;
-    private final Step5SchedulerService step5SchedulerService;
 
     @Transactional(readOnly = true)
     public List<AccountFindAllRes> accountFindAll(AccountFindAllReq accountFindAllReq, String phoneNumber) {
@@ -362,19 +360,22 @@ public class AccountService {
         }
         deleteAccount.updateInterest(interest);
 
-        // 이자입금 [ -> 입금계좌]
-        transactionService.transactionInterestSave(
-                new TransactionInterestSaveReq(
-                        (long) (deleteAccount.getBalance() * interest / 100), "예적금이자", depositAccount.getAccountNumber()
-                )
-        );
+        Long deleteAmount = deleteAccount.getBalance();
+        if (deleteAmount > 0) {
+            // 계좌 간 송금 [출금계좌 -> 입금계좌]
+            transactionService.transactionSave(
+                    new TransactionSaveReq(
+                            deleteAmount, "예적금해지", "예적금해지", deleteAccount.getAccountNumber(), depositAccount.getAccountNumber()
+                    )
+            );
 
-        // 계좌 간 송금 [출금계좌 -> 입금계좌]
-        transactionService.transactionSave(
-                new TransactionSaveReq(
-                        deleteAccount.getBalance(), "예적금해지", "예적금해지", deleteAccount.getAccountNumber(), depositAccount.getAccountNumber()
-                )
-        );
+            // 이자입금 [ -> 입금계좌]
+            transactionService.transactionInterestSave(
+                    new TransactionInterestSaveReq(
+                            (long) (deleteAmount * interest / 100), "예적금이자", depositAccount.getAccountNumber()
+                    )
+            );
+        }
 
         // 해지
         deleteAccount.deleteAccount();
