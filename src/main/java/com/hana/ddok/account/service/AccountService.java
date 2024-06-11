@@ -358,6 +358,7 @@ public class AccountService {
             }
         } else if (currentDate.isEqual(endDate) || currentDate.isAfter(endDate)) {  // 만기일 이후 : 만기해지 최고금리
             interest = (products.getInterest1());
+            users.updateStepStatus(UsersStepStatus.SUCCESS);
         }
         deleteAccount.updateInterest(interest);
 
