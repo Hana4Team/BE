@@ -143,22 +143,24 @@ public class AccountService {
                 .orElseThrow(() -> new MoneyboxNotFound());
         Long initialAmount = moneybox.getSavingBalance();
 
-        // 머니박스 간 송금 [머니박스(저축) -> 머니박스(파킹)]
-        String title = MoneyboxType.SAVING + "->" + MoneyboxType.PARKING;
-        transactionService.transactionMoneyboxSave(
-                new TransactionMoneyboxSaveReq(
-                        initialAmount, title, title, MoneyboxType.SAVING, MoneyboxType.PARKING
-                ), phoneNumber
-        );
+        if (initialAmount > 0) {
+            // 머니박스 간 송금 [머니박스(저축) -> 머니박스(파킹)]
+            String title = MoneyboxType.SAVING + "->" + MoneyboxType.PARKING;
+            transactionService.transactionMoneyboxSave(
+                    new TransactionMoneyboxSaveReq(
+                            initialAmount, title, title, MoneyboxType.SAVING, MoneyboxType.PARKING
+                    ), phoneNumber
+            );
 
-        // 계좌 간 송금 [머니박스 -> 100일적금]
-        Account moneyboxAccount = accountRepository.findByUsersAndProductsTypeAndIsDeletedFalse(users, ProductsType.MONEYBOX)
-                .orElseThrow(() -> new AccountNotFound());
-        transactionService.transactionSave(
-                new TransactionSaveReq(
-                        initialAmount, "백일적금가입", "백일적금가입", moneyboxAccount.getAccountNumber(), account.getAccountNumber()
-                )
-        );
+            // 계좌 간 송금 [머니박스 -> 100일적금]
+            Account moneyboxAccount = accountRepository.findByUsersAndProductsTypeAndIsDeletedFalse(users, ProductsType.MONEYBOX)
+                    .orElseThrow(() -> new AccountNotFound());
+            transactionService.transactionSave(
+                    new TransactionSaveReq(
+                            initialAmount, "백일적금가입", "백일적금가입", moneyboxAccount.getAccountNumber(), account.getAccountNumber()
+                    )
+            );
+        }
 
         // 스케줄링 : 1일1회 적금 납입
         AtomicInteger executionCount = new AtomicInteger(1);
