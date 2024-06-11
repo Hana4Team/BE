@@ -19,7 +19,7 @@ import com.hana.ddok.transaction.exception.TransactionAccessDenied;
 import com.hana.ddok.transaction.exception.TransactionAmountInvalid;
 import com.hana.ddok.transaction.exception.TransactionNotFound;
 import com.hana.ddok.transaction.repository.TransactionRepository;
-import com.hana.ddok.transaction.scheduler.TransactionStep2SchedulerService;
+import com.hana.ddok.common.scheduler.Step2SchedulerService;
 import com.hana.ddok.users.domain.Users;
 import com.hana.ddok.users.domain.UsersStepStatus;
 import com.hana.ddok.users.exception.UsersNotFound;
@@ -43,7 +43,7 @@ public class TransactionService {
     private final MoneyboxRepository moneyboxRepository;
     private final UsersRepository usersRepository;
     private final SpendRepository spendRepository;
-    private final TransactionStep2SchedulerService step2SchedulerService;
+    private final Step2SchedulerService step2SchedulerService;
 
     @Transactional
     public TransactionSaveRes transactionSave(TransactionSaveReq transactionSaveReq) {
@@ -103,12 +103,11 @@ public class TransactionService {
             }
         }
 
-
         Transaction transaction = transactionRepository.save(transactionSaveReq.toEntity(senderAccount, recipientAccount));
         return new TransactionSaveRes(transaction);
     }
 
-
+    @Transactional(readOnly = true)
     public TransactionWasteGetRes getWaste(String phoneNumber) {
         Optional<Users> usersOptional = usersRepository.findByPhoneNumber(phoneNumber);
         if (!usersOptional.isPresent()) {
@@ -333,8 +332,8 @@ public class TransactionService {
         Integer successCount = transactionRepository.countByRecipientAccountAndCreatedAtBetween(account, startDateTime, LocalDateTime.now());
         // 실패일수 : 개설일자 ~ 현재 의 송금 없는 개수 확인
         Period period = Period.between(startDateTime.toLocalDate(), LocalDate.now());
-        Integer days = period.getYears() * 365 + period.getMonths() * 30 + period.getDays();
-        Integer failCount = days + 1 - successCount;    // 시작일이 1일차
+        Integer dayPeriod = period.getYears() * 365 + period.getMonths() * 30 + period.getDays();
+        Integer failCount = dayPeriod + 1 - successCount;    // 시작일이 1일차
 
         return new TransactionSaving100CheckRes(successCount, failCount);
     }
