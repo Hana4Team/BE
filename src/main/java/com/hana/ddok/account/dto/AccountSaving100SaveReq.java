@@ -30,7 +30,7 @@ public record AccountSaving100SaveReq(
     public Depositsaving toDepositsaving(Account account, Account withdrawalAccount) {
         return Depositsaving.builder()
                 .payment(payment)
-                .payDate(0) // TODO : 100일적금에는 납입일 없음
+                .payDate(0)
                 .endDate(endDate)
                 .withdrawalAccount(withdrawalAccount)
                 .account(account)

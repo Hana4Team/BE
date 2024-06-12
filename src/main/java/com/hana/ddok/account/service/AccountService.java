@@ -373,13 +373,12 @@ public class AccountService {
         Random random = new Random();
         Integer randomIndex = random.nextInt(productsList.size());
         Products products = productsList.get(randomIndex);
-        String password = String.format("%04d", random.nextInt(10000));   // 0000~9999
 
         Account account = Account.builder()
                 .accountNumber(generateAccountNumber())
                 .balance(10000000L)
                 .interest(products.getInterest1())
-                .password(password)
+                .password("1234")
                 .isDeleted(false)
                 .users(users)
                 .products(products)
