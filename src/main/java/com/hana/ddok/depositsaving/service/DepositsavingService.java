@@ -19,7 +19,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.Period;
+import java.time.temporal.ChronoUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -49,8 +51,7 @@ public class DepositsavingService {
                 targetAmount = initialAmount + payment * 99;
                 break;
             case SAVING:
-                Period period = Period.between(account.getCreatedAt().toLocalDate(), depositsaving.getEndDate());
-                Integer monthPeriod = period.getYears() * 12 + period.getMonths();
+                Integer monthPeriod = (int) ChronoUnit.MONTHS.between(account.getCreatedAt().toLocalDate(), LocalDate.now());
                 targetAmount = payment * (monthPeriod - 1) + initialAmount;
                 break;
             case DEPOSIT:

@@ -1,6 +1,6 @@
-package com.hana.ddok.transaction.scheduler;
+package com.hana.ddok.common.scheduler;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 
@@ -10,20 +10,13 @@ import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 
 @Service
-public class TransactionStep2SchedulerService {
+@RequiredArgsConstructor
+public class Step5SchedulerService {
     private final Map<Long, ScheduledFuture<?>> scheduledTasks = new HashMap<>();
-    @Autowired
-    private TaskScheduler taskScheduler;
+    private final TaskScheduler taskScheduler;
 
     public void scheduleTaskForUser(Long userId, Runnable task, long delayInMilliseconds) {
         ScheduledFuture<?> scheduledTask = taskScheduler.schedule(task, new Date(System.currentTimeMillis() + delayInMilliseconds));
         scheduledTasks.put(userId, scheduledTask);
-    }
-
-    public void cancelScheduledTaskForUser(Long userId) {
-        ScheduledFuture<?> scheduledTask = scheduledTasks.get(userId);
-        if (scheduledTask != null) {
-            scheduledTask.cancel(true);
-        }
     }
 }

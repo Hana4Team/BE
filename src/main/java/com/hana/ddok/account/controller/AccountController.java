@@ -60,8 +60,9 @@ public class AccountController {
 
     @DeleteMapping("/account")
     @Operation(summary = "계좌 해지")
-    public ResponseEntity<AccountDeleteRes> accountDelete(@RequestBody AccountDeleteReq accountDeleteReq) {
-        AccountDeleteRes accountDeleteRes = accountService.accountDelete(accountDeleteReq);
+    public ResponseEntity<AccountDeleteRes> accountDelete(@RequestBody AccountDeleteReq accountDeleteReq,
+                                                          @AuthenticationPrincipal UsersDetails usersDetails) {
+        AccountDeleteRes accountDeleteRes = accountService.accountDelete(accountDeleteReq, usersDetails.getUsername());
         return ResponseEntity.ok(accountDeleteRes);
     }
 
