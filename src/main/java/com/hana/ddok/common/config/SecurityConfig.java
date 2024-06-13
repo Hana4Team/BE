@@ -46,7 +46,16 @@ public class SecurityConfig {
 
         //경로별 인가 작업
         http.authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/", "/api/v1/users/login", "/api/v1/users/join").permitAll()
+                        .requestMatchers(
+                                "/",
+                                "/api/v1/users/login",
+                                "/api/v1/users/join",
+                                "/api/v1/users/message",
+                                "/api/v1/users/msgCheck",
+                                "/swagger-ui/**",
+                                "/swagger-resources/**",
+                                "/v3/api-docs/**"
+                        ).permitAll()
                         .anyRequest().authenticated());
 
         // 로그인 필터 전에 동작

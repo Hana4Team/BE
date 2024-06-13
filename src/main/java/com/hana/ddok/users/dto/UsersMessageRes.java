@@ -1,5 +1,7 @@
 package com.hana.ddok.users.dto;
 
-public record UsersMessageRes(Integer code) {
+public record UsersMessageRes(
+        String code
+) {
 
 }

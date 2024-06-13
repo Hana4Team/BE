@@ -5,6 +5,8 @@ import com.hana.ddok.alarm.dto.AlarmSaveReq;
 import com.hana.ddok.alarm.dto.AlarmSaveRes;
 import com.hana.ddok.alarm.service.AlarmService;
 import com.hana.ddok.users.domain.UsersDetails;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,19 +16,23 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/alarm")
+@RequestMapping("api/v1")
+@Tag(name = "Alarm", description = "알림 API")
 public class AlarmController {
     private final AlarmService alarmService;
 
-    @PostMapping("")
+    @PostMapping("/alarm")
+    @Operation(summary = "알림 저장")
     public ResponseEntity<AlarmSaveRes> alarmSave(@AuthenticationPrincipal UsersDetails usersDetails,
-                                                  @RequestBody AlarmSaveReq req) {
-        return ResponseEntity.ok(alarmService.alarmSave(usersDetails.getUsername(), req));
+                                                  @RequestBody AlarmSaveReq alarmSaveReq) {
+        AlarmSaveRes alarmSaveRes = alarmService.alarmSave(usersDetails.getUsername(), alarmSaveReq);
+        return ResponseEntity.ok(alarmSaveRes);
     }
 
-    @GetMapping("")
+    @GetMapping("/alarm")
+    @Operation(summary = "알림 전체조회")
     public ResponseEntity<List<AlarmGetRes>> alarmGet(@AuthenticationPrincipal UsersDetails usersDetails) {
-        List<AlarmGetRes> response = alarmService.alarmGet(usersDetails.getUsername());
-        return ResponseEntity.ok(response);
+        List<AlarmGetRes> alarmGetResList = alarmService.alarmGet(usersDetails.getUsername());
+        return ResponseEntity.ok(alarmGetResList);
     }
 }

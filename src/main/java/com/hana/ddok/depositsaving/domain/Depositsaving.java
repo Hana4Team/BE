@@ -23,7 +23,10 @@ public class Depositsaving extends BaseEntity {
     private Long depositsavingId;
 
     @Column(name = "payment")
-    private Integer payment;
+    private Long payment;
+
+    @Column(name = "pay_date")
+    private Integer payDate;
 
     @Column(name = "end_date")
     private LocalDate endDate;

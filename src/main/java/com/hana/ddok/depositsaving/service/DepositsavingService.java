@@ -19,7 +19,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.Period;
+import java.time.temporal.ChronoUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -34,24 +36,23 @@ public class DepositsavingService {
     public DepositsavingFindbyTypeRes depositsavingFindByType(ProductsType type, String phoneNumber) {
         Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
-        Account account = accountRepository.findByUsersAndProductsType(users, type)
+        Account account = accountRepository.findByUsersAndProductsTypeAndIsDeletedFalse(users, type)
                         .orElseThrow(() -> new AccountNotFound());
         Depositsaving depositsaving = depositsavingRepository.findByAccount(account)
                 .orElseThrow(() -> new DepositsavingNotFound());
         Transaction transaction = transactionRepository.findFirstByRecipientAccountOrderByCreatedAt(account)
                 .orElseThrow(() -> new TransactionNotFound());
 
-        Long initialAmount = transaction.getAmount().longValue();
-        Integer payment = depositsaving.getPayment();
+        Long initialAmount = transaction.getAmount();
+        Long payment = depositsaving.getPayment();
         Long targetAmount = 0L;
         switch (type) {
             case SAVING100:
-                targetAmount = initialAmount + payment * 100;
+                targetAmount = initialAmount + payment * 99;
                 break;
             case SAVING:
-                Period period = Period.between(account.getCreatedAt().toLocalDate(), depositsaving.getEndDate());
-                Integer monthPeriod = period.getYears() * 12 + period.getMonths();
-                targetAmount = initialAmount + payment * monthPeriod;
+                Integer monthPeriod = (int) ChronoUnit.MONTHS.between(account.getCreatedAt().toLocalDate(), LocalDate.now());
+                targetAmount = payment * (monthPeriod - 1) + initialAmount;
                 break;
             case DEPOSIT:
                 targetAmount = initialAmount;
@@ -60,6 +61,6 @@ public class DepositsavingService {
                 throw new ProductsTypeInvalid();
         }
 
-        return new DepositsavingFindbyTypeRes(account, depositsaving,  initialAmount, payment, targetAmount);
+        return new DepositsavingFindbyTypeRes(account, depositsaving, initialAmount, payment, targetAmount);
     }
 }

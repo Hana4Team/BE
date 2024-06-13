@@ -2,11 +2,15 @@ spring:
   jpa:
     database: mysql
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     show-sql: true
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: Asia/Seoul
   datasource:
 #    url: jdbc:mysql://localhost:3306/ddok
-    url: jdbc:mysql://database-ec2-loginjoindb-21.cbmoo6w6k67n.ap-northeast-2.rds.amazonaws.com:3306/ddok
+    url: jdbc:mysql://database-ec2-loginjoindb-21.cbmoo6w6k67n.ap-northeast-2.rds.amazonaws.com:3306/ddok?serverTimezone=Asia/Seoul
     username: root
     password: mysql123
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -22,3 +26,12 @@ coolsms:
   api:
     key: NCSP6WUKOM9I7XGN
     secret: ISTXPET0RJXKMFR1D79GGKC2IOYSFOUR
+
+springdoc:
+  swagger-ui:
+    path: /api-test  # swagger-ui 접근 경로에 대한 별칭, 해당 주소로 접속해도 http://localhost:8080/swagger-ui/index.html로 리다이렉션 됨.
+    groups-order: DESC # path, query, body, response 순으로 출력
+    tags-sorter: alpha # 태그를 알파벳 순으로 정렬
+    operations-sorter: method  # delete - get - patch - post - put 순으로 정렬, alpha를 사용하면 알파벳 순으로 정렬 가능
+  paths-to-match:
+    - /api/** # swagger-ui에 표시할 api의 엔드포인트 패턴

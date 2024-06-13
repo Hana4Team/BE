@@ -1,35 +1,29 @@
 package com.hana.ddok.users.service;
 
-import com.hana.ddok.account.domain.Account;
-import com.hana.ddok.account.repository.AccountRepository;
 import com.hana.ddok.account.service.AccountService;
-import com.hana.ddok.common.exception.EntityNotFoundException;
-import com.hana.ddok.common.exception.ValueInvalidException;
 import com.hana.ddok.common.jwt.JWTUtil;
 import com.hana.ddok.home.domain.Home;
+import com.hana.ddok.home.exception.HomeNotFound;
 import com.hana.ddok.home.repository.HomeRepository;
-import com.hana.ddok.products.domain.Products;
-import com.hana.ddok.products.domain.ProductsType;
-import com.hana.ddok.products.exception.ProductsNotFound;
-import com.hana.ddok.products.repository.ProductsRepository;
+import com.hana.ddok.transaction.service.TransactionService;
 import com.hana.ddok.users.domain.Users;
+import com.hana.ddok.users.domain.UsersStepStatus;
 import com.hana.ddok.users.dto.*;
 import com.hana.ddok.users.exception.UsersExistPhoneNumber;
 import com.hana.ddok.users.exception.UsersInvalidPwd;
 import com.hana.ddok.users.exception.UsersNotFound;
+import com.hana.ddok.users.exception.UsersReadNewsUpdateDenied;
 import com.hana.ddok.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import net.nurigo.sdk.message.model.Message;
 import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
 import net.nurigo.sdk.message.response.SingleMessageSentResponse;
 import net.nurigo.sdk.message.service.DefaultMessageService;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
@@ -39,12 +33,11 @@ import java.util.Random;
 public class UsersService {
     private final UsersRepository usersRepository;
     private final HomeRepository homeRepository;
-    private final AccountRepository accountRepository;
-    private final ProductsRepository productsRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JWTUtil jwtUtil;
-    private final DefaultMessageService messageService;
     private final AccountService accountService;
+    private final TransactionService transactionService;
+    private final DefaultMessageService messageService;
 
     @Value("${jwt.expired.time}")
     private Long expiredTime;
@@ -52,17 +45,17 @@ public class UsersService {
     private String from;
 
     public UsersLoginRes usersLogin(UsersLoginReq req) {
-        Users user = usersRepository.findByPhoneNumber(req.phoneNumber())
+        Users users = usersRepository.findByPhoneNumber(req.phoneNumber())
                 .orElseThrow(() -> new UsersNotFound());
         String targetPwd = req.password();
-        String originPwd = user.getPassword();
+        String originPwd = users.getPassword();
 
         if (!bCryptPasswordEncoder.matches(targetPwd, originPwd)) {
             throw new UsersInvalidPwd();
         }
 
-        String token = jwtUtil.createJwt(user.getPhoneNumber(), expiredTime);
-        return new UsersLoginRes(true, user.getName(), user.getPhoneNumber(), user.getStep(), user.getStepStatus(), token);
+        String token = jwtUtil.createJwt(users.getPhoneNumber(), expiredTime);
+        return new UsersLoginRes(true, users, token);
     }
 
     @Transactional
@@ -76,20 +69,12 @@ public class UsersService {
             throw new UsersInvalidPwd();
 
         String encodedPwd = bCryptPasswordEncoder.encode(req.password());
-        Home home = homeRepository.findById(1L).orElseThrow(() -> new EntityNotFoundException("집을 찾을 수 없습니다"));
+        Home home = homeRepository.findById(1L).orElseThrow(() -> new HomeNotFound());
         Users users = usersRepository.save(UsersJoinReq.toEntity(req, encodedPwd, home));
 
-        // 입출금계좌 더미로 자동 개설
-        List<Products> productsList = productsRepository.findAllByType(ProductsType.DEPOSITWITHDRAWAL);
-        if (productsList.isEmpty()) {
-            throw new ProductsNotFound();
-        }
-        Random random = new Random();
-        Integer randomIndex = random.nextInt(productsList.size());
-        Products products = productsList.get(randomIndex);
-        String password = String.format("%04d", random.nextInt(10000));   // 0000~9999
-
-        accountRepository.save(req.toAccount(users, products, accountService.generateAccountNumber(), password, 10000000L));
+        // 더미데이터 : 입출금계좌 개설 + 소비하기
+        accountService.generateDummyDepositWithdrawalAccount(users);
+        transactionService.generateDummyTransaction(users);
 
         return new UsersJoinRes(true, users.getUsersId(), users.getPhoneNumber());
     }
@@ -98,12 +83,12 @@ public class UsersService {
         Message message = new Message();
 
         Random random = new Random();
-        Integer code = 1000000 + random.nextInt(9000000);
+        int codeValue = random.nextInt(10000000); // 0~9999999
+        String code = String.format("%07d", codeValue);
 
         message.setFrom(from);
         message.setTo(req.phoneNumber());
         message.setText("인증번호: " + code);
-
         SingleMessageSentResponse response = this.messageService.sendOne(new SingleMessageSendingRequest(message));
 
         return new UsersMessageRes(code);
@@ -113,18 +98,21 @@ public class UsersService {
         return new UsersMsgCheckRes(Objects.equals(req.code(), req.input()) ? "match" : "mismatch");
     }
 
+    @Transactional(readOnly = true)
     public UsersGetRes usersGet(String phoneNumber) {
-        Users user = usersRepository.findByPhoneNumber(phoneNumber)
+        Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
-        return new UsersGetRes(user.getName(), user.getPhoneNumber(), user.getStep(), user.getStepStatus());
+        return new UsersGetRes(users);
     }
 
+    @Transactional(readOnly = true)
     public UsersGetPointRes usersGetPoint(String phoneNumber) {
         Users user = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
         return new UsersGetPointRes(user.getPoints());
     }
 
+    @Transactional
     public UsersSavePointRes usersSavePoint(String phoneNumber, UsersSavePointReq req) {
         Users user = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
@@ -152,52 +140,45 @@ public class UsersService {
         return new UsersSavePointRes(curStep, points);
     }
 
-    //null(시작전)
-    //1 : 진행중
-    //2 : 성공
-    //3 : 성공확인
-    //4 : 실패
+    @Transactional
     public UsersMissionRes usersMissionStart(String phoneNumber) {
-        Users user = usersRepository.findByPhoneNumber(phoneNumber)
+        Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
-        user.updateStepStatus(1); //진행중
-        usersRepository.save(user);
-        return new UsersMissionRes(user.getPhoneNumber(), user.getStep(), user.getStepStatus());
+        users.updateStepStatus(UsersStepStatus.PROCEEDING);
+        usersRepository.save(users);
+        return new UsersMissionRes(users);
     }
 
-
-    public UsersMissionRes usersMove(String phoneNumber) {
-        Users user = usersRepository.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new UsersNotFound());
-        Home home = homeRepository.findById(user.getHome().getHomeId() + 1).orElseThrow(() -> new EntityNotFoundException("집을 찾을 수 없습니다."));
-        user.updateHome(home);
-        user.updateStepStatus(2); //성공
-        usersRepository.save(user);
-        return new UsersMissionRes(user.getPhoneNumber(), user.getStep(), user.getStepStatus());
-    }
-
+    @Transactional
     public UsersMissionRes usersMissionCheck(String phoneNumber) {
-        Users user = usersRepository.findByPhoneNumber(phoneNumber)
+        Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
-        if (user.getStepStatus() == 3) { //실패시
-            if (user.getStep() == 2) {
-                user.updateStepStatus(1);
-            } else user.updateStepStatus(null);
-        } else { //성공시
-            user.updateStep(user.getStep() + 1);
-            user.updateStepStatus(null);
+        if (users.getStepStatus() == UsersStepStatus.FAIL) {
+            if (users.getStep() == 2) {
+                users.updateStepStatus(UsersStepStatus.PROCEEDING);
+            } else users.updateStepStatus(UsersStepStatus.NOTSTARTED);
+        } else {
+            users.updateStep(users.getStep() + 1);
+            users.updateStepStatus(UsersStepStatus.NOTSTARTED);
         }
-        usersRepository.save(user);
-        return new UsersMissionRes(user.getPhoneNumber(), user.getStep(), user.getStepStatus());
+        usersRepository.save(users);
+
+        // 이사가기
+        Home home = homeRepository.findById(users.getHome().getHomeId() + 1)
+                .orElseThrow(() -> new HomeNotFound());
+        users.updateHome(home);
+
+        return new UsersMissionRes(users);
     }
 
+    @Transactional
     public UsersReadNewsRes usersReadNews(String phoneNumber) {
-        Users user = usersRepository.findByPhoneNumber(phoneNumber)
+        Users users = usersRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UsersNotFound());
-        if (user.getReadNews())
-            throw new ValueInvalidException("이미 읽은 회원입니다.");
-        user.updateReadNews(true);
-        usersRepository.save(user);
+        if (users.getReadNews())
+            throw new UsersReadNewsUpdateDenied();
+        users.updateReadNews(true);
+        usersRepository.save(users);
         return new UsersReadNewsRes(true);
     }
 }

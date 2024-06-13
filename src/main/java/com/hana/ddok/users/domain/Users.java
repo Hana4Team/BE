@@ -1,9 +1,11 @@
 package com.hana.ddok.users.domain;
 import com.hana.ddok.budget.domain.Budget;
+import com.hana.ddok.budget.exception.BudgetNotFound;
 import com.hana.ddok.common.exception.EntityNotFoundException;
 import com.hana.ddok.common.exception.ValueInvalidException;
 import com.hana.ddok.home.domain.Home;
 import com.hana.ddok.home.exception.HomeNotFound;
+import com.hana.ddok.users.exception.UsersPointsInvalid;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -37,8 +39,9 @@ public class Users {
     @Column(name = "step", nullable = false)
     private Integer step;
 
-    @Column(name = "step_status")
-    private Integer stepStatus;
+    @Enumerated(EnumType.ORDINAL)
+    @Column(name = "step_status", nullable = false)
+    private UsersStepStatus stepStatus;
 
     @Column(name = "points", nullable = false)
     private Integer points;
@@ -46,7 +49,7 @@ public class Users {
     @Column(name = "read_news", nullable = false)
     private Boolean readNews;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "home_id", nullable = false)
     private Home home;
 
@@ -61,13 +64,13 @@ public class Users {
     public void updateStep(Integer step) {
         this.step = step;
     }
-    public void updateStepStatus(Integer stepStatus) {
+    public void updateStepStatus(UsersStepStatus stepStatus) {
         this.stepStatus = stepStatus;
     }
 
     public void updatePoints(Integer points) {
         if (points < 0) {
-            throw new ValueInvalidException("하나머니는 마이너스가 될 수 없습니다.");
+            throw new UsersPointsInvalid();
         }
         this.points = points;
     }
@@ -77,5 +80,12 @@ public class Users {
             throw new HomeNotFound();
         }
         this.home = home;
+    }
+
+    public void updateBudget(Budget budget) {
+        if (budget == null) {
+            throw new BudgetNotFound();
+        }
+        this.budget = budget;
     }
 }

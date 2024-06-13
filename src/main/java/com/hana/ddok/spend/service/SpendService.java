@@ -31,7 +31,6 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class SpendService {
-    private final TransactionRepository transactionRepository;
     private final UsersRepository usersRepository;
     private final AccountRepository accountRepository;
     private final SpendRepository spendRepository;
@@ -42,6 +41,7 @@ public class SpendService {
                 .orElseThrow(() -> new UsersNotFound());
 
         // 입출금계좌, 머니박스만 소비 존재
+        // 만약 해지된 계좌여도, 소비는 확인해야함 : isDeleted=true/false 모두 포함
         List<Account> spendAccountList = accountRepository.findAllByUsersAndProductsTypeIn(users,
                 List.of(ProductsType.DEPOSITWITHDRAWAL, ProductsType.MONEYBOX)
         );
@@ -49,17 +49,17 @@ public class SpendService {
         LocalDateTime startDateTime = LocalDateTime.of(year, month, 1, 0, 0);
         LocalDateTime endDateTime = startDateTime.plusMonths(1).minusDays(1).plusHours(23).plusMinutes(59).plusSeconds(59);
 
-        Integer shopping = calculateSpendByType(spendAccountList, SpendType.SHOPPING, startDateTime, endDateTime);
-        Integer food = calculateSpendByType(spendAccountList, SpendType.FOOD, startDateTime, endDateTime);
-        Integer traffic = calculateSpendByType(spendAccountList, SpendType.TRAFFIC, startDateTime, endDateTime);
-        Integer hospital = calculateSpendByType(spendAccountList, SpendType.HOSPITAL, startDateTime, endDateTime);
-        Integer fee = calculateSpendByType(spendAccountList, SpendType.FEE, startDateTime, endDateTime);
-        Integer education = calculateSpendByType(spendAccountList, SpendType.EDUCATION, startDateTime, endDateTime);
-        Integer leisure = calculateSpendByType(spendAccountList, SpendType.LEISURE, startDateTime, endDateTime);
-        Integer society = calculateSpendByType(spendAccountList, SpendType.SOCIETY, startDateTime, endDateTime);
-        Integer daily = calculateSpendByType(spendAccountList, SpendType.DAILY, startDateTime, endDateTime);
-        Integer overseas = calculateSpendByType(spendAccountList, SpendType.OVERSEAS, startDateTime, endDateTime);
-        Integer sum = shopping + food + traffic + hospital + fee + education + leisure + society + daily + overseas;
+        Long shopping = calculateSpendByType(spendAccountList, SpendType.SHOPPING, startDateTime, endDateTime);
+        Long food = calculateSpendByType(spendAccountList, SpendType.FOOD, startDateTime, endDateTime);
+        Long traffic = calculateSpendByType(spendAccountList, SpendType.TRAFFIC, startDateTime, endDateTime);
+        Long hospital = calculateSpendByType(spendAccountList, SpendType.HOSPITAL, startDateTime, endDateTime);
+        Long fee = calculateSpendByType(spendAccountList, SpendType.FEE, startDateTime, endDateTime);
+        Long education = calculateSpendByType(spendAccountList, SpendType.EDUCATION, startDateTime, endDateTime);
+        Long leisure = calculateSpendByType(spendAccountList, SpendType.LEISURE, startDateTime, endDateTime);
+        Long society = calculateSpendByType(spendAccountList, SpendType.SOCIETY, startDateTime, endDateTime);
+        Long daily = calculateSpendByType(spendAccountList, SpendType.DAILY, startDateTime, endDateTime);
+        Long overseas = calculateSpendByType(spendAccountList, SpendType.OVERSEAS, startDateTime, endDateTime);
+        Long sum = shopping + food + traffic + hospital + fee + education + leisure + society + daily + overseas;
 
         List<SpendFindByTypeRes> spendFindByTypeResList = new ArrayList<>(
                 List.of(
@@ -76,15 +76,15 @@ public class SpendService {
                 )
         );
         // 내림차순 정렬
-        spendFindByTypeResList.sort(Comparator.comparingInt(s -> ((SpendFindByTypeRes)s).amount()).reversed());
+        spendFindByTypeResList.sort(Comparator.comparingLong(s -> ((SpendFindByTypeRes)s).amount()).reversed());
 
         return new SpendFindAllRes(sum, spendFindByTypeResList);
     }
 
     @Transactional(readOnly = true)
-    public Integer calculateSpendByType(List<Account> spendAccountList, SpendType type, LocalDateTime startDateTime, LocalDateTime endDateTime) {
+    public Long calculateSpendByType(List<Account> spendAccountList, SpendType type, LocalDateTime startDateTime, LocalDateTime endDateTime) {
         return spendRepository.findByTransactionSenderAccountInAndTypeAndCreatedAtBetween(spendAccountList, type, startDateTime, endDateTime).stream()
-                .mapToInt(spend -> spend.getAmount())
+                .mapToLong(spend -> spend.getAmount())
                 .sum();
     }
 }

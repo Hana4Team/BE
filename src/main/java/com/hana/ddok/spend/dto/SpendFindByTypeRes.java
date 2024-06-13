@@ -4,6 +4,6 @@ import com.hana.ddok.spend.domain.SpendType;
 
 public record SpendFindByTypeRes(
         SpendType type,
-        Integer amount
+        Long amount
 ) {
 }

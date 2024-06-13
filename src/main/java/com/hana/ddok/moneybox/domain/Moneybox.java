@@ -31,12 +31,6 @@ public class Moneybox extends BaseEntity {
     @Column(name = "saving_balance", nullable = false)
     private Long savingBalance;
 
-    @Column(name = "expense_total", nullable = false)
-    private Long expenseTotal;
-
-    @Column(name = "is_charged", nullable = false)
-    private Boolean isCharged;
-
     @OneToOne
     @JoinColumn(name = "account_id")
     private Account account;
@@ -60,9 +54,5 @@ public class Moneybox extends BaseEntity {
         if (savingBalance < 0) {
             throw new AccountBalanceInvalid();
         }
-    }
-
-    public void updateExpenseTotal(Long balance) {
-        expenseTotal += balance;
     }
 }

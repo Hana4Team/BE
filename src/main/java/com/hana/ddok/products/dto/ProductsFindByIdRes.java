@@ -12,8 +12,8 @@ public class ProductsFindByIdRes {
     private Float interest1;
     private Float interest2;
     private String period;
-    private Integer payment1;
-    private Integer payment2;
+    private Long payment1;
+    private Long payment2;
     private String desc1;
     private String descDetail1;
     private String descImage1;
